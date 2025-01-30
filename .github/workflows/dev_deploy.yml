@@ -1,4 +1,4 @@
-name: CIPP Development Frontend CI/CD
+name: CIPP Development Frontend CI/CD Update
 
 on:
   push:
