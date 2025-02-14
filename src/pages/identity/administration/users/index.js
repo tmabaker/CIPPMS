@@ -1,6 +1,7 @@
 import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
 import { Layout as DashboardLayout } from "/src/layouts/index.js";
 import { Button } from "@mui/material";
+import { Send, GroupAdd, PersonAdd } from "@mui/icons-material";
 import Link from "next/link";
 import { useSettings } from "/src/hooks/use-settings.js";
 import { CippUserActions } from "/src/components/CippComponents/CippUserActions.jsx";
@@ -30,6 +31,7 @@ const Page = () => {
   const offCanvas = {
     extendedInfoFields: [
       "createdDateTime", // Created Date (UTC)
+      "id", // Unique ID
       "userPrincipalName", // UPN
       "givenName", // Given Name
       "surname", // Surname
@@ -41,7 +43,7 @@ const Page = () => {
       "city", // City
       "department", // Department
       "onPremisesLastSyncDateTime", // OnPrem Last Sync
-      "id", // Unique ID
+      "onPremisesDistinguishedName", // OnPrem DN
       "otherMails", // Alternate Email Addresses
     ],
     actions: CippUserActions(),
@@ -53,14 +55,14 @@ const Page = () => {
       apiUrl="/api/ListGraphRequest"
       cardButton={
         <>
-          <Button component={Link} href="users/bulk-add">
+          <Button component={Link} href="users/add" startIcon={<PersonAdd />}>
+            Add User
+          </Button>
+          <Button component={Link} href="users/bulk-add" startIcon={<GroupAdd />}>
             Bulk Add Users
           </Button>
-          <Button component={Link} href="users/invite">
+          <Button component={Link} href="users/invite" startIcon={<Send />}>
             Invite Guest
-          </Button>
-          <Button component={Link} href="users/add">
-            Add User
           </Button>
         </>
       }
@@ -68,7 +70,7 @@ const Page = () => {
         Endpoint: "users",
         manualPagination: true,
         $select:
-          "id,accountEnabled,businessPhones,city,createdDateTime,companyName,country,department,displayName,faxNumber,givenName,isResourceAccount,jobTitle,mail,mailNickname,mobilePhone,onPremisesDistinguishedName,officeLocation,onPremisesLastSyncDateTime,otherMails,postalCode,preferredDataLocation,preferredLanguage,proxyAddresses,showInAddressList,state,streetAddress,surname,usageLocation,userPrincipalName,userType,assignedLicenses,onPremisesSyncEnabled",
+          "id,accountEnabled,businessPhones,city,createdDateTime,companyName,country,department,displayName,faxNumber,givenName,isResourceAccount,jobTitle,mail,mailNickname,mobilePhone,officeLocation,otherMails,postalCode,preferredDataLocation,preferredLanguage,proxyAddresses,showInAddressList,state,streetAddress,surname,usageLocation,userPrincipalName,userType,assignedLicenses,onPremisesSyncEnabled,OnPremisesImmutableId,onPremisesLastSyncDateTime,onPremisesDistinguishedName",
         $count: true,
         $orderby: "displayName",
         $top: 999,
