@@ -67,7 +67,10 @@ export const CippCustomRoles = () => {
     queryKey: "customRoleList",
   });
 
-  const { data: { pages = [] } = {}, isSuccess: tenantsSuccess } = ApiGetCallWithPagination({
+  const {
+    data: { pages = [] } = {},
+    isSuccess: tenantsSuccess,
+  } = ApiGetCallWithPagination({
     url: "/api/ListTenants?AllTenantSelector=true",
     queryKey: "ListTenants-AllTenantSelector",
   });
@@ -277,7 +280,7 @@ export const CippCustomRoles = () => {
                 label: role.RowKey,
                 value: role.RowKey,
               }))}
-              isFetching={customRoleListFetching}
+              isLoading={customRoleListFetching}
               refreshFunction={() => refetchCustomRoleList()}
               creatable={true}
               formControl={formControl}
@@ -286,9 +289,8 @@ export const CippCustomRoles = () => {
             />
             {cippApiRoleSelected && (
               <Alert color="info">
-                This is the default role for all API clients in the CIPP-API integration. If you
-                would like different permissions for specific applications, create a role per
-                application and select it from the CIPP-API integrations page.
+                This role will limit access for the CIPP-API integration. It is not intended to be
+                used for users.
               </Alert>
             )}
           </Stack>

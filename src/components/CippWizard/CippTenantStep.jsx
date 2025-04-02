@@ -23,7 +23,6 @@ export const CippTenantStep = (props) => {
         formControl={formControl}
         allTenants={allTenants}
         type={type}
-        preselectedEnabled={true}
       />
       <CippWizardStepButtons
         currentStep={currentStep}

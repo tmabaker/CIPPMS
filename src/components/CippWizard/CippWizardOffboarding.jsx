@@ -13,10 +13,9 @@ export const CippWizardOffboarding = (props) => {
   const selectedUsers = useWatch({ control: formControl.control, name: "user" });
   const [showAlert, setShowAlert] = useState(false);
   const userSettingsDefaults = useSettings().userSettingsDefaults;
-  const disableForwarding = useWatch({ control: formControl.control, name: "disableForwarding" });
 
   useEffect(() => {
-    if (selectedUsers.length >= 3) {
+    if (selectedUsers.length >= 4) {
       setShowAlert(true);
       formControl.setValue("Scheduled.enabled", true);
     }
@@ -29,13 +28,6 @@ export const CippWizardOffboarding = (props) => {
       });
     }
   }, [userSettingsDefaults]);
-
-  useEffect(() => {
-    if (disableForwarding) {
-      formControl.setValue("forward", null);
-      formControl.setValue("keepCopy", false);
-    }
-  }, [disableForwarding, formControl]);
 
   return (
     <Stack spacing={4}>
@@ -102,12 +94,6 @@ export const CippWizardOffboarding = (props) => {
               <CippFormComponent
                 name="DisableSignIn"
                 label="Disable Sign in"
-                type="switch"
-                formControl={formControl}
-              />
-              <CippFormComponent
-                name="ClearImmutableId"
-                label="Clear Immutable ID"
                 type="switch"
                 formControl={formControl}
               />
@@ -218,50 +204,36 @@ export const CippWizardOffboarding = (props) => {
                 Email Forwarding
               </Typography>
               <CippFormComponent
-                name="disableForwarding"
-                label="Disable Email Forwarding"
+                sx={{ m: 1 }}
+                name="forward"
+                label="Forward Email To"
+                type="autoComplete"
+                placeholder="Leave blank if not needed"
+                formControl={formControl}
+                multiple={false}
+                api={{
+                  tenantFilter: currentTenant ? currentTenant.value : undefined,
+                  labelField: (option) => `${option.displayName} (${option.userPrincipalName})`,
+                  valueField: "id",
+                  url: "/api/ListGraphRequest",
+                  dataKey: "Results",
+                  data: {
+                    Endpoint: "users",
+                    manualPagination: true,
+                    $select: "id,userPrincipalName,displayName",
+                    $count: true,
+                    $orderby: "displayName",
+                    $top: 999,
+                  },
+                }}
+              />
+
+              <CippFormComponent
+                name="keepCopy"
+                label="Keep a copy of forwarded mail"
                 type="switch"
                 formControl={formControl}
               />
-
-              <CippFormCondition
-                formControl={formControl}
-                field={"disableForwarding"}
-                compareType="isNot"
-                compareValue={true}
-              >
-                <CippFormComponent
-                  sx={{ m: 1 }}
-                  name="forward"
-                  label="Forward Email To"
-                  type="autoComplete"
-                  placeholder="Leave blank if not needed"
-                  formControl={formControl}
-                  multiple={false}
-                  api={{
-                    tenantFilter: currentTenant ? currentTenant.value : undefined,
-                    labelField: (option) => `${option.displayName} (${option.userPrincipalName})`,
-                    valueField: "id",
-                    url: "/api/ListGraphRequest",
-                    dataKey: "Results",
-                    data: {
-                      Endpoint: "users",
-                      manualPagination: true,
-                      $select: "id,userPrincipalName,displayName",
-                      $count: true,
-                      $orderby: "displayName",
-                      $top: 999,
-                    },
-                  }}
-                />
-
-                <CippFormComponent
-                  name="keepCopy"
-                  label="Keep a copy of forwarded mail"
-                  type="switch"
-                  formControl={formControl}
-                />
-              </CippFormCondition>
               <CippFormComponent
                 name="OOO"
                 label="Out of Office Message"
@@ -314,23 +286,18 @@ export const CippWizardOffboarding = (props) => {
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2">Send results to:</Typography>
                 <CippFormComponent
-                  name="postExecution.webhook"
+                  name="webhook"
                   label="Webhook"
                   type="switch"
                   formControl={formControl}
                 />
                 <CippFormComponent
-                  name="postExecution.email"
+                  name="email"
                   label="E-mail"
                   type="switch"
                   formControl={formControl}
                 />
-                <CippFormComponent
-                  name="postExecution.psa"
-                  label="PSA"
-                  type="switch"
-                  formControl={formControl}
-                />
+                <CippFormComponent name="psa" label="PSA" type="switch" formControl={formControl} />
               </Grid>
             </CippFormCondition>
           </Grid>

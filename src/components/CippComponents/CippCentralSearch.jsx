@@ -9,7 +9,6 @@ import {
   Grid,
   Card,
   CardContent,
-  CardActionArea,
   Typography,
   Box,
 } from "@mui/material";
@@ -108,19 +107,15 @@ export const CippCentralSearch = ({ handleClose, open }) => {
                   <Grid item xs={12} sm={12} md={12} key={index}>
                     <Card
                       variant="outlined"
-                      sx={{ height: "100%" }}
+                      sx={{ height: "100%", cursor: "pointer" }}
+                      onClick={() => handleCardClick(item.path)}
                     >
-                      <CardActionArea
-                        onClick={() => handleCardClick(item.path)}
-                        aria-label={`Navigate to ${item.title}`}
-                      >
-                        <CardContent>
-                          <Typography variant="h6">{highlightMatch(item.title)}</Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            Path: {highlightMatch(item.path)}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
+                      <CardContent>
+                        <Typography variant="h6">{highlightMatch(item.title)}</Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Path: {highlightMatch(item.path)}
+                        </Typography>
+                      </CardContent>
                     </Card>
                   </Grid>
                 ))}

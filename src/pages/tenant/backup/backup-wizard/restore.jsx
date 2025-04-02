@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Alert, Divider, Grid, Typography } from "@mui/material";
+import { Alert, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { Layout as DashboardLayout } from "/src/layouts/index.js";
 import CippFormPage from "/src/components/CippFormPages/CippFormPage";
 import CippFormComponent from "/src/components/CippComponents/CippFormComponent";
 import { useSettings } from "/src/hooks/use-settings";
 import { CippFormCondition } from "/src/components/CippComponents/CippFormCondition";
-import { Chip, Stack } from "@mui/material";
 
 const RestoreBackupForm = () => {
   const userSettingsDefaults = useSettings();
@@ -86,6 +85,7 @@ const RestoreBackupForm = () => {
               antiphishing: values.antiphishing,
               CippWebhookAlerts: values.CippWebhookAlerts,
               CippScriptedAlerts: values.CippScriptedAlerts,
+              CippStandards: values.CippStandards,
               overwrite: values.overwrite,
             },
           },
@@ -95,7 +95,6 @@ const RestoreBackupForm = () => {
             Email: values.email,
             PSA: values.psa,
           },
-          DisallowDuplicateName: true,
         };
         return shippedValues;
       }}
@@ -105,7 +104,7 @@ const RestoreBackupForm = () => {
         Use this form to restore a backup for a tenant. Please select the tenant, backup, and
         restore options.
       </Typography>
-      <Grid container spacing={2} sx={{ mb: 2 }}>
+      <Grid container spacing={2}>
         {/* Backup Selector */}
         <Grid item xs={12}>
           <CippFormComponent
@@ -114,23 +113,17 @@ const RestoreBackupForm = () => {
             name="backup"
             multiple={false}
             api={{
+              tenantFilter: tenantFilter,
               url: "/api/ExecListBackup",
               queryKey: `BackupList-${tenantFilter}`,
-              labelField: (option) => {
-                const match = option.BackupName.match(/.*_(\d{4}-\d{2}-\d{2})-(\d{2})(\d{2})/);
-                return match ? `${match[1]} @ ${match[2]}:${match[3]}` : option.BackupName;
-              },
-              valueField: "BackupName",
+              labelField: (option) => `${option.RowKey}`,
+              valueField: "RowKey",
               data: {
                 Type: "Scheduled",
-                NameOnly: true,
+                TenantFilter: tenantFilter,
               },
             }}
             formControl={formControl}
-            required={true}
-            validators={{
-              validate: (value) => !!value || "Please select a backup",
-            }}
           />
         </Grid>
 
@@ -217,6 +210,12 @@ const RestoreBackupForm = () => {
             name="CippScriptedAlerts"
             formControl={formControl}
           />
+          <CippFormComponent
+            type="switch"
+            label="Standards Configuration"
+            name="CippStandards"
+            formControl={formControl}
+          />
         </Grid>
 
         {/* Overwrite Existing Entries */}
@@ -263,46 +262,38 @@ const RestoreBackupForm = () => {
         <Grid item xs={12} md={4}>
           <CippFormComponent type="switch" label="PSA" name="psa" formControl={formControl} />
         </Grid>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
+
         {/* Review and Confirm */}
         <Grid item xs={12}>
-          <Typography variant="h5">Review and Confirm</Typography>
-          <Typography variant="body1" color="textSecondary">
+          <Typography variant="h6">Review and Confirm</Typography>
+          <Typography variant="body1">
             Please review the selected options before submitting.
           </Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle1">Selected Tenant:</Typography>
-          <Typography variant="body2" color="textSecondary">
-            {tenantFilter}
-          </Typography>
+          <Typography variant="body2">{tenantFilter}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle1">Selected Backup:</Typography>
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2">
             {formControl.watch("backup")?.label || "None selected"}
           </Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography variant="subtitle1">Overwrite Existing Configuration:</Typography>
-          <Typography variant="body2" color="textSecondary">
-            {formControl.watch("overwrite") ? "Yes" : "No"}
-          </Typography>
+          <Typography variant="body2">{formControl.watch("overwrite") ? "Yes" : "No"}</Typography>
         </Grid>
-
         <Grid item xs={12}>
           <Typography variant="subtitle1">Send Results To:</Typography>
-          <Typography variant="body2" color="textSecondary">
-            <Stack direction="row" spacing={1}>
-              {formControl.watch("webhook") && <Chip color="primary" label="Webhook" />}
-              {formControl.watch("email") && <Chip color="primary" label="E-mail" />}
-              {formControl.watch("psa") && <Chip color="primary" label="PSA" />}
-              {!formControl.watch("webhook") &&
-                !formControl.watch("email") &&
-                !formControl.watch("psa") && <Chip color="default" label="None" />}
-            </Stack>
+          <Typography variant="body2">
+            {formControl.watch("webhook") && "Webhook "}
+            {formControl.watch("email") && "E-mail "}
+            {formControl.watch("psa") && "PSA "}
+            {!formControl.watch("webhook") &&
+              !formControl.watch("email") &&
+              !formControl.watch("psa") &&
+              "None"}
           </Typography>
         </Grid>
       </Grid>

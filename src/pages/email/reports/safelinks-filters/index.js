@@ -14,7 +14,7 @@ const Page = () => {
   const actions = [
     {
       label: "Enable Rule",
-      type: "POST",
+      type: "GET",
       icon: <Check />,
       url: "/api/EditSafeLinksFilter",
       data: {
@@ -27,7 +27,7 @@ const Page = () => {
     },
     {
       label: "Disable Rule",
-      type: "POST",
+      type: "GET",
       icon: <Block />,
       url: "/api/EditSafeLinksFilter",
       data: {

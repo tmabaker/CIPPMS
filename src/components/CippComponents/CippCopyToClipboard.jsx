@@ -31,7 +31,6 @@ export const CippCopyToClipBoard = (props) => {
               size="small"
               color="info"
               sx={{ mr: "0.25rem" }}
-              {...other}
             />
           </Tooltip>
         </CopyToClipboard>

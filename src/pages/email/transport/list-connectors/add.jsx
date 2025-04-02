@@ -27,9 +27,9 @@ const AddPolicy = () => {
   return (
     <CippFormPage
       formControl={formControl}
-      queryKey="AddConnector"
-      title="Add Connector"
-      backButtonTitle="Connectors Overview"
+      queryKey="AddTransportRule"
+      title="Add Transport Rule"
+      backButtonTitle="Transport Rules Overview"
       postUrl="/api/AddExConnector"
     >
       <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -55,7 +55,7 @@ const AddPolicy = () => {
             formControl={formControl}
             multiple={false}
             api={{
-              queryKey: `TemplateListConnectors`,
+              queryKey: `TemplateListTransport`,
               labelField: "name",
               valueField: (option) => option,
               url: "/api/ListExconnectorTemplates",

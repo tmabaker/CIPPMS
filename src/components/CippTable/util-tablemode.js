@@ -6,8 +6,7 @@ export const utilTableMode = (
   actions,
   simpleColumns,
   offCanvas,
-  onChange,
-  maxHeightOffset = "380px"
+  onChange
 ) => {
   const settings = useSettings();
   if (mode === true) {
@@ -21,7 +20,7 @@ export const utilTableMode = (
         rowsPerPageOptions: [25, 50, 100, 250, 500],
       },
       muiTableContainerProps: {
-        sx: { maxHeight: `calc(100vh - ${maxHeightOffset})` },
+        sx: { maxHeight: `calc(100vh - 380px)` },
       },
       initialState: {
         columnOrder: [...simpleColumns],
@@ -58,7 +57,7 @@ export const utilTableMode = (
         rowsPerPageOptions: [25, 50, 100, 250, 500],
       },
       muiTableContainerProps: {
-        sx: { maxHeight: `calc(100vh - ${maxHeightOffset})` },
+        sx: { maxHeight: `calc(100vh - 380px)` },
       },
       displayColumnDefOptions: {
         "mrt-row-actions": {

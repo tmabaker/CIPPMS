@@ -13,7 +13,8 @@ const Page = () => {
       icon: <PersonAdd />,
       url: "/api/ExecSetSecurityIncident",
       data: {
-        GUID: "Id",
+        GUID: "id",
+        Assigned: "currentUserId",
       },
       confirmText: "Are you sure you want to assign this incident to yourself?",
     },
@@ -23,9 +24,9 @@ const Page = () => {
       icon: <PlayArrow />,
       url: "/api/ExecSetSecurityIncident",
       data: {
-        GUID: "Id",
-        Status: "!active",
-        Assigned: "AssignedTo",
+        GUID: "id",
+        Status: "active",
+        Assigned: "currentAssignedUser",
       },
       confirmText: "Are you sure you want to set the status to active?",
     },
@@ -35,9 +36,9 @@ const Page = () => {
       icon: <Assignment />,
       url: "/api/ExecSetSecurityIncident",
       data: {
-        GUID: "Id",
-        Status: "!inProgress",
-        Assigned: "AssignedTo",
+        GUID: "id",
+        Status: "inProgress",
+        Assigned: "currentAssignedUser",
       },
       confirmText: "Are you sure you want to set the status to in progress?",
     },
@@ -47,9 +48,9 @@ const Page = () => {
       icon: <Done />,
       url: "/api/ExecSetSecurityIncident",
       data: {
-        GUID: "Id",
-        Status: "!resolved",
-        Assigned: "AssignedTo",
+        GUID: "id",
+        Status: "resolved",
+        Assigned: "currentAssignedUser",
       },
       confirmText: "Are you sure you want to set the status to resolved?",
     },
@@ -76,22 +77,13 @@ const Page = () => {
   };
 
   // Simplified columns for the table
-  const simpleColumns = [
-    "Created",
-    "Tenant",
-    "Id",
-    "DisplayName",
-    "Status",
-    "Severity",
-    "Tags",
-    "IncidentUrl",
-  ];
+  const simpleColumns = ["Created", "Tenant", "Id", "DisplayName", "Status", "Severity", "Tags"];
 
   return (
     <CippTablePage
       title={pageTitle}
       apiUrl="/api/ExecIncidentsList"
-      apiDataKey="Results"
+      dataKey="Results"
       actions={actions}
       offCanvas={offCanvas}
       simpleColumns={simpleColumns}

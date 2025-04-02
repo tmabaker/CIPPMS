@@ -112,13 +112,9 @@ export const CippUserInfoCard = (props) => {
           value={isFetching ? <Skeleton variant="text" width={100} /> : user?.jobTitle || "N/A"}
         />
         <PropertyListItem
+          divider
           label="Department"
           value={isFetching ? <Skeleton variant="text" width={100} /> : user?.department || "N/A"}
-        />
-        <PropertyListItem
-          divider
-          label="Manager"
-          value={isFetching ? <Skeleton variant="text" width={100} /> : user?.manager?.displayName || "N/A"}
         />
         <PropertyListItem
           label="Address"

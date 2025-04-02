@@ -26,9 +26,6 @@ export const CippTenantSelector = (props) => {
     url: "/api/listTenants",
     data: { AllTenantSelector: true },
     queryKey: "TenantSelector",
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    keepPreviousData: true,
   });
 
   const [currentTenant, setSelectedTenant] = useState(null);
@@ -61,12 +58,11 @@ export const CippTenantSelector = (props) => {
       settings.handleUpdate({
         currentTenant: currentTenant.value,
       });
-      //if we have a tenantfilter, we add the tenantfilter to the title of the tab/page so its "Tenant - original title".
     }
   }, [currentTenant?.value]);
 
   useEffect(() => {
-    if (tenant && currentTenant?.value && currentTenant?.value !== 'AllTenants') {
+    if (tenant && currentTenant?.value) {
       tenantDetails.refetch();
     }
   }, [tenant, offcanvasVisible]);

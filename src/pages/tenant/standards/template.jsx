@@ -34,17 +34,8 @@ const Page = () => {
     }
 
     if (existingTemplate.isSuccess) {
-      //formControl.reset(existingTemplate.data?.[0]);
+      formControl.reset(existingTemplate.data?.[0]);
       const apiData = existingTemplate.data?.[0];
-
-      Object.keys(apiData.standards).forEach((key) => {
-        if (Array.isArray(apiData.standards[key])) {
-          apiData.standards[key] = apiData.standards[key].filter(
-            (value) => value !== null && value !== undefined
-          );
-        }
-      });
-
       formControl.reset(apiData);
       if (router.query.clone) {
         formControl.setValue("templateName", `${apiData.templateName} (Clone)`);
@@ -83,10 +74,7 @@ const Page = () => {
   }, {});
 
   const handleOpenDialog = () => setDialogOpen(true);
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setSearchQuery("");
-  };
+  const handleCloseDialog = () => setDialogOpen(false);
 
   const filterStandards = (standardsList) =>
     standardsList.filter(
@@ -110,10 +98,12 @@ const Page = () => {
     if (match) {
       standardName = match[1];
     }
+    console.log("Adding multiple", standardName);
 
     setSelectedStandards((prev) => {
       const existingInstances = Object.keys(prev).filter((name) => name.startsWith(standardName));
       const newIndex = existingInstances.length;
+
       return {
         ...prev,
         [`${standardName}[${newIndex}]`]: true,
@@ -215,20 +205,17 @@ const Page = () => {
             </Grid>
             <Grid item xs={12} lg={8}>
               <Stack spacing={3}>
+                {existingTemplate.isLoading && <Skeleton />}
                 {/* Show accordions based on selectedStandards (which is populated by API when editing) */}
-                {existingTemplate.isLoading ? (
-                  <Skeleton variant="rectangular" height="700px" />
-                ) : (
-                  <CippStandardAccordion
-                    standards={standards}
-                    selectedStandards={selectedStandards} // Render only the relevant standards
-                    expanded={expanded}
-                    handleAccordionToggle={handleAccordionToggle}
-                    handleRemoveStandard={handleRemoveStandard}
-                    handleAddMultipleStandard={handleAddMultipleStandard} // Pass the handler for adding multiple
-                    formControl={formControl}
-                  />
-                )}
+                <CippStandardAccordion
+                  standards={standards}
+                  selectedStandards={selectedStandards} // Render only the relevant standards
+                  expanded={expanded}
+                  handleAccordionToggle={handleAccordionToggle}
+                  handleRemoveStandard={handleRemoveStandard}
+                  handleAddMultipleStandard={handleAddMultipleStandard} // Pass the handler for adding multiple
+                  formControl={formControl}
+                />
               </Stack>
             </Grid>
           </Grid>

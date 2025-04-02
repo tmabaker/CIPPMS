@@ -42,7 +42,6 @@ const Page = () => {
             This functionality is in beta and should be treated as such. Removing permissions from
             the CIPP-SAM app is not advised.
           </Alert>
-          {execSamAppPermissions.isLoading && <Skeleton variant="rectangular" height={300} />}
           {execSamAppPermissions.isSuccess && (
             <CippAppPermissionBuilder
               postUrl={"/api/execSamAppPermissions"}

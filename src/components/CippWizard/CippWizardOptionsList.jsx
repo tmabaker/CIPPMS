@@ -3,19 +3,10 @@ import { useEffect, useState } from "react";
 import { CippWizardStepButtons } from "./CippWizardStepButtons";
 
 export const CippWizardOptionsList = (props) => {
-  const {
-    onNextStep,
-    options,
-    title,
-    subtext,
-    formControl,
-    currentStep,
-    onPreviousStep,
-    name = "selectedOption",
-  } = props;
+  const { onNextStep, options, title, subtext, formControl, currentStep, onPreviousStep } = props;
   const [selectedOption, setSelectedOption] = useState(null);
-  // Register the name field in react-hook-form
-  formControl.register(name, {
+  // Register the "selectedOption" field in react-hook-form
+  formControl.register("selectedOption", {
     required: true,
   });
 
@@ -33,7 +24,7 @@ export const CippWizardOptionsList = (props) => {
 
   const handleOptionClick = (value) => {
     setSelectedOption(value); // Visually select the option
-    formControl.setValue(name, value); // Update form value in React Hook Form
+    formControl.setValue("selectedOption", value); // Update form value in React Hook Form
     formControl.trigger();
   };
 

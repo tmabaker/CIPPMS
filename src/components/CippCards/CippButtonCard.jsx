@@ -23,7 +23,6 @@ export default function CippButtonCard({
   variant,
   component = "card",
   accordionExpanded = false,
-  onAccordionChange,
 }) {
   const [cardExpanded, setCardExpanded] = useState(accordionExpanded);
   useEffect(() => {
@@ -31,12 +30,6 @@ export default function CippButtonCard({
       setCardExpanded(accordionExpanded);
     }
   }, [accordionExpanded]);
-
-  useEffect(() => {
-    if (onAccordionChange) {
-      onAccordionChange(cardExpanded);
-    }
-  }, [cardExpanded]);
 
   return (
     <Card variant={variant} sx={cardSx}>

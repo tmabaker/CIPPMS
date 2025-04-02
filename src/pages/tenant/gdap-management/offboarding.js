@@ -53,7 +53,7 @@ const Page = () => {
     data: {
       Endpoint: "servicePrincipals",
       TenantFilter: tenantId?.value,
-      $filter: `appOwnerOrganizationId eq %partnertenantid%`,
+      $filter: `appOwnerOrganizationId eq %tenantid%`,
       $select: "id,displayName,appId,appOwnerOrganizationId",
       $count: true,
     },
@@ -81,7 +81,6 @@ const Page = () => {
         hideBackButton={true}
         hidePageType={true}
         postUrl="/api/ExecOffboardTenant"
-        resetForm={true}
       >
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid size={12}>

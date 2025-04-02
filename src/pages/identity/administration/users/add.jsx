@@ -11,7 +11,7 @@ const Page = () => {
   const userSettingsDefaults = useSettings();
 
   const formControl = useForm({
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       tenantFilter: userSettingsDefaults.currentTenant,
       usageLocation: userSettingsDefaults.usageLocation,
@@ -36,7 +36,6 @@ const Page = () => {
         newFields.usageLocation = { label: usageLocation, value: usageLocation };
       }
       newFields.tenantFilter = userSettingsDefaults.currentTenant;
-
       formControl.reset(newFields);
     }
   }, [formValues]);

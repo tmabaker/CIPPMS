@@ -1,8 +1,9 @@
-import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { isAxiosError } from "axios";
 import { useDispatch } from "react-redux";
 import { showToast } from "../store/toasts";
 import { getCippError } from "../utils/get-cipp-error";
+import { useRouter } from "next/router";
 
 export function ApiGetCall(props) {
   const {
@@ -15,11 +16,6 @@ export function ApiGetCall(props) {
     bulkRequest = false,
     toast = false,
     onResult,
-    staleTime = 600000, // 10 minutes
-    refetchOnWindowFocus = false,
-    refetchOnMount = true,
-    refetchOnReconnect = true,
-    keepPreviousData = false,
   } = props;
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
@@ -31,12 +27,6 @@ export function ApiGetCall(props) {
       returnRetry = false;
     }
     if (isAxiosError(error) && HTTP_STATUS_TO_NOT_RETRY.includes(error.response?.status ?? 0)) {
-      if (
-        error.response?.status === 302 &&
-        error.response?.headers.get("location").includes("/.auth/login/aad")
-      ) {
-        queryClient.invalidateQueries({ queryKey: ["authmecipp"] });
-      }
       returnRetry = false;
     }
     if (returnRetry === false && toast) {
@@ -103,11 +93,8 @@ export function ApiGetCall(props) {
         return response.data;
       }
     },
-    staleTime: staleTime,
-    refetchOnWindowFocus: refetchOnWindowFocus,
-    refetchOnMount: refetchOnMount,
-    refetchOnReconnect: refetchOnReconnect,
-    keepPreviousData: keepPreviousData,
+    staleTime: 600000, // 10 minutes
+    refetchOnWindowFocus: false,
     retry: retryFn,
   });
   return queryInfo;

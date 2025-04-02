@@ -32,8 +32,6 @@ export const CippFormContactSelector = ({
         valueField: valueField ? valueField : "id",
         queryKey: `listcontacts-${currentTenant?.value ? currentTenant.value : selectedTenant}`,
       }}
-      creatable={false}
-      {...other}
     />
   );
 };

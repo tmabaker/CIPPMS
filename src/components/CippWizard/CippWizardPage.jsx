@@ -3,7 +3,6 @@ import { Box, Button, Container, Stack, SvgIcon } from "@mui/material";
 import { CippWizard } from "./CippWizard";
 import { useRouter } from "next/router";
 import { ArrowLeftIcon } from "@mui/x-date-pickers";
-import { CippHead } from "../CippComponents/CippHead";
 
 const CippWizardPage = (props) => {
   const router = useRouter();
@@ -18,7 +17,9 @@ const CippWizardPage = (props) => {
   } = props;
   return (
     <>
-      <CippHead title={wizardTitle} />
+      <Head>
+        <title>{wizardTitle}</title>
+      </Head>
       <Box
         sx={{
           backgroundColor: "background.default",

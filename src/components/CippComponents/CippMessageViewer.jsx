@@ -36,7 +36,6 @@ import {
   Visibility,
   AccountCircle,
   Close,
-  ReceiptLong,
 } from "@mui/icons-material";
 
 import { CippTimeAgo } from "./CippTimeAgo";
@@ -52,7 +51,6 @@ import {
   SunIcon,
 } from "@heroicons/react/24/outline";
 import { useSettings } from "/src/hooks/use-settings";
-import CippForefrontHeaderDialog from "./CippForefrontHeaderDialog";
 
 export const CippMessageViewer = ({ emailSource }) => {
   const [emlContent, setEmlContent] = useState(null);
@@ -63,8 +61,6 @@ export const CippMessageViewer = ({ emailSource }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState(null);
   const [dialogTitle, setDialogTitle] = useState("");
-  const [forefrontDialogOpen, setForefrontDialogOpen] = useState(false);
-  const [forefrontHeader, setForefrontHeader] = useState("");
 
   const currentTheme = useSettings()?.currentTheme?.value;
   const [darkMode, setDarkMode] = useState(currentTheme === "dark");
@@ -193,16 +189,10 @@ export const CippMessageViewer = ({ emailSource }) => {
     setDialogOpen(true);
   };
 
-  const showForefrontDialog = (header) => {
-    setForefrontHeader(header);
-    setForefrontDialogOpen(true);
-  };
-
   const EmailButtons = (emailHeaders, emailSource) => {
     const emailSourceBytes = new TextEncoder().encode(emailSource);
     const blob = new Blob([emailSourceBytes], { type: "message/rfc822" });
     const url = URL.createObjectURL(blob);
-    const forefrontHeader = emailHeaders?.match(/X-Forefront-Antispam-Report: (.*)/)?.[1];
     return (
       <Stack spacing={1} direction="row" sx={{ mt: 1.5, mr: 1 }}>
         {emailHeaders && (
@@ -217,20 +207,6 @@ export const CippMessageViewer = ({ emailSource }) => {
             }
           >
             View Headers
-          </Button>
-        )}
-        {forefrontHeader && (
-          <Button
-            size="small"
-            variant="contained"
-            onClick={() => showForefrontDialog(forefrontHeader)}
-            startIcon={
-              <SvgIcon fontSize="small">
-                <ReceiptLong />
-              </SvgIcon>
-            }
-          >
-            Anti-Spam Report
           </Button>
         )}
         <Button
@@ -501,7 +477,7 @@ export const CippMessageViewer = ({ emailSource }) => {
                       </ThemeProvider>
                     ) : (
                       <div className="mt-4">
-                        <CippCodeBlock
+                        <CodeBlock
                           code={emlContent?.text ?? "No text"}
                           language="plain"
                           showLineNumbers={false}
@@ -533,11 +509,6 @@ export const CippMessageViewer = ({ emailSource }) => {
         </DialogTitle>
         <DialogContent dividers>{dialogContent}</DialogContent>
       </Dialog>
-      <CippForefrontHeaderDialog
-        open={forefrontDialogOpen}
-        onClose={() => setForefrontDialogOpen(false)}
-        header={forefrontHeader}
-      />
     </>
   );
 };

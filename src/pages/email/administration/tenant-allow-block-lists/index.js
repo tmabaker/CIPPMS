@@ -17,18 +17,22 @@ const Page = () => {
         Entries: "Value",
         ListType: "ListType",
       },
-      confirmText: "Are you sure you want to delete this entry?",
+      confirmText: "Are you sure you want to delete?",
       color: "danger",
       icon: <TrashIcon />,
     },
   ];
+
+  const offCanvas = {
+    extendedInfoFields: ["Value", "Notes", "ExpirationDate"],
+    actions: actions,
+  };
 
   const simpleColumns = [
     "Value",
     "ListType",
     "Action",
     "Notes",
-    "LastUsedDate",
     "LastModifiedDateTime",
     "ExpirationDate",
   ];
@@ -38,6 +42,7 @@ const Page = () => {
       title={pageTitle}
       apiUrl="/api/ListTenantAllowBlockList"
       actions={actions}
+      offCanvas={offCanvas}
       simpleColumns={simpleColumns}
       titleButton={{
         label: "Add",

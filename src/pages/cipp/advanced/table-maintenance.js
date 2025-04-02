@@ -274,7 +274,7 @@ const Page = () => {
   };
 
   return (
-    <Container maxWidth={false} sx={{ mt: 4, width: "100%" }}>
+    <Container maxWidth="xl" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
         {pageTitle}
       </Typography>
@@ -282,7 +282,7 @@ const Page = () => {
         This page allows you to view and manage data in Azure Tables. This is advanced functionality
         that should only be used when directed by CyberDrain support.
       </Alert>
-      <Grid sx={{ flexGrow: 1, display: "flex" }} container spacing={2}>
+      <Grid container spacing={2}>
         <Grid item size={3}>
           <CippPropertyListCard
             title="Tables"

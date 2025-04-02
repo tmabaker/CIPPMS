@@ -85,49 +85,47 @@ const CippIntegrationSettings = ({ children }) => {
     if (tableData?.find((item) => item.TenantId === selectedTenant.addedFields.customerId)) return;
 
     const newRowData = {
-      TenantId: selectedTenant.value,
+      TenantId: selectedTenant.addedFields.customerId,
       Tenant: selectedTenant.label,
       IntegrationName: selectedCompany.label,
       IntegrationId: selectedCompany.value,
-      TenantDomain: selectedTenant.addedFields.defaultDomainName,
     };
 
     setTableData([...tableData, newRowData]);
   };
 
   const handleAutoMap = () => {
-    const newTableData = [];
-    tenantList.data?.pages[0]?.forEach((tenant) => {
-      const matchingCompany = mappings.data.Companies.find(
-        (company) => company.name === tenant.displayName
-      );
-      if (
-        Array.isArray(tableData) &&
-        tableData?.find((item) => item.TenantId === tenant.customerId)
-      )
-        return;
-      if (matchingCompany) {
-        newTableData.push({
-          TenantId: tenant.customerId,
-          Tenant: tenant.displayName,
-          TenantDomain: tenant.defaultDomainName,
-          IntegrationName: matchingCompany.name,
-          IntegrationId: matchingCompany.value,
+      const newTableData = [];
+      tenantList.data?.pages[0]?.forEach((tenant) => {
+        const matchingCompany = mappings.data.Companies.find(
+          (company) => company.name === tenant.displayName
+        );
+        if (
+          Array.isArray(tableData) &&
+          tableData?.find((item) => item.TenantId === tenant.customerId)
+        )
+          return;
+        if (matchingCompany) {
+          newTableData.push({
+            TenantId: tenant.customerId,
+            Tenant: tenant.displayName,
+            IntegrationName: matchingCompany.name,
+            IntegrationId: matchingCompany.value,
+          });
+        }
+      });
+      if (Array.isArray(tableData)) {
+        setTableData([...tableData, ...newTableData]);
+      } else {
+        setTableData(newTableData);
+      }
+      if (extension.autoMapSyncApi) {
+        automapPostCall.mutate({
+          url: `/api/ExecExtensionMapping?AutoMapping=${router.query.id}`,
+          queryKey: `IntegrationTenantMapping-${router.query.id}`,
         });
       }
-    });
-    if (Array.isArray(tableData)) {
-      setTableData([...tableData, ...newTableData]);
-    } else {
-      setTableData(newTableData);
-    }
-    if (extension.autoMapSyncApi) {
-      automapPostCall.mutate({
-        url: `/api/ExecExtensionMapping?AutoMapping=${router.query.id}`,
-        queryKey: `IntegrationTenantMapping-${router.query.id}`,
-      });
-    }
-  };
+    };
 
   const actions = [
     {
@@ -142,7 +140,7 @@ const CippIntegrationSettings = ({ children }) => {
 
   useEffect(() => {
     if (mappings.isSuccess) {
-      setTableData(mappings.data.Mappings ?? []);
+      setTableData(mappings.data.Mappings);
     }
   }, [mappings.isSuccess]);
 
@@ -169,8 +167,6 @@ const CippIntegrationSettings = ({ children }) => {
                     multiple={false}
                     required={false}
                     disableClearable={false}
-                    removeOptions={tableData.map((item) => item.TenantId)}
-                    valueField="customerId"
                   />
                 </Box>
               </Grid>
@@ -239,7 +235,7 @@ const CippIntegrationSettings = ({ children }) => {
                 reportTitle={`${extension.id}-tenant-map`}
                 data={tableData}
                 simple={false}
-                simpleColumns={["IntegrationName", "Tenant", "TenantDomain"]}
+                simpleColumns={["Tenant", "IntegrationName"]}
                 isFetching={mappings.isFetching}
                 refreshFunction={() => mappings.refetch()}
               />

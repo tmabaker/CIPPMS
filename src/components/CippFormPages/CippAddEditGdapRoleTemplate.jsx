@@ -44,7 +44,6 @@ export const CippAddEditGdapRoleTemplate = (props) => {
             return true;
           },
         }}
-        sortOptions={true}
       />
     </Stack>
   );

@@ -24,16 +24,11 @@ import {
 } from "mui-tiptap";
 import StarterKit from "@tiptap/starter-kit";
 import { CippDataTable } from "../CippTable/CippDataTable";
-import React from "react";
 
 // Helper function to convert bracket notation to dot notation
 const convertBracketsToDots = (name) => {
   return name.replace(/\[(\d+)\]/g, ".$1"); // Replace [0] with .0
 };
-
-const MemoizedCippAutoComplete = React.memo((props) => {
-  return <CippAutoComplete {...props} />;
-});
 
 export const CippFormComponent = (props) => {
   const {
@@ -43,7 +38,6 @@ export const CippFormComponent = (props) => {
     name, // The name that may have bracket notation
     label,
     labelLocation = "behind", // Default location for switches
-    defaultValue,
     ...other
   } = props;
   const { errors } = useFormState({ control: formControl.control });
@@ -122,7 +116,6 @@ export const CippFormComponent = (props) => {
               {...other}
               {...formControl.register(convertedName, { ...validators })}
               label={label}
-              defaultValue={defaultValue}
             />
           </div>
           <Typography variant="subtitle3" color="error">
@@ -158,7 +151,6 @@ export const CippFormComponent = (props) => {
               {...other}
               {...formControl.register(convertedName, { ...validators })}
               label={label}
-              defaultValue={defaultValue}
             />
           </div>
           <Typography variant="subtitle3" color="error">
@@ -174,7 +166,6 @@ export const CippFormComponent = (props) => {
             <Controller
               name={convertedName}
               control={formControl.control}
-              defaultValue={defaultValue}
               render={({ field }) =>
                 renderSwitchWithLabel(
                   <Switch
@@ -243,14 +234,14 @@ export const CippFormComponent = (props) => {
               control={formControl.control}
               rules={validators}
               render={({ field }) => (
-                <MemoizedCippAutoComplete
+                <CippAutoComplete
                   {...other}
                   isFetching={other.isFetching}
                   variant="filled"
                   defaultValue={field.value}
                   label={label}
                   multiple={false}
-                  onChange={(value) => field.onChange(value?.value)}
+                  onChange={(value) => field.onChange(value.value)}
                 />
               )}
             />
@@ -270,7 +261,7 @@ export const CippFormComponent = (props) => {
               control={formControl.control}
               rules={validators}
               render={({ field }) => (
-                <MemoizedCippAutoComplete
+                <CippAutoComplete
                   {...other}
                   isFetching={other.isFetching}
                   variant="filled"
@@ -301,12 +292,9 @@ export const CippFormComponent = (props) => {
                   <RichTextEditor
                     {...other}
                     ref={field.ref}
-                    key={field.value ? "edit" : ""}
                     extensions={[StarterKit]}
-                    content={field.value || ""}
-                    onUpdate={({ editor }) => {
-                      field.onChange(editor.getHTML());
-                    }}
+                    content={field.value}
+                    onUpdate={({ editor }) => field.onChange(editor.getHTML())} // Update react-hook-form on change
                     label={label}
                     renderControls={() => (
                       <MenuControlsContainer>

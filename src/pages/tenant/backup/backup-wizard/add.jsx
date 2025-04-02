@@ -1,12 +1,10 @@
 import React from "react";
 import { Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { omit } from "lodash";
 import { Layout as DashboardLayout } from "/src/layouts/index.js";
 import CippFormPage from "/src/components/CippFormPages/CippFormPage";
 import CippFormComponent from "/src/components/CippComponents/CippFormComponent";
 import { useSettings } from "/src/hooks/use-settings";
-import { CippFormTenantSelector } from "../../../../components/CippComponents/CippFormTenantSelector";
 
 const CreateBackup = () => {
   const userSettingsDefaults = useSettings();
@@ -26,12 +24,13 @@ const CreateBackup = () => {
       antiphishing: true,
       CippWebhookAlerts: true,
       CippScriptedAlerts: true,
+      CippStandards: true,
     },
   });
 
   return (
     <CippFormPage
-      title="Backup Schedule"
+      title="Add Backup Schedule"
       formControl={formControl}
       queryKey={`Backup Tasks`}
       postUrl="/api/AddScheduledItem?hidden=true&DisallowDuplicateName=true"
@@ -42,30 +41,27 @@ const CreateBackup = () => {
         const tenantFilter = values.tenantFilter || tenantDomain;
         const shippedValues = {
           TenantFilter: tenantFilter,
-          Name: `CIPP Backup - ${tenantFilter}`,
+          Name: `CIPP Backup ${tenantFilter}`,
           Command: { value: `New-CIPPBackup` },
-          Parameters: { backupType: "Scheduled", ScheduledBackupValues: { ...omit(values, ['tenantFilter']) } },
+          Parameters: { backupType: "Scheduled", ScheduledBackupValues: { ...values } },
           ScheduledTime: unixTime,
           Recurrence: { value: "1d" },
         };
         return shippedValues;
       }}
       backButtonTitle="Backup Tasks"
-      allowResubmit={true}
     >
       <Typography variant="body1">
         Backups are stored in CIPP's storage and can be restored using the CIPP Restore Backup
         Wizard. Backups run daily or on demand by clicking the backup now button.
       </Typography>
-      <Grid container spacing={2} sx={{ my: 2 }}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
-          <CippFormTenantSelector
-            formControl={formControl}
-            allTenants={true}
+          <CippFormComponent
+            type="tenantSelector"
+            label="Tenant"
             name="tenantFilter"
-            required={true}
-            disableClearable={true}
-            componentType="select"
+            formControl={formControl}
           />
         </Grid>
 
@@ -164,6 +160,14 @@ const CreateBackup = () => {
             type="switch"
             label="Scripted Alerts Configuration"
             name="CippScriptedAlerts"
+            formControl={formControl}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CippFormComponent
+            type="switch"
+            label="Standards Configuration"
+            name="CippStandards"
             formControl={formControl}
           />
         </Grid>

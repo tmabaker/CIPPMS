@@ -9,11 +9,11 @@ const Page = () => {
   const actions = [
     {
       label: "Enable Rule",
-      type: "POST",
+      type: "GET",
       icon: <Check />,
       url: "/api/EditAntiPhishingFilter",
       data: {
-        State: "!Enable",
+        State: "Enable",
         RuleName: "RuleName",
       },
       confirmText: "Are you sure you want to enable this rule?",
@@ -21,11 +21,11 @@ const Page = () => {
     },
     {
       label: "Disable Rule",
-      type: "POST",
+      type: "GET",
       icon: <Block />,
       url: "/api/EditAntiPhishingFilter",
       data: {
-        State: "!Disable",
+        State: "Disable",
         RuleName: "RuleName",
       },
       confirmText: "Are you sure you want to disable this rule?",

@@ -24,7 +24,6 @@ import { CippApiDialog } from "../CippComponents/CippApiDialog";
 import { getCippError } from "../../utils/get-cipp-error";
 import { Box } from "@mui/system";
 import { useSettings } from "../../hooks/use-settings";
-import { isEqual } from "lodash"; // Import lodash for deep comparison
 
 export const CippDataTable = (props) => {
   const {
@@ -54,8 +53,6 @@ export const CippDataTable = (props) => {
     incorrectDataMessage = "Data not in correct format",
     onChange,
     filters,
-    maxHeightOffset = "380px",
-    defaultSorting = [],
   } = props;
   const [columnVisibility, setColumnVisibility] = useState(initialColumnVisibility);
   const [configuredSimpleColumns, setConfiguredSimpleColumns] = useState(simpleColumns);
@@ -65,7 +62,6 @@ export const CippDataTable = (props) => {
   const [offCanvasData, setOffCanvasData] = useState({});
   const [actionData, setActionData] = useState({ data: {}, action: {}, ready: false });
   const [graphFilterData, setGraphFilterData] = useState({});
-  const [sorting, setSorting] = useState([]);
   const waitingBool = api?.url ? true : false;
 
   const settings = useSettings();
@@ -80,11 +76,9 @@ export const CippDataTable = (props) => {
 
   useEffect(() => {
     if (Array.isArray(data) && !api?.url) {
-      if (!isEqual(data, usedData)) {
-        setUsedData(data);
-      }
+      setUsedData(data);
     }
-  }, [data, api?.url, usedData]);
+  }, [data, api?.url]);
 
   useEffect(() => {
     if (getRequestData.isSuccess && !getRequestData.isFetching) {
@@ -130,13 +124,7 @@ export const CippDataTable = (props) => {
     queryKey,
   ]);
   useEffect(() => {
-    if (
-      !Array.isArray(usedData) ||
-      usedData.length === 0 ||
-      typeof usedData[0] !== "object" ||
-      usedData === null ||
-      usedData === undefined
-    ) {
+    if (!Array.isArray(usedData) || usedData.length === 0 || typeof usedData[0] !== "object") {
       return;
     }
     const apiColumns = utilColumnsFromAPI(usedData);
@@ -160,26 +148,15 @@ export const CippDataTable = (props) => {
         newVisibility[col.accessorKey] = providedColumnKeys.has(col.id);
       });
     }
-    if (defaultSorting?.length > 0) {
-      setSorting(defaultSorting);
-    }
     setUsedColumns(finalColumns);
     setColumnVisibility(newVisibility);
-  }, [columns.length, usedData, queryKey]);
+  }, [columns.length, usedData.length, queryKey]);
 
   const createDialog = useDialog();
 
   // Apply the modeInfo directly
   const [modeInfo] = useState(
-    utilTableMode(
-      columnVisibility,
-      simple,
-      actions,
-      configuredSimpleColumns,
-      offCanvas,
-      onChange,
-      maxHeightOffset
-    )
+    utilTableMode(columnVisibility, simple, actions, configuredSimpleColumns, offCanvas, onChange)
   );
   //create memoized version of usedColumns, and usedData
   const memoizedColumns = useMemo(() => usedColumns, [usedColumns]);
@@ -196,26 +173,12 @@ export const CippDataTable = (props) => {
     mrtTheme: (theme) => ({
       baseBackgroundColor: theme.palette.background.paper,
     }),
-    muiTablePaperProps: ({ table }) => ({
-      //not sx
-      style: {
-        zIndex: table.getState().isFullScreen ? 1000 : undefined,
-        top: table.getState().isFullScreen ? 64 : undefined,
-      },
-    }),
+
     columns: memoizedColumns,
-    data: memoizedData ?? [],
+    data: memoizedData,
     state: {
       columnVisibility,
-      sorting,
-      showSkeletons: getRequestData.isFetchingNextPage
-        ? false
-        : getRequestData.isFetching
-        ? getRequestData.isFetching
-        : isFetching,
-    },
-    onSortingChange: (newSorting) => {
-      setSorting(newSorting ?? []);
+      showSkeletons: getRequestData.isFetching ? getRequestData.isFetching : isFetching,
     },
     renderEmptyRowsFallback: ({ table }) =>
       getRequestData.data?.pages?.[0].Metadata?.QueueMessage ? (
@@ -303,15 +266,15 @@ export const CippDataTable = (props) => {
               data={data}
               columnVisibility={columnVisibility}
               getRequestData={getRequestData}
-              usedColumns={memoizedColumns}
-              usedData={memoizedData ?? []}
+              usedColumns={usedColumns}
+              usedData={usedData}
               title={title}
               actions={actions}
               exportEnabled={exportEnabled}
               refreshFunction={refreshFunction}
               setColumnVisibility={setColumnVisibility}
               filters={filters}
-              queryKeys={queryKey ? queryKey : title}
+              queryKeys={queryKey}
               graphFilterData={graphFilterData}
               setGraphFilterData={setGraphFilterData}
               setConfiguredSimpleColumns={setConfiguredSimpleColumns}
@@ -320,23 +283,6 @@ export const CippDataTable = (props) => {
         </>
       );
     },
-    sortingFns: {
-      dateTimeNullsLast: (a, b, id) => {
-        const aVal = a?.original?.[id] ?? null;
-        const bVal = b?.original?.[id] ?? null;
-        if (aVal === null && bVal === null) {
-          return 0;
-        }
-        if (aVal === null) {
-          return 1;
-        }
-        if (bVal === null) {
-          return -1;
-        }
-        return aVal > bVal ? 1 : -1;
-      },
-    },
-    enableGlobalFilterModes: true,
   });
 
   useEffect(() => {
@@ -344,13 +290,6 @@ export const CippDataTable = (props) => {
       onChange(table.getSelectedRowModel().rows.map((row) => row.original));
     }
   }, [table.getSelectedRowModel().rows]);
-
-  useEffect(() => {
-    //check if the simplecolumns are an array,
-    if (Array.isArray(simpleColumns) && simpleColumns.length > 0) {
-      setConfiguredSimpleColumns(simpleColumns);
-    }
-  }, [simpleColumns]);
 
   return (
     <>
@@ -374,7 +313,7 @@ export const CippDataTable = (props) => {
         </Scrollbar>
       ) : (
         // Render the table inside a Card
-        <Card style={{ width: "100%" }} {...props.cardProps}>
+        <Card style={{ width: "100%" }}>
           {cardButton || !hideTitle ? (
             <>
               <CardHeader action={cardButton} title={hideTitle ? "" : title} />
@@ -419,19 +358,16 @@ export const CippDataTable = (props) => {
         customComponent={offCanvas?.customComponent}
         {...offCanvas}
       />
-      {useMemo(() => {
-        if (!actionData.ready) return null;
-        return (
-          <CippApiDialog
-            createDialog={createDialog}
-            title="Confirmation"
-            fields={actionData.action?.fields}
-            api={actionData.action}
-            row={actionData.data}
-            relatedQueryKeys={queryKey ? queryKey : title}
-          />
-        );
-      }, [actionData.ready, createDialog, actionData.action, actionData.data, queryKey, title])}
+      {actionData.ready && (
+        <CippApiDialog
+          createDialog={createDialog}
+          title="Confirmation"
+          fields={actionData.action?.fields}
+          api={actionData.action}
+          row={actionData.data}
+          relatedQueryKeys={queryKey ? queryKey : title}
+        />
+      )}
     </>
   );
 };

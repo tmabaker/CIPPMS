@@ -5,15 +5,6 @@ export const getCippTranslation = (field) => {
     return "No data";
   }
 
-  // special translations for extensions
-  if (field.startsWith("extension_")) {
-    field = field.split("_").pop();
-  }
-  // special translation for schema extensions
-  if (field.startsWith("ext") && field.includes("_")) {
-    field = field.split("_").pop();
-  }
-
   return (
     CippTranslations[field] ||
     field

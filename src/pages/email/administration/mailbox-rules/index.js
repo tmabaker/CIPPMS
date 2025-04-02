@@ -10,7 +10,7 @@ const Page = () => {
   const actions = [
     {
       label: "Remove Mailbox Rule",
-      type: "POST",
+      type: "GET",
       icon: <TrashIcon />,
       url: "/api/ExecRemoveMailboxRule",
       data: { ruleId: "Identity", userPrincipalName: "UserPrincipalName", ruleName: "Name" },

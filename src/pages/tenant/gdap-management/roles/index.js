@@ -73,7 +73,6 @@ const Page = () => {
         </Button>
       }
       queryKey="ListGDAPRoles"
-      maxHeightOffset="460px"
     />
   );
 };

@@ -28,13 +28,7 @@ const Page = () => {
         showHidden: true,
         Type: "New-CIPPBackup",
       }}
-      simpleColumns={[
-        "Tenant",
-        "Name",
-        "Parameters.ScheduledBackupValues",
-        "TaskState",
-        "ExecutedTime",
-      ]}
+      simpleColumns={["Tenant", "TaskState", "ExecutedTime"]}
       actions={[
         {
           label: "Delete Task",
@@ -45,7 +39,7 @@ const Page = () => {
         },
       ]}
       offCanvas={{
-        extendedInfoFields: ["Name", "Tenant", "TaskState", "ExecutedTime"],
+        extendedInfoFields: ["RowKey", "TaskState", "ExecutedTime"],
         actions: [
           {
             label: "Delete Task",

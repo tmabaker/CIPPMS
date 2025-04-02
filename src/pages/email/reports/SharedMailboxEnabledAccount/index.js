@@ -19,7 +19,7 @@ const Page = () => {
       actions={[
         {
           label: "Block Sign In",
-          type: "POST",
+          type: "GET",
           icon: <Block />,
           url: "/api/ExecDisableUser",
           data: { ID: "id" },

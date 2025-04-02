@@ -143,7 +143,7 @@ export const CippBannerListCard = (props) => {
                     </Stack>
                   </Stack>
                   {isCollapsible && (
-                    <Collapse in={isExpanded} unmountOnExit>
+                    <Collapse in={isExpanded}>
                       <Divider />
                       <Stack spacing={1}>
                         {item?.propertyItems?.length > 0 && (

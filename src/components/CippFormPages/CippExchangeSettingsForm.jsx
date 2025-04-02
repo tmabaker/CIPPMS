@@ -257,7 +257,7 @@ const CippExchangeSettingsForm = (props) => {
           <CippFormComponent
             type="hidden"
             name="calendar.FolderName"
-            value={calPermissions?.[0]?.FolderName ?? "Calendar"}
+            value={calPermissions?.[0]?.FolderName}
             formControl={formControl}
           />
           <CippFormCondition
@@ -515,7 +515,7 @@ const CippExchangeSettingsForm = (props) => {
                 </SvgIcon>
               </IconButton>
             </Box>
-            <Collapse in={isExpanded} unmountOnExit>
+            <Collapse in={isExpanded}>
               <Divider />
               <Box sx={{ p: 2 }}>{section.formContent}</Box>
             </Collapse>

@@ -1,4 +1,4 @@
-import { DeveloperMode, SevereCold, Sync, Tune, ViewColumn, MoreVert } from "@mui/icons-material";
+import { DeveloperMode, Sync, Tune, ViewColumn } from "@mui/icons-material";
 import {
   Button,
   Checkbox,
@@ -12,11 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Box, Stack } from "@mui/system";
-import {
-  MRT_GlobalFilterTextField,
-  MRT_ToggleFiltersButton,
-  MRT_ToggleFullScreenButton,
-} from "material-react-table";
+import { MRT_GlobalFilterTextField, MRT_ToggleFiltersButton } from "material-react-table";
 import { PDFExportButton } from "../pdfExportButton";
 import { ChevronDownIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { usePopover } from "../../hooks/use-popover";
@@ -32,7 +28,6 @@ import { CippCodeBlock } from "../CippComponents/CippCodeBlock";
 import { ApiGetCall } from "../../api/ApiCall";
 import GraphExplorerPresets from "/src/data/GraphExplorerPresets.json";
 import CippGraphExplorerFilter from "./CippGraphExplorerFilter";
-import { useMediaQuery } from "@mui/material";
 
 export const CIPPTableToptoolbar = ({
   api,
@@ -58,7 +53,6 @@ export const CIPPTableToptoolbar = ({
   const columnPopover = usePopover();
   const filterPopover = usePopover();
 
-  const mdDown = useMediaQuery((theme) => theme.breakpoints.down("md"));
   const settings = useSettings();
   const router = useRouter();
   const createDialog = useDialog();
@@ -70,14 +64,6 @@ export const CIPPTableToptoolbar = ({
   const pageName = router.pathname.split("/").slice(1).join("/");
   const currentTenant = useSettings()?.currentTenant;
 
-  const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
-  const handleActionMenuOpen = (event) => setActionMenuAnchor(event.currentTarget);
-  const handleActionMenuClose = () => setActionMenuAnchor(null);
-
-  useEffect(() => {
-    //if usedData changes, deselect all rows
-    table.toggleAllRowsSelected(false);
-  }, [usedData]);
   //if the currentTenant Switches, remove Graph filters
   useEffect(() => {
     if (currentTenant) {
@@ -94,10 +80,6 @@ export const CIPPTableToptoolbar = ({
       setColumnVisibility(settings?.columnDefaults?.[pageName]);
     }
   }, [settings?.columnDefaults?.[pageName], router, usedColumns]);
-
-  useEffect(() => {
-    setOriginalSimpleColumns(simpleColumns);
-  }, [simpleColumns]);
 
   const presetList = ApiGetCall({
     url: "/api/ListGraphExplorerPresets",
@@ -272,7 +254,7 @@ export const CIPPTableToptoolbar = ({
       // update filters to include graph explorer presets
       setFilterList([...filters, ...graphPresetList]);
     }
-  }, [presetList?.isSuccess, simpleColumns]);
+  }, [presetList?.isSuccess]);
 
   return (
     <>
@@ -284,15 +266,7 @@ export const CIPPTableToptoolbar = ({
           justifyContent: "space-between",
         })}
       >
-        <Box
-          sx={{
-            display: "flex",
-            gap: "0.5rem",
-            alignItems: "center",
-            width: "100%",
-            flexWrap: "wrap",
-          }}
-        >
+        <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <>
             <Tooltip
               title={
@@ -346,6 +320,7 @@ export const CIPPTableToptoolbar = ({
                 </IconButton>
               </div>
             </Tooltip>
+
             <MRT_GlobalFilterTextField table={table} />
             <Tooltip title="Preset Filters">
               <IconButton onClick={filterPopover.handleOpen} ref={filterPopover.anchorRef}>
@@ -425,41 +400,27 @@ export const CIPPTableToptoolbar = ({
                   </MenuItem>
                 ))}
             </Menu>
-
-            <>
-              {exportEnabled && (
-                <>
-                  <PDFExportButton
-                    rows={table.getFilteredRowModel().rows}
-                    columns={usedColumns}
-                    reportName={title}
-                    columnVisibility={columnVisibility}
-                  />
-                  <CSVExportButton
-                    reportName={title}
-                    columnVisibility={columnVisibility}
-                    rows={table.getFilteredRowModel().rows}
-                    columns={usedColumns}
-                  />
-                </>
-              )}
-              <Tooltip title="View API Response">
-                <IconButton onClick={() => setOffcanvasVisible(true)}>
-                  <DeveloperMode />
-                </IconButton>
-              </Tooltip>
-              {mdDown && (
-                <MRT_ToggleFullScreenButton table={table} />
-              )}
-            </>
-            {
-              //add a little icon with how many rows are selected
-              (table.getIsAllRowsSelected() || table.getIsSomeRowsSelected()) && (
-                <Typography variant="body2" sx={{ alignSelf: "center" }}>
-                  {table.getSelectedRowModel().rows.length} rows selected
-                </Typography>
-              )
-            }
+            {exportEnabled && (
+              <>
+                <PDFExportButton
+                  rows={table.getFilteredRowModel().rows}
+                  columns={usedColumns}
+                  reportName={title}
+                  columnVisibility={columnVisibility}
+                />
+                <CSVExportButton
+                  reportName={title}
+                  columnVisibility={columnVisibility}
+                  rows={table.getFilteredRowModel().rows}
+                  columns={usedColumns}
+                />
+              </>
+            )}
+            <Tooltip title="View API Response">
+              <IconButton onClick={() => setOffcanvasVisible(true)}>
+                <DeveloperMode />
+              </IconButton>
+            </Tooltip>
             <CippOffCanvas
               size="xl"
               title="API Response"
@@ -474,7 +435,6 @@ export const CIPPTableToptoolbar = ({
                   type="editor"
                   code={JSON.stringify(usedData, null, 2)}
                   editorHeight="1000px"
-                  showLineNumbers={!mdDown}
                 />
               </Stack>
             </CippOffCanvas>
@@ -482,11 +442,6 @@ export const CIPPTableToptoolbar = ({
         </Box>
         <Box>
           <Box sx={{ display: "flex", gap: "0.5rem" }}>
-            {getRequestData?.data?.pages?.[0].Metadata?.ColdStart === true && (
-              <Tooltip title="Function App cold start was detected, data takes a little longer to retrieve on first load.">
-                <SevereCold />
-              </Tooltip>
-            )}
             {actions && (table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) && (
               <>
                 <Button
@@ -574,43 +529,13 @@ export const CIPPTableToptoolbar = ({
         size="md"
         title="Edit Filters"
         visible={filterCanvasVisible}
-        onClose={() => setFilterCanvasVisible(!filterCanvasVisible)}
+        onClose={() => setFilterCanvasVisible(false)}
       >
         <CippGraphExplorerFilter
           endpointFilter={api?.data?.Endpoint}
           onSubmitFilter={(filter) => {
             setTableFilter(filter, "graph", "Custom Filter");
-            if (filter?.$select) {
-              let selectedColumns = [];
-              if (Array.isArray(filter?.$select)) {
-                selectedColumns = filter?.$select;
-              } else {
-                selectedColumns = filter?.$select.split(",");
-              }
-              const setNestedVisibility = (col) => {
-                if (typeof col === "object" && col !== null) {
-                  Object.keys(col).forEach((key) => {
-                    if (usedColumns.includes(key.trim())) {
-                      setColumnVisibility((prev) => ({ ...prev, [key.trim()]: true }));
-                      setNestedVisibility(col[key]);
-                    }
-                  });
-                } else {
-                  if (usedColumns.includes(col.trim())) {
-                    setColumnVisibility((prev) => ({ ...prev, [col.trim()]: true }));
-                  }
-                }
-              };
-              if (selectedColumns.length > 0) {
-                setConfiguredSimpleColumns(selectedColumns);
-                selectedColumns.forEach((col) => {
-                  setNestedVisibility(col);
-                });
-              }
-            } else {
-              setConfiguredSimpleColumns(originalSimpleColumns);
-            }
-            setFilterCanvasVisible(!filterCanvasVisible);
+            setFilterCanvasVisible(false);
           }}
           component="card"
         />

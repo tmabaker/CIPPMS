@@ -20,8 +20,22 @@ import { CippOffCanvas } from "../CippComponents/CippOffCanvas";
 import { CippCodeBlock } from "../CippComponents/CippCodeBlock";
 import CippSchedulerForm from "../CippFormPages/CippSchedulerForm";
 import defaultPresets from "../../data/GraphExplorerPresets";
-import { Grid, Stack } from "@mui/system";
-import { GroupHeader, GroupItems } from "../CippComponents/CippAutocompleteGrouping";
+import { lighten, darken, styled, Grid, Stack } from "@mui/system";
+
+const GroupHeader = styled("div")(({ theme }) => ({
+  position: "sticky",
+  top: "-8px",
+  padding: "4px 10px",
+  color: theme.palette.primary.main,
+  backgroundColor: lighten(theme.palette.primary.light, 0.85),
+  ...theme.applyStyles("dark", {
+    backgroundColor: darken(theme.palette.primary.main, 0.8),
+  }),
+}));
+
+const GroupItems = styled("ul")({
+  padding: 0,
+});
 
 const CippGraphExplorerFilter = ({
   endpointFilter = "",
@@ -52,12 +66,6 @@ const CippGraphExplorerFilter = ({
       $count: false,
       manualPagination: false,
       IsShared: false,
-    },
-  });
-  const presetControl = useForm({
-    mode: "onChange",
-    defaultValues: {
-      reportTemplate: null,
     },
   });
 
@@ -177,7 +185,7 @@ const CippGraphExplorerFilter = ({
     });
   };
 
-  const selectedPresets = useWatch({ control: presetControl.control, name: "reportTemplate" });
+  const selectedPresets = useWatch({ control, name: "reportTemplate" });
   useEffect(() => {
     if (selectedPresets?.addedFields?.params) {
       setPresetOwner(selectedPresets?.addedFields?.IsMyPreset ?? false);
@@ -363,6 +371,7 @@ const CippGraphExplorerFilter = ({
 
   function getPresetProps(values) {
     var newvals = Object.assign({}, values);
+    console.log(values);
     if (newvals?.$select !== undefined && Array.isArray(newvals?.$select)) {
       newvals.$select = newvals?.$select.map((p) => p.value).join(",");
     }
@@ -451,7 +460,6 @@ const CippGraphExplorerFilter = ({
     setCardExpanded(false);
   };
 
-  console.log(cardExpanded);
   const deletePreset = (id) => {
     savePresetApi.mutate({
       url: "/api/ExecGraphExplorerPreset",
@@ -465,7 +473,6 @@ const CippGraphExplorerFilter = ({
         title="Graph Filter"
         component={component}
         accordionExpanded={cardExpanded}
-        onAccordionChange={(expanded) => setCardExpanded(expanded)}
         cardSx={{
           width: "100%",
           height: "100%",
@@ -547,7 +554,7 @@ const CippGraphExplorerFilter = ({
               name="reportTemplate"
               label="Select a preset"
               multiple={false}
-              formControl={presetControl}
+              formControl={formControl}
               options={presetOptions}
               isFetching={presetList.isFetching}
               groupBy={(option) => option.type}

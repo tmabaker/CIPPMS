@@ -21,7 +21,6 @@ const Page = () => {
       data: { value: "customerId" },
       confirmText: "Are you sure you want to exclude these tenants?",
       multiPost: false,
-      condition: (row) => row.displayName !== '*Partner Tenant',
     },
     {
       label: "Include Tenants",
@@ -31,14 +30,13 @@ const Page = () => {
       data: { value: "customerId" },
       confirmText: "Are you sure you want to include these tenants?",
       multiPost: false,
-      condition: (row) => row.displayName !== '*Partner Tenant',
     },
     {
       label: "Refresh CPV Permissions",
       type: "POST",
       url: `/api/ExecCPVPermissions`,
       icon: <PlayArrow />,
-      data: { tenantFilter: "customerId" },
+      data: { TenantFilter: "customerId" },
       confirmText: "Are you sure you want to refresh the CPV permissions for these tenants?",
       multiPost: false,
     },
@@ -47,11 +45,10 @@ const Page = () => {
       type: "POST",
       url: `/api/ExecCPVPermissions?&ResetSP=true`,
       icon: <RestartAlt />,
-      data: { tenantFilter: "customerId" },
+      data: { TenantFilter: "customerId" },
       confirmText:
         "Are you sure you want to reset the CPV permissions for these tenants? (This will delete the Service Principal and re-add it.)",
       multiPost: false,
-      condition: (row) => row.displayName !== '*Partner Tenant',
     },
     {
       label: "Remove Tenant",
@@ -61,7 +58,6 @@ const Page = () => {
       data: { TenantID: "customerId" },
       confirmText: "Are you sure you want to remove this tenant?",
       multiPost: false,
-      condition: (row) => row.displayName !== '*Partner Tenant',
     },
   ];
 

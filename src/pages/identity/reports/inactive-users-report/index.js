@@ -23,7 +23,7 @@ const Page = () => {
     },
     {
       label: "Block Sign In",
-      type: "POST",
+      type: "GET",
       icon: <Block />,
       url: "/api/ExecDisableUser",
       data: { ID: "azureAdUserId" },
@@ -32,7 +32,7 @@ const Page = () => {
     },
     {
       label: "Delete User",
-      type: "POST",
+      type: "GET",
       icon: <TrashIcon />,
       url: "/api/RemoveUser",
       data: { ID: "azureAdUserId" },

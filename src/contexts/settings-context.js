@@ -72,7 +72,6 @@ const initialSettings = {
   paletteMode: "light",
   pinNav: true,
   currentTenant: null,
-  showDevtools: false,
 };
 
 const initialState = {

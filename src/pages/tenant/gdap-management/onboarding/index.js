@@ -57,7 +57,6 @@ const Page = () => {
           Start Tenant Onboarding
         </Button>
       }
-      maxHeightOffset="460px"
     />
   );
 };

@@ -24,11 +24,14 @@ export const CippFormLicenseSelector = ({
       api={{
         addedField: addedField,
         tenantFilter: userSettingsDefaults.currentTenant ?? undefined,
-        url: "/api/ListLicenses",
+        url: "/api/ListGraphRequest",
+        dataKey: "Results",
         labelField: (option) =>
-          `${getCippLicenseTranslation([option])} (${option?.availableUnits} available)`,
+          `${getCippLicenseTranslation([option])} (${
+            option.prepaidUnits.enabled - option.consumedUnits
+          } available)`,
         valueField: "skuId",
-        queryKey: `ListLicenses-${userSettingsDefaults?.currentTenant ?? undefined}`,
+        queryKey: `ListLicenses-${userSettingsDefaults.currentTenant ?? undefined}`,
         data: {
           Endpoint: "subscribedSkus",
           $count: true,

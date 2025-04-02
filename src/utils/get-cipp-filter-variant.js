@@ -23,7 +23,7 @@ export const getCippFilterVariant = (providedColumnKeys) => {
   if (timeAgoArray.includes(providedColumnKeys) || matchDateTime.test(providedColumnKeys)) {
     return {
       filterVariant: "datetime-range",
-      sortingFn: "dateTimeNullsLast",
+      sortingFn: "datetime",
       filterFn: "betweenInclusive",
     };
   }

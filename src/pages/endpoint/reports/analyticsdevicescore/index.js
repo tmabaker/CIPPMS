@@ -10,7 +10,7 @@ const Page = () => {
   // Actions from the source file
   const actions = [
     {
-      label: "View in Intune",
+      label: "View in InTune",
       link: `https://intune.microsoft.com/${tenantFilter}/#view/Microsoft_Intune_Devices/DeviceSettingsMenuBlade/~/overview/mdmDeviceId/[id]`,
       color: "info",
       icon: <EyeIcon />,

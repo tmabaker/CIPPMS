@@ -34,9 +34,9 @@ const CippFormSection = (props) => {
     if (!isValid) {
       return;
     }
-    let values = formControl.getValues();
+    const values = formControl.getValues();
     if (customDataformatter) {
-      values = customDataformatter(values);
+      customDataformatter(values);
     }
     postCall.mutate({
       url: postUrl,

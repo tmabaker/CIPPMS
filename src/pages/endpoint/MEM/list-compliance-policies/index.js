@@ -9,11 +9,11 @@ const Page = () => {
   const actions = [
     {
       label: "Create template based on policy",
-      type: "POST",
+      type: "GET",
       url: "/api/AddIntuneTemplate",
       data: {
         ID: "id",
-        ODataType: "@odata.type",
+        URLName: "URLName",
       },
       confirmText: "Are you sure you want to create a template based on this policy?",
       icon: <Book />,
@@ -21,7 +21,7 @@ const Page = () => {
     },
     {
       label: "Assign to All Users",
-      type: "POST",
+      type: "GET",
       url: "/api/ExecAssignPolicy",
       data: {
         AssignTo: "allLicensedUsers",
@@ -34,7 +34,7 @@ const Page = () => {
     },
     {
       label: "Assign to All Devices",
-      type: "POST",
+      type: "GET",
       url: "/api/ExecAssignPolicy",
       data: {
         AssignTo: "AllDevices",
@@ -47,7 +47,7 @@ const Page = () => {
     },
     {
       label: "Assign Globally (All Users / All Devices)",
-      type: "POST",
+      type: "GET",
       url: "/api/ExecAssignPolicy",
       data: {
         AssignTo: "AllDevicesAndUsers",
@@ -60,7 +60,7 @@ const Page = () => {
     },
     {
       label: "Delete Policy",
-      type: "POST",
+      type: "GET",
       url: "/api/RemovePolicy",
       data: {
         ID: "id",

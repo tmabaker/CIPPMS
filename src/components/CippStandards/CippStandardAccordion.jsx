@@ -13,7 +13,7 @@ import {
   Tooltip,
   Chip,
 } from "@mui/material";
-import { ExpandMore as ExpandMoreIcon, Delete, Add, Public } from "@mui/icons-material";
+import { ExpandMore as ExpandMoreIcon, Delete, Add, Public, TableChart } from "@mui/icons-material";
 import CippFormComponent from "/src/components/CippComponents/CippFormComponent";
 import { useWatch } from "react-hook-form";
 import _ from "lodash";
@@ -49,7 +49,6 @@ const CippAddedComponent = React.memo(({ standardName, component, formControl })
       label: tz.timezone,
       value: tz.timezone,
     }));
-    updatedComponent.multiple = false;
   } else {
     updatedComponent.type = component.type;
   }
@@ -159,29 +158,17 @@ const CippStandardAccordion = ({
               {selectedActions && selectedActions?.length > 0 && (
                 <Stack direction="row" spacing={1} sx={{ my: 0.5 }}>
                   {selectedActions?.map((action, index) => (
-                    <>
-                      <Chip
-                        key={index}
-                        label={action.label}
-                        color="info"
-                        variant="outlined"
-                        size="small"
-                        sx={{ mr: 1 }}
-                      />
-                    </>
+                    <Chip
+                      key={index}
+                      label={action.label}
+                      color="info"
+                      variant="outlined"
+                      size="small"
+                      sx={{ mr: 1 }}
+                    />
                   ))}
-                  <Chip
-                    label={standard?.impact}
-                    color={standard?.impact === "High Impact" ? "error" : "info"}
-                    variant="outlined"
-                    size="small"
-                    sx={{ mr: 1 }}
-                  />
                 </Stack>
               )}
-              {
-                //add a chip that shows the impact
-              }
               <Typography variant="body2" color="textSecondary">
                 {standard.helpText}
               </Typography>
@@ -217,7 +204,7 @@ const CippStandardAccordion = ({
           </Stack>
         </Stack>
 
-        <Collapse in={isExpanded} unmountOnExit>
+        <Collapse in={isExpanded}>
           <Divider />
           <Box sx={{ p: 3 }}>
             <Grid container spacing={2}>

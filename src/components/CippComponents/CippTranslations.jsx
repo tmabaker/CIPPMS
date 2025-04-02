@@ -44,6 +44,4 @@ export const CippTranslations = {
   "commitmentTerm.renewalConfiguration.renewalDate": "Renewal Date",
   storageUsedInBytes: "Storage Used",
   prohibitSendReceiveQuotaInBytes: "Quota",
-  ClientId: "Client ID",
-  html_url: "URL",
 };

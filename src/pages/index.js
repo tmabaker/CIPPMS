@@ -80,12 +80,7 @@ const Page = () => {
       name: "Default Domain",
       data: (
         <>
-          <CippCopyToClipBoard
-            text={
-              organization.data?.verifiedDomains?.find((domain) => domain.isDefault === true)?.name
-            }
-            type="chip"
-          />
+          <CippCopyToClipBoard text={organization.data?.verifiedDomains?.[0]?.name} type="chip" />
         </>
       ),
     },

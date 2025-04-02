@@ -59,7 +59,6 @@ export default function CippRemediationCard(props) {
         <ListItem>Block user sign-in</ListItem>
         <ListItem>Reset user password</ListItem>
         <ListItem>Disconnect all current sessions</ListItem>
-        <ListItem>Remove all MFA methods for the user</ListItem>
         <ListItem>Disable all inbox rules for the user</ListItem>
       </List>
       <CippApiDialog
