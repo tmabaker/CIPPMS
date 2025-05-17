@@ -155,6 +155,9 @@ export const CippFormComponent = (props) => {
             <TextField
               type="number"
               variant="filled"
+              InputLabelProps={{
+                shrink: true,
+              }}
               {...other}
               {...formControl.register(convertedName, { ...validators })}
               label={label}
@@ -189,6 +192,11 @@ export const CippFormComponent = (props) => {
           <Typography variant="subtitle3" color="error">
             {get(errors, convertedName, {})?.message}
           </Typography>
+          {other.helperText && (
+            <Typography variant="subtitle3" color="text.secondary">
+              {other.helperText}
+            </Typography>
+          )}
         </>
       );
 
