@@ -334,6 +334,7 @@ const Page = () => {
                           !relationship?.addedFields?.displayName?.startsWith("MLT_")
                       );
                     },
+                    showRefresh: true,
                   }}
                   multiple={false}
                   creatable={true}
@@ -496,7 +497,7 @@ const Page = () => {
                               value: getCippFormatting(
                                 currentInvite
                                   ? currentInvite.RoleMappings
-                                  : currentRelationship?.addedFields?.accessDetails.unifiedRoles,
+                                  : currentRelationship?.addedFields?.accessDetails?.unifiedRoles,
                                 "unifiedRoles",
                                 "object"
                               ),
