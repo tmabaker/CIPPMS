@@ -1,16 +1,32 @@
 import React from "react";
-import { Grid, InputAdornment } from "@mui/material";
+import { InputAdornment } from "@mui/material";
+import { Grid } from "@mui/system";
 import CippFormComponent from "/src/components/CippComponents/CippFormComponent";
 import { CippFormCondition } from "/src/components/CippComponents/CippFormCondition";
 import { CippFormDomainSelector } from "../CippComponents/CippFormDomainSelector";
 import { CippFormUserSelector } from "../CippComponents/CippFormUserSelector";
+
+const DynamicMembershipRules = ({ formControl }) => (
+  <Grid item size={{ xs: 12 }}>
+    <CippFormComponent
+      type="textField"
+      label="Dynamic Group Parameters"
+      name="membershipRules"
+      formControl={formControl}
+      placeholder="Enter dynamic group parameters syntax"
+      multiline
+      rows={4}
+      fullWidth
+    />
+  </Grid>
+);
 
 const CippAddGroupForm = (props) => {
   const { formControl } = props;
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} md={12}>
+      <Grid item size={{ md: 12, xs: 12 }}>
         <CippFormComponent
           type="textField"
           label="Display Name"
@@ -19,7 +35,7 @@ const CippAddGroupForm = (props) => {
           fullWidth
         />
       </Grid>
-      <Grid item xs={12} md={12}>
+      <Grid item size={{ md: 12, xs: 12 }}>
         <CippFormComponent
           type="textField"
           label="Description"
@@ -28,7 +44,7 @@ const CippAddGroupForm = (props) => {
           fullWidth
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           label="Username"
@@ -40,7 +56,7 @@ const CippAddGroupForm = (props) => {
           }}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item size={{ md: 6, xs: 12 }}>
         <CippFormDomainSelector
           formControl={formControl}
           name="primDomain"
@@ -48,7 +64,7 @@ const CippAddGroupForm = (props) => {
         />
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid item size={{ xs: 12 }}>
         <CippFormUserSelector
           sx={{ mb: "1rem" }}
           formControl={formControl}
@@ -59,7 +75,7 @@ const CippAddGroupForm = (props) => {
         />
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid item size={{ xs: 12 }}>
         <CippFormUserSelector
           sx={{ mb: "1rem" }}
           formControl={formControl}
@@ -69,7 +85,7 @@ const CippAddGroupForm = (props) => {
           select={"id,userPrincipalName,displayName"}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item size={{ xs: 12 }}>
         <CippFormComponent
           type="radio"
           name="groupType"
@@ -91,7 +107,7 @@ const CippAddGroupForm = (props) => {
         compareType="is"
         compareValue="distribution"
       >
-        <Grid item xs={12}>
+        <Grid item size={{ xs: 12 }}>
           <CippFormComponent
             type="switch"
             label="Let people outside the organization email the group"
@@ -100,25 +116,17 @@ const CippAddGroupForm = (props) => {
           />
         </Grid>
       </CippFormCondition>
-      <CippFormCondition
-        formControl={formControl}
-        field="groupType"
-        compareType="contains"
-        compareValue="dynamic"
-      >
-        <Grid item xs={12}>
-          <CippFormComponent
-            type="textField"
-            label="Dynamic Group Parameters"
-            name="membershipRules"
-            formControl={formControl}
-            placeholder="Enter dynamic group parameters syntax"
-            multiline
-            rows={4}
-            fullWidth
-          />
-        </Grid>
-      </CippFormCondition>
+      {["dynamic", "dynamicDistribution", "m365"].map((groupType) => (
+        <CippFormCondition
+          key={groupType}
+          formControl={formControl}
+          field="groupType"
+          compareType="is"
+          compareValue={groupType}
+        >
+          <DynamicMembershipRules formControl={formControl} />
+        </CippFormCondition>
+      ))}
     </Grid>
   );
 };

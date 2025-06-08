@@ -87,8 +87,8 @@ export const nativeMenuItems = [
           },
           { title: "Audit Logs", path: "/tenant/administration/audit-logs" },
           {
-            title: "Enterprise Applications",
-            path: "/tenant/administration/enterprise-apps",
+            title: "Applications",
+            path: "/tenant/administration/applications/enterprise-apps",
           },
           { title: "Secure Score", path: "/tenant/administration/securescore" },
           {
@@ -258,6 +258,7 @@ export const nativeMenuItems = [
         path: "/endpoint/reports",
         items: [
           { title: "Analytics Device Score", path: "/endpoint/reports/analyticsdevicescore" },
+          { title: "Work from anywhere", path: "/endpoint/reports/workfromanywhere" },
         ],
       },
     ],
@@ -307,6 +308,7 @@ export const nativeMenuItems = [
           { title: "Deleted Mailboxes", path: "/email/administration/deleted-mailboxes" },
           { title: "Mailbox Rules", path: "/email/administration/mailbox-rules" },
           { title: "Contacts", path: "/email/administration/contacts" },
+          { title: "Contact Templates", path: "/email/administration/contacts-template" },
           { title: "Quarantine", path: "/email/administration/quarantine" },
           {
             title: "Tenant Allow/Block Lists",
@@ -341,12 +343,17 @@ export const nativeMenuItems = [
             title: "Connection filter templates",
             path: "/email/spamfilter/list-connectionfilter-templates",
           },
+          {
+            title: "Quarantine Policies",
+            path: "/email/spamfilter/list-quarantine-policies",
+          },
         ],
       },
       {
         title: "Resource Management",
         path: "/email/resources/management",
         items: [
+          { title: "Equipment", path: "/email/resources/management/equipment" },
           { title: "Rooms", path: "/email/resources/management/list-rooms" },
           { title: "Room Lists", path: "/email/resources/management/room-lists" },
         ],
@@ -464,12 +471,12 @@ export const nativeMenuItems = [
     items: [
       { title: "Application Settings", path: "/cipp/settings", roles: ["admin", "superadmin"] },
       { title: "Logbook", path: "/cipp/logs", roles: ["editor", "admin", "superadmin"] },
-      { title: "SAM Setup Wizard", path: "/onboarding", roles: ["admin", "superadmin"] },
+      { title: "Setup Wizard", path: "/onboardingv2", roles: ["admin", "superadmin"] },
       { title: "Integrations", path: "/cipp/integrations", roles: ["admin", "superadmin"] },
       {
         title: "Custom Data",
         path: "/cipp/custom-data/directory-extensions",
-        roles: ["admin", "superadmin"]
+        roles: ["admin", "superadmin"],
       },
       {
         title: "Advanced",
