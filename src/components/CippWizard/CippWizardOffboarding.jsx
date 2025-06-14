@@ -40,7 +40,7 @@ export const CippWizardOffboarding = (props) => {
   return (
     <Stack spacing={4}>
       <Grid container spacing={4}>
-        <Grid item size={6}>
+        <Grid size={6}>
           <Card variant="outlined">
             <CardHeader title="Offboarding Settings" />
             <Divider />
@@ -133,7 +133,7 @@ export const CippWizardOffboarding = (props) => {
           </Card>
         </Grid>
 
-        <Grid item size={6}>
+        <Grid size={6}>
           <Card variant="outlined">
             <CardHeader title="Permissions and forwarding" />
             <Divider />
@@ -155,6 +155,7 @@ export const CippWizardOffboarding = (props) => {
                   dataKey: "Results",
                   labelField: (option) => `${option.displayName} (${option.userPrincipalName})`,
                   valueField: "id",
+                  queryKey: "Offboarding-Users",
                   data: {
                     Endpoint: "users",
                     manualPagination: true,
@@ -179,6 +180,7 @@ export const CippWizardOffboarding = (props) => {
                   url: "/api/ListGraphRequest",
                   dataKey: "Results",
                   tenantFilter: currentTenant ? currentTenant.value : undefined,
+                  queryKey: "Offboarding-Users",
                   data: {
                     Endpoint: "users",
                     manualPagination: true,
@@ -203,6 +205,7 @@ export const CippWizardOffboarding = (props) => {
                   valueField: "id",
                   url: "/api/ListGraphRequest",
                   dataKey: "Results",
+                  queryKey: "Offboarding-Users",
                   data: {
                     Endpoint: "users",
                     manualPagination: true,
@@ -244,6 +247,7 @@ export const CippWizardOffboarding = (props) => {
                     valueField: "id",
                     url: "/api/ListGraphRequest",
                     dataKey: "Results",
+                    queryKey: "Offboarding-Users",
                     data: {
                       Endpoint: "users",
                       manualPagination: true,
@@ -277,7 +281,7 @@ export const CippWizardOffboarding = (props) => {
 
       {showAlert && (
         <Alert severity="warning">
-          You have selected more than 3 users. This offboarding must be scheduled.
+          You have selected more than 2 users. This offboarding must be scheduled.
         </Alert>
       )}
 
@@ -286,7 +290,7 @@ export const CippWizardOffboarding = (props) => {
         <Divider />
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <CippFormComponent
                 name="Scheduled.enabled"
                 label="Schedule this offboarding"
@@ -301,7 +305,7 @@ export const CippWizardOffboarding = (props) => {
               compareType="is"
               compareValue={true}
             >
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ sm: 6, xs: 12 }}>
                 <Typography variant="subtitle2">Scheduled Offboarding Date</Typography>
                 <CippFormComponent
                   name="Scheduled.date"
@@ -311,7 +315,7 @@ export const CippWizardOffboarding = (props) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ sm: 6, xs: 12 }}>
                 <Typography variant="subtitle2">Send results to:</Typography>
                 <CippFormComponent
                   name="postExecution.webhook"

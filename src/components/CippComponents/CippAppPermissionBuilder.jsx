@@ -70,7 +70,18 @@ const CippAppPermissionBuilder = ({
     setExpanded(newExpanded ? panel : false);
   };
 
+  const deprecatedServicePrincipals = [
+    "00000002-0000-0000-c000-000000000000", // Windows Azure Active Directory
+    "a0c73c16-a7e3-4564-9a95-2bdf47383716", // Microsoft Exchange Online Remote PowerShell
+    "1b730954-1685-4b74-9bfd-dac224a7b894", // Azure Active Directory PowerShell
+  ];
+
   const currentSelectedSp = useWatch({ control: formControl.control, name: "servicePrincipal" });
+
+  // Check if selected service principal is in the deprecated list
+  const isDeprecatedSp =
+    currentSelectedSp && deprecatedServicePrincipals.includes(currentSelectedSp.value);
+
   const {
     data: servicePrincipals = [],
     isSuccess: spSuccess,
@@ -79,7 +90,7 @@ const CippAppPermissionBuilder = ({
     refetch: refetchServicePrincipals,
   } = ApiGetCall({
     url: "/api/ExecServicePrincipals",
-    queryKey: "execServicePrincipals",
+    queryKey: "execServicePrincipalList",
     waiting: true,
   });
 
@@ -427,7 +438,7 @@ const CippAppPermissionBuilder = ({
       waiting: true,
     });
 
-    console.log(spInfo);
+    //console.log(spInfo);
 
     const currentAppPermission = useWatch({
       control: formControl.control,
@@ -545,7 +556,7 @@ const CippAppPermissionBuilder = ({
     return (
       <>
         {spInfoFetching && <Skeleton variant="rectangle" height={250} />}
-        {servicePrincipal && spInfoSuccess && (
+        {servicePrincipal && spInfoSuccess && !spInfoFetching && (
           <>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
               Manage the permissions for the {servicePrincipal.displayName}.
@@ -567,7 +578,7 @@ const CippAppPermissionBuilder = ({
                   <>
                     <Stack spacing={2}>
                       <Grid container sx={{ display: "flex", alignItems: "center" }} spacing={2}>
-                        <Grid item size={{ xl: 8, xs: 12 }}>
+                        <Grid size={{ xl: 8, xs: 12 }}>
                           <CippFormComponent
                             type="autoComplete"
                             label="Application Permissions"
@@ -583,7 +594,7 @@ const CippAppPermissionBuilder = ({
                             multiple={false}
                           />
                         </Grid>
-                        <Grid item>
+                        <Grid>
                           <Tooltip title="Add Permission">
                             <div
                               onClick={() =>
@@ -629,7 +640,7 @@ const CippAppPermissionBuilder = ({
                     </Alert>
                   )}
                   <Grid container sx={{ display: "flex", alignItems: "center" }} spacing={2}>
-                    <Grid item size={{ xl: 8, xs: 12 }}>
+                    <Grid size={{ xl: 8, xs: 12 }}>
                       <CippFormComponent
                         type="autoComplete"
                         label="Delegated Permissions"
@@ -645,7 +656,7 @@ const CippAppPermissionBuilder = ({
                         multiple={false}
                       />
                     </Grid>
-                    <Grid item sx={{ ms: 2 }}>
+                    <Grid sx={{ ms: 2 }}>
                       <Tooltip title="Add Permission">
                         <div
                           onClick={() =>
@@ -715,7 +726,8 @@ const CippAppPermissionBuilder = ({
                         <CippFormComponent
                           type="autoComplete"
                           fullWidth
-                          label="Select a Service Principal or enter an AppId if not listed"
+                          label="Add a Service Principal (optional)"
+                          placeholder="Select a Service Principal or enter an AppId if not listed"
                           name="servicePrincipal"
                           createOption={true}
                           onCreateOption={onCreateServicePrincipal}
@@ -736,24 +748,33 @@ const CippAppPermissionBuilder = ({
                     </IconButton>
                   </Stack>
                 </Grid>
-                <Grid item>
+                <Grid>
                   <Stack direction="row" spacing={1}>
-                    <Tooltip title="Add Service Principal">
+                    <Tooltip
+                      title={
+                        isDeprecatedSp
+                          ? "This service principal is deprecated and cannot be added"
+                          : "Add Service Principal"
+                      }
+                    >
                       <div
                         onClick={(e) => {
-                          setSelectedApp([
-                            ...selectedApp,
-                            servicePrincipals?.Results?.find(
-                              (sp) => sp.appId === currentSelectedSp.value
-                            ),
-                          ]);
-                          formControl.setValue("servicePrincipal", null);
+                          // Only add if not deprecated
+                          if (!isDeprecatedSp) {
+                            setSelectedApp([
+                              ...selectedApp,
+                              servicePrincipals?.Results?.find(
+                                (sp) => sp.appId === currentSelectedSp.value
+                              ),
+                            ]);
+                            formControl.setValue("servicePrincipal", null);
+                          }
                         }}
                       >
                         <Button
                           variant="contained"
                           component={!currentSelectedSp?.value ? "span" : undefined}
-                          disabled={!currentSelectedSp?.value}
+                          disabled={!currentSelectedSp?.value || isDeprecatedSp}
                         >
                           <SvgIcon fontSize="small">
                             <PlusIcon />
@@ -819,7 +840,7 @@ const CippAppPermissionBuilder = ({
                 }}
               >
                 <Grid container>
-                  <Grid item size={12}>
+                  <Grid size={12}>
                     <Typography variant="h4" sx={{ mb: 2 }}>
                       Import Permission Manifest
                     </Typography>
@@ -831,7 +852,7 @@ const CippAppPermissionBuilder = ({
                   </Grid>
                 </Grid>
                 <Grid container>
-                  <Grid item size={12}>
+                  <Grid size={12}>
                     <FileDropzone
                       onDrop={onManifestImport}
                       accept={{
@@ -851,12 +872,12 @@ const CippAppPermissionBuilder = ({
                 {importedManifest && (
                   <>
                     <Grid container sx={{ mt: 2 }} spacing={2}>
-                      <Grid item size={12}>
+                      <Grid size={12}>
                         <Alert color="success" icon={<TaskAlt />}>
                           Manifest is valid. Click Import to apply the permissions.
                         </Alert>
                       </Grid>
-                      <Grid item size={12}>
+                      <Grid size={12}>
                         <Button
                           variant="contained"
                           onClick={() => importManifest()}
@@ -871,7 +892,7 @@ const CippAppPermissionBuilder = ({
                       </Grid>
                     </Grid>
                     <Grid container className="mt-3">
-                      <Grid item size={12}>
+                      <Grid size={12}>
                         <h4>Preview</h4>
                         <CippCodeBlock
                           code={JSON.stringify(importedManifest, null, 2)}
@@ -884,10 +905,21 @@ const CippAppPermissionBuilder = ({
                 )}
               </CippOffCanvas>
               {calloutMessage && (
-                <Grid container sx={{ my: 3 }}>
+                <Grid container>
                   <Grid size={{ xl: 8, xs: 12 }}>
                     <Alert variant="outlined" color="info" onClose={() => setCalloutMessage(null)}>
                       {calloutMessage}
+                    </Alert>
+                  </Grid>
+                </Grid>
+              )}
+
+              {isDeprecatedSp && (
+                <Grid container>
+                  <Grid size={{ xl: 8, xs: 12 }}>
+                    <Alert color="error" icon={<WarningAmberOutlined />}>
+                      {currentSelectedSp.label} is deprecated and cannot be added. Please select a
+                      different service principal.
                     </Alert>
                   </Grid>
                 </Grid>
@@ -1064,7 +1096,7 @@ const CippAppPermissionBuilder = ({
           </Grid>
 
           <Grid container sx={{ display: "flex", alignItems: "center" }}>
-            <Grid item size={{ xl: 1, xs: 12 }}>
+            <Grid size={{ xl: 1, xs: 12 }}>
               <Button
                 variant="contained"
                 startIcon={
@@ -1073,10 +1105,7 @@ const CippAppPermissionBuilder = ({
                   </SvgIcon>
                 }
                 type="submit"
-                disabled={
-                  updatePermissions.isPending ||
-                  _.isEqual(currentPermissions.Permissions, newPermissions.Permissions)
-                }
+                disabled={updatePermissions.isPending}
                 onClick={handleSubmit}
               >
                 Save
