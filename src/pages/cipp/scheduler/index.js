@@ -1,38 +1,14 @@
 import { Layout as DashboardLayout } from "/src/layouts/index.js";
 import CippTablePage from "/src/components/CippComponents/CippTablePage";
-import { Button, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import Link from "next/link";
-import { CalendarDaysIcon, EyeIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { CopyAll, Edit } from "@mui/icons-material";
-import { CippCodeBlock } from "../../../components/CippComponents/CippCodeBlock";
+import ScheduledTaskDetails from "../../../components/CippComponents/ScheduledTaskDetails";
+import { CippScheduledTaskActions } from "../../../components/CippComponents/CippScheduledTaskActions";
 
 const Page = () => {
-  const actions = [
-    {
-      label: "Edit Job",
-      link: "/cipp/scheduler/job?id=[RowKey]",
-      multiPost: false,
-      icon: <Edit />,
-      color: "success",
-    },
-    {
-      label: "Clone and Edit Job",
-      link: "/cipp/scheduler/job?id=[RowKey]&Clone=True",
-      multiPost: false,
-      icon: <CopyAll />,
-      color: "success",
-    },
-    {
-      label: "Delete Job",
-      icon: <TrashIcon />,
-      type: "POST",
-      url: "/api/RemoveScheduledItem",
-      data: { id: "RowKey" },
-      confirmText: "Are you sure you want to delete this job?",
-      multiPost: false,
-    },
-  ];
+  const actions = CippScheduledTaskActions();
 
   const filterList = [
     {
@@ -58,12 +34,8 @@ const Page = () => {
   ];
 
   const offCanvas = {
-    children: (extendedData) => (
-      <>
-        <Typography variant="h6">Job Results</Typography>
-        <CippCodeBlock type="editor" code={extendedData.Results} />
-      </>
-    ),
+    children: (extendedData) => <ScheduledTaskDetails data={extendedData} showActions={false} />,
+    size: "xl",
     actions: actions,
   };
   const [showHiddenJobs, setShowHiddenJobs] = useState(false);
