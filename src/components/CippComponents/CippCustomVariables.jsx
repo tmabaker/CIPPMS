@@ -20,6 +20,20 @@ const CippCustomVariables = ({ id }) => {
     "tenantfilter",
     "partnertenantid",
     "samappid",
+    "cippuserschema",
+    "cippurl",
+    "defaultdomain",
+    "serial",
+    "systemroot",
+    "systemdrive",
+    "temp",
+    "userprofile",
+    "username",
+    "userdomain",
+    "windir",
+    "programfiles",
+    "programfiles(x86)",
+    "programdata",
   ];
 
   const validateVariableName = (value) => {
@@ -50,7 +64,7 @@ const CippCustomVariables = ({ id }) => {
           label: "Variable Name",
           placeholder: "Enter the key for the custom variable.",
           required: true,
-          validators: validateVariableName,
+          validators: { validate: validateVariableName },
         },
         {
           type: "textField",
@@ -64,7 +78,7 @@ const CippCustomVariables = ({ id }) => {
       url: "/api/ExecCippReplacemap",
       data: {
         Action: "!AddEdit",
-        customerId: id,
+        tenantId: id,
       },
       relatedQueryKeys: [`CustomVariables_${id}`],
     },
@@ -77,7 +91,7 @@ const CippCustomVariables = ({ id }) => {
       data: {
         Action: "Delete",
         RowKey: "RowKey",
-        customerId: id,
+        tenantId: id,
       },
       relatedQueryKeys: [`CustomVariables_${id}`],
       multiPost: false,
@@ -100,7 +114,7 @@ const CippCustomVariables = ({ id }) => {
         title={id === "AllTenants" ? "Global Variables" : "Custom Variables"}
         actions={actions}
         api={{
-          url: `/api/ExecCippReplacemap?Action=List&customerId=${id}`,
+          url: `/api/ExecCippReplacemap?Action=List&tenantId=${id}`,
           dataKey: "Results",
         }}
         simpleColumns={["RowKey", "Value"]}
@@ -134,7 +148,7 @@ const CippCustomVariables = ({ id }) => {
             label: "Variable Name",
             placeholder: "Enter the name for the custom variable without %.",
             required: true,
-            validators: validateVariableName,
+            validators: { validate: validateVariableName },
           },
           {
             type: "textField",
@@ -147,7 +161,7 @@ const CippCustomVariables = ({ id }) => {
         api={{
           type: "POST",
           url: "/api/ExecCippReplacemap",
-          data: { Action: "AddEdit", customerId: id },
+          data: { Action: "AddEdit", tenantId: id },
           relatedQueryKeys: [`CustomVariables_${id}`],
         }}
       />

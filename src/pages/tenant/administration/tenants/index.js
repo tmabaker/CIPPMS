@@ -1,10 +1,8 @@
 import { Layout as DashboardLayout } from "/src/layouts/index.js";
 import { TabbedLayout } from "/src/layouts/TabbedLayout";
 import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
-import { Button, SvgIcon } from "@mui/material";
-import { AddBusinessOutlined, Edit } from "@mui/icons-material";
+import { Edit } from "@mui/icons-material";
 import tabOptions from "./tabOptions";
-import NextLink from "next/link";
 
 const Page = () => {
   const pageTitle = "Tenants";
@@ -20,6 +18,8 @@ const Page = () => {
     "portal_intune",
     "portal_security",
     "portal_compliance",
+    "portal_platform",
+    "portal_bi",
   ];
 
   const actions = [
