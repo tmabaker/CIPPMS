@@ -433,7 +433,7 @@ function CippJsonView({
       "createdDateTime",
       "modifiedDateTime",
     ];
-    const cleanedObj = cleanObject(object);
+    const cleanedObj = cleanObject(object) || {};
     const filteredObj = Object.fromEntries(
       Object.entries(cleanedObj).filter(([key]) => !blacklist.includes(key))
     );
@@ -519,7 +519,6 @@ function CippJsonView({
               ?.filter((data) => data !== null && data !== undefined)
               .map((data, index) => (
                 <Grid
-                  item
                   size={{ sm: type === "intune" ? 12 : 3, xs: 12 }}
                   key={index}
                   sx={{

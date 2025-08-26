@@ -3,7 +3,7 @@ import { ApiGetCall } from "../api/ApiCall";
 import { useSettings } from "./use-settings";
 import standards from "/src/data/standards.json";
 
-export function useSecureScore() {
+export function useSecureScore({ waiting = true } = {}) {
   const currentTenant = useSettings().currentTenant;
   if (currentTenant === "AllTenants") {
     return {
@@ -27,6 +27,7 @@ export function useSecureScore() {
       $top: 999,
     },
     queryKey: `controlScore-${currentTenant}`,
+    waiting: waiting,
   });
 
   const secureScore = ApiGetCall({
@@ -39,6 +40,7 @@ export function useSecureScore() {
       $top: 7,
     },
     queryKey: `secureScore-${currentTenant}`,
+    waiting: waiting,
   });
 
   useEffect(() => {
@@ -89,12 +91,10 @@ export function useSecureScore() {
           (secureScoreData.currentScore / secureScoreData.maxScore) * 100
         ),
         percentageVsAllTenants: Math.round(
-          (secureScoreData.averageComparativeScores?.[0]?.averageScore / secureScoreData.maxScore) *
-            100
+          secureScoreData.averageComparativeScores?.[0]?.averageScore
         ),
         percentageVsSimilar: Math.round(
-          (secureScoreData.averageComparativeScores?.[1]?.averageScore / secureScoreData.maxScore) *
-            100
+          secureScoreData.averageComparativeScores?.[1]?.averageScore
         ),
         controlScores: updatedControlScores,
       });
