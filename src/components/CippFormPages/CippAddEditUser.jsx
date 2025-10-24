@@ -1,25 +1,74 @@
-import { Alert, InputAdornment, Typography } from "@mui/material";
+import { Alert, Divider, InputAdornment, Typography } from "@mui/material";
 import CippFormComponent from "/src/components/CippComponents/CippFormComponent";
 import { CippFormCondition } from "/src/components/CippComponents/CippFormCondition";
 import { CippFormDomainSelector } from "/src/components/CippComponents/CippFormDomainSelector";
 import { CippFormUserSelector } from "/src/components/CippComponents/CippFormUserSelector";
 import countryList from "/src/data/countryList.json";
 import { CippFormLicenseSelector } from "/src/components/CippComponents/CippFormLicenseSelector";
-import Grid from "@mui/material/Grid";
+import { Grid } from "@mui/system";
 import { ApiGetCall } from "../../api/ApiCall";
 import { useSettings } from "../../hooks/use-settings";
 import { useWatch } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/router";
 
 const CippAddEditUser = (props) => {
   const { formControl, userSettingsDefaults, formType = "add" } = props;
   const tenantDomain = useSettings().currentTenant;
+  const router = useRouter();
+  const { userId } = router.query;
   const integrationSettings = ApiGetCall({
     url: "/api/ListExtensionsConfig",
     queryKey: "ListExtensionsConfig",
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
+
+  // Get all groups the is the user is a member of
+  const userGroups = ApiGetCall({
+    url: `/api/ListUserGroups?userId=${userId}&tenantFilter=${tenantDomain}`,
+    queryKey: `User-${userId}-Groups-${tenantDomain}`,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    waiting: !!userId,
+  });
+
+  // Get all groups for the tenant
+  const tenantGroups = ApiGetCall({
+    url: `/api/ListGroups?tenantFilter=${tenantDomain}`,
+    queryKey: `ListGroups-${tenantDomain}`,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    waiting: !!userId,
+  });
+
+  // Get manual entry custom data mappings for current tenant
+  const manualEntryMappings = ApiGetCall({
+    url: `/api/ListCustomDataMappings?sourceType=Manual Entry&directoryObject=User&tenantFilter=${tenantDomain}`,
+    queryKey: `ManualEntryMappings-${tenantDomain}`,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+
+  // Use mappings directly since they're already filtered by the API
+  const currentTenantManualMappings = useMemo(() => {
+    if (manualEntryMappings.isSuccess) {
+      return manualEntryMappings.data?.Results || [];
+    }
+    return [];
+  }, [manualEntryMappings.isSuccess, manualEntryMappings.data]);
+
+  // Make new list of groups by removing userGroups from tenantGroups
+  const filteredTenantGroups = useMemo(() => {
+    if (tenantGroups.isSuccess && userGroups.isSuccess) {
+      const tenantGroupsList = tenantGroups?.data || [];
+
+      return tenantGroupsList.filter(
+        (tenantGroup) => !userGroups?.data?.some((userGroup) => userGroup.id === tenantGroup.id)
+      );
+    }
+    return [];
+  }, [tenantGroups.isSuccess, userGroups.isSuccess, tenantGroups.data, userGroups.data]);
 
   const watcher = useWatch({ control: formControl.control });
   useEffect(() => {
@@ -31,7 +80,7 @@ const CippAddEditUser = (props) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -40,7 +89,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -49,7 +98,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -58,7 +107,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -70,14 +119,14 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormDomainSelector
           formControl={formControl}
           name="primDomain"
           label="Primary Domain name"
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -90,10 +139,10 @@ const CippAddEditUser = (props) => {
         />
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <Typography variant="h6">Settings</Typography>
       </Grid>
-      <Grid item xs={6}>
+      <Grid size={{ xs: 6 }}>
         <CippFormComponent
           type="switch"
           label="Create password manually"
@@ -106,7 +155,7 @@ const CippAddEditUser = (props) => {
           compareType="is"
           compareValue={true}
         >
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <CippFormComponent
               type="password"
               fullWidth
@@ -117,7 +166,7 @@ const CippAddEditUser = (props) => {
           </Grid>
         </CippFormCondition>
       </Grid>
-      <Grid item xs={6}>
+      <Grid size={{ xs: 6 }}>
         <CippFormComponent
           type="switch"
           label="Require password change at next logon"
@@ -125,13 +174,13 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormComponent
           type="autoComplete"
           label="Usage Location"
           name="usageLocation"
           multiple={false}
-          defaultValue="US"
+          defaultValue={userSettingsDefaults?.usageLocation || "US"}
           options={countryList.map(({ Code, Name }) => ({
             label: Name,
             value: Code,
@@ -139,7 +188,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormLicenseSelector label="Licenses" name="licenses" formControl={formControl} />
       </Grid>
       {integrationSettings?.data?.Sherweb?.Enabled === true && (
@@ -151,7 +200,7 @@ const CippAddEditUser = (props) => {
             compareValue="(0 available)"
             labelCompare={true}
           >
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <CippFormComponent
                 type="switch"
                 label="0 Licences available. Purchase new licence?"
@@ -165,14 +214,14 @@ const CippAddEditUser = (props) => {
               compareType="is"
               compareValue={true}
             >
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Alert severity="info">
                   This will Purchase a new Sherweb License for the user, according to the terms and
                   conditions with Sherweb. When the license becomes available, CIPP will assign the
                   license to this user.
                 </Alert>
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <CippFormComponent
                   type="autoComplete"
                   api={{
@@ -191,7 +240,7 @@ const CippAddEditUser = (props) => {
           </CippFormCondition>
         </>
       )}
-      <Grid item xs={6}>
+      <Grid size={{ xs: 6 }}>
         <CippFormComponent
           type="switch"
           label="Remove all licenses"
@@ -199,7 +248,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -208,7 +257,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -217,7 +266,25 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
+        <CippFormComponent
+          type="textField"
+          fullWidth
+          label="City"
+          name="city"
+          formControl={formControl}
+        />
+      </Grid>
+      <Grid size={{ md: 6, xs: 12 }}>
+        <CippFormComponent
+          type="textField"
+          fullWidth
+          label="State/Province"
+          name="state"
+          formControl={formControl}
+        />
+      </Grid>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -226,7 +293,16 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
+        <CippFormComponent
+          type="textField"
+          fullWidth
+          label="Country"
+          name="country"
+          formControl={formControl}
+        />
+      </Grid>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -235,7 +311,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -244,7 +320,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -253,7 +329,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -262,7 +338,7 @@ const CippAddEditUser = (props) => {
           formControl={formControl}
         />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ md: 6, xs: 12 }}>
         <CippFormComponent
           type="textField"
           fullWidth
@@ -274,7 +350,7 @@ const CippAddEditUser = (props) => {
       {userSettingsDefaults?.userAttributes
         ?.filter((attribute) => attribute.value !== "sponsor")
         .map((attribute, idx) => (
-          <Grid item xs={6} key={idx}>
+          <Grid size={{ xs: 6 }} key={idx}>
             <CippFormComponent
               type="textField"
               fullWidth
@@ -286,7 +362,7 @@ const CippAddEditUser = (props) => {
         ))}
 
       {/* Set Manager */}
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormUserSelector
           formControl={formControl}
           name="setManager"
@@ -296,7 +372,7 @@ const CippAddEditUser = (props) => {
         />
       </Grid>
       {userSettingsDefaults?.userAttributes?.some((attribute) => attribute.value === "sponsor") && (
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <CippFormUserSelector
             formControl={formControl}
             name="setSponsor"
@@ -306,7 +382,7 @@ const CippAddEditUser = (props) => {
           />
         </Grid>
       )}
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <CippFormUserSelector
           formControl={formControl}
           name="copyFrom"
@@ -315,70 +391,131 @@ const CippAddEditUser = (props) => {
         />
       </Grid>
       {formType === "edit" && (
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <CippFormComponent
             type="autoComplete"
             label="Add to Groups"
             name="AddToGroups"
             multiple={true}
-            api={{
-              url: "/api/ListGroups",
-              queryKey: `ListGroups-${tenantDomain}`,
-              labelField: "displayName",
-              valueField: "id",
-              addedField: {
-                calculatedGroupType: "calculatedGroupType",
+            options={filteredTenantGroups?.map((tenantGroup) => ({
+              label: tenantGroup.displayName,
+              value: tenantGroup.id,
+              addedFields: {
+                calculatedGroupType: tenantGroup.calculatedGroupType,
               },
-            }}
+            }))}
             formControl={formControl}
           />
         </Grid>
       )}
-      {/* Schedule User Creation */}
-      {formType === "add" && (
-        <Grid item xs={12}>
+      {formType === "edit" && (
+        <Grid size={{ xs: 12 }}>
           <CippFormComponent
-            type="switch"
-            label="Schedule user creation"
-            name="Scheduled.enabled"
+            type="autoComplete"
+            label="Remove from Groups"
+            name="RemoveFromGroups"
+            multiple={true}
+            options={userGroups?.data?.map((userGroups) => ({
+              label: userGroups.DisplayName,
+              value: userGroups.id,
+              addedFields: {
+                calculatedGroupType: userGroups.calculatedGroupType,
+              },
+            }))}
             formControl={formControl}
           />
-          <CippFormCondition
-            formControl={formControl}
-            field="Scheduled.enabled"
-            compareType="is"
-            compareValue={true}
-          >
-            <Grid item xs={12}>
-              <label>Scheduled creation Date</label>
-              <CippFormComponent
-                type="datePicker"
-                name="Scheduled.date"
-                formControl={formControl}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CippFormComponent
-                type="switch"
-                label="Send results to Webhook"
-                name="webhook"
-                formControl={formControl}
-              />
-              <CippFormComponent
-                type="switch"
-                label="Send results to E-mail"
-                name="email"
-                formControl={formControl}
-              />
-              <CippFormComponent
-                type="switch"
-                label="Send results to PSA"
-                name="psa"
-                formControl={formControl}
-              />
-            </Grid>
-          </CippFormCondition>
         </Grid>
+      )}
+      {/* Manual Entry Custom Data Fields */}
+      {currentTenantManualMappings.length > 0 && (
+        <>
+          <Grid size={{ xs: 12 }}>
+            <Typography variant="h6">Custom Data</Typography>
+          </Grid>
+          {currentTenantManualMappings.map((mapping, index) => {
+            const fieldName = `customData.${mapping.customDataAttribute.value}`;
+            const fieldLabel = mapping.manualEntryFieldLabel;
+            const dataType = mapping.customDataAttribute.addedFields.dataType;
+
+            // Determine field type based on the custom data attribute type
+            const getFieldType = (dataType) => {
+              switch (dataType?.toLowerCase()) {
+                case "boolean":
+                  return "switch";
+                case "datetime":
+                case "date":
+                  return "datePicker";
+                case "string":
+                default:
+                  return "textField";
+              }
+            };
+
+            return (
+              <Grid size={{ md: 6, xs: 12 }} key={`manual-entry-${index}`}>
+                <CippFormComponent
+                  type={getFieldType(dataType)}
+                  fullWidth
+                  label={fieldLabel}
+                  name={fieldName}
+                  formControl={formControl}
+                  placeholder={`Enter ${fieldLabel.toLowerCase()}`}
+                />
+              </Grid>
+            );
+          })}
+        </>
+      )}
+      {/* Schedule User Creation */}
+      {formType === "add" && (
+        <>
+          <Grid size={{ xs: 12 }}>
+            <Divider />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <CippFormComponent
+              type="switch"
+              label="Schedule user creation"
+              name="Scheduled.enabled"
+              formControl={formControl}
+            />
+            <CippFormCondition
+              formControl={formControl}
+              field="Scheduled.enabled"
+              compareType="is"
+              compareValue={true}
+            >
+              <Grid size={{ xs: 12 }}>
+                <label>Scheduled creation Date</label>
+                <CippFormComponent
+                  type="datePicker"
+                  name="Scheduled.date"
+                  formControl={formControl}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <CippFormComponent
+                  type="switch"
+                  label="Send results to Webhook"
+                  name="webhook"
+                  formControl={formControl}
+                />
+                <CippFormComponent
+                  type="switch"
+                  label="Send results to E-mail"
+                  name="email"
+                  formControl={formControl}
+                />
+                <CippFormComponent
+                  type="switch"
+                  label="Send results to PSA"
+                  name="psa"
+                  formControl={formControl}
+                />
+              </Grid>
+            </CippFormCondition>
+          </Grid>
+        </>
       )}
     </Grid>
   );

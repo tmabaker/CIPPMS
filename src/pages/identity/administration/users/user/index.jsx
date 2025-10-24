@@ -9,13 +9,13 @@ import { HeaderedTabbedLayout } from "../../../../../layouts/HeaderedTabbedLayou
 import tabOptions from "./tabOptions";
 import { CippCopyToClipBoard } from "../../../../../components/CippComponents/CippCopyToClipboard";
 import { Box, Stack } from "@mui/system";
-import Grid from "@mui/material/Grid2";
+import { Grid } from "@mui/system";
 import { CippUserInfoCard } from "../../../../../components/CippCards/CippUserInfoCard";
 import { SvgIcon, Typography } from "@mui/material";
 import { CippBannerListCard } from "../../../../../components/CippCards/CippBannerListCard";
 import { CippTimeAgo } from "../../../../../components/CippComponents/CippTimeAgo";
 import { useEffect, useState } from "react";
-import CippUserActions from "/src/components/CippComponents/CippUserActions";
+import { useCippUserActions } from "/src/components/CippComponents/CippUserActions";
 import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { CippDataTable } from "/src/components/CippTable/CippDataTable";
 import dynamic from "next/dynamic";
@@ -73,6 +73,7 @@ const Page = () => {
   const { userId } = router.query;
   const [waiting, setWaiting] = useState(false);
   const [signInLogsDialogOpen, setSignInLogsDialogOpen] = useState(false);
+  const userActions = useCippUserActions();
 
   useEffect(() => {
     if (userId) {
@@ -81,13 +82,15 @@ const Page = () => {
   }, [userId]);
 
   const userRequest = ApiGetCall({
-    url: `/api/ListUsers?UserId=${userId}&tenantFilter=${userSettingsDefaults.currentTenant}`,
+    url: `/api/ListUsers?UserId=${userId}&tenantFilter=${
+      router.query.tenantFilter ?? userSettingsDefaults.currentTenant
+    }`,
     queryKey: `ListUsers-${userId}`,
     waiting: waiting,
   });
 
   const userBulkRequest = ApiPostCall({
-    urlfromdata: true,
+    urlFromData: true,
   });
 
   useEffect(() => {
@@ -231,7 +234,7 @@ const Page = () => {
             <>
               <Typography variant="h6">Location</Typography>
               <Grid container spacing={2}>
-                <Grid item size={8}>
+                <Grid size={8}>
                   <CippMap
                     markers={[
                       {
@@ -244,7 +247,7 @@ const Page = () => {
                     ]}
                   />
                 </Grid>
-                <Grid item size={4}>
+                <Grid size={4}>
                   <CippPropertyList
                     propertyItems={[
                       { label: "City", value: signInData.location.city },
@@ -558,7 +561,7 @@ const Page = () => {
     <HeaderedTabbedLayout
       tabOptions={tabOptions}
       title={title}
-      actions={CippUserActions()}
+      actions={userActions}
       actionsData={data}
       subtitle={subtitle}
       isFetching={userRequest.isLoading}
@@ -572,14 +575,14 @@ const Page = () => {
           }}
         >
           <Grid container spacing={2}>
-            <Grid item size={4}>
+            <Grid size={4}>
               <CippUserInfoCard
                 user={data}
                 tenant={userSettingsDefaults.currentTenant}
                 isFetching={userRequest.isLoading}
               />
             </Grid>
-            <Grid item size={8}>
+            <Grid size={8}>
               <Stack spacing={3}>
                 <Typography variant="h6">Latest Logon</Typography>
                 <CippBannerListCard

@@ -14,7 +14,7 @@ import { HeaderedTabbedLayout } from "../../../../../layouts/HeaderedTabbedLayou
 import tabOptions from "./tabOptions";
 import { CippCopyToClipBoard } from "../../../../../components/CippComponents/CippCopyToClipboard";
 import { CippTimeAgo } from "../../../../../components/CippComponents/CippTimeAgo";
-import { Button } from "@mui/material";
+import { Button, Alert } from "@mui/material";
 import { Box } from "@mui/system";
 const Page = () => {
   const userSettingsDefaults = useSettings();
@@ -43,8 +43,13 @@ const Page = () => {
           defaultAttributes[attribute.label] = { Value: user?.[attribute.label] };
         });
       }
+
+      // Use fallback for usageLocation if user's usageLocation is null/undefined
+      const usageLocation = user?.usageLocation || userSettingsDefaults?.usageLocation || null;
+
       formControl.reset({
         ...user,
+        usageLocation: usageLocation,
         defaultAttributes: defaultAttributes,
         tenantFilter: userSettingsDefaults.currentTenant,
         licenses: user.assignedLicenses.map((license) => ({
@@ -102,6 +107,12 @@ const Page = () => {
       subtitle={subtitle}
       isFetching={userRequest.isLoading}
     >
+      {userRequest.isSuccess && userRequest.data?.[0]?.onPremisesSyncEnabled && (
+        <Alert severity="error" sx={{ mb: 1 }}>
+          This user is synced from on-premises Active Directory. Changes should be made in the
+          on-premises environment instead.
+        </Alert>
+      )}
       <CippFormPage
         queryKey={[`ListUsers-${userId}`, `Licenses-${userSettingsDefaults.currentTenant}`]}
         formControl={formControl}

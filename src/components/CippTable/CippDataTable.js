@@ -12,10 +12,10 @@ import {
 import { ResourceUnavailable } from "../resource-unavailable";
 import { ResourceError } from "../resource-error";
 import { Scrollbar } from "../scrollbar";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ApiGetCallWithPagination } from "../../api/ApiCall";
 import { utilTableMode } from "./util-tablemode";
-import { utilColumnsFromAPI } from "./util-columnsFromAPI";
+import { utilColumnsFromAPI, resolveSimpleColumnVariables } from "./util-columnsFromAPI";
 import { CIPPTableToptoolbar } from "./CIPPTableToptoolbar";
 import { Info, More, MoreHoriz } from "@mui/icons-material";
 import { CippOffCanvas } from "../CippComponents/CippOffCanvas";
@@ -56,6 +56,7 @@ export const CippDataTable = (props) => {
     filters,
     maxHeightOffset = "380px",
     defaultSorting = [],
+    isInDialog = false,
   } = props;
   const [columnVisibility, setColumnVisibility] = useState(initialColumnVisibility);
   const [configuredSimpleColumns, setConfiguredSimpleColumns] = useState(simpleColumns);
@@ -66,6 +67,7 @@ export const CippDataTable = (props) => {
   const [actionData, setActionData] = useState({ data: {}, action: {}, ready: false });
   const [graphFilterData, setGraphFilterData] = useState({});
   const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
   const waitingBool = api?.url ? true : false;
 
   const settings = useSettings();
@@ -77,6 +79,12 @@ export const CippDataTable = (props) => {
     waiting: waitingBool,
     ...graphFilterData,
   });
+
+  useEffect(() => {
+    if (filters && Array.isArray(filters) && filters.length > 0) {
+      setColumnFilters(filters);
+    }
+  }, [filters]);
 
   useEffect(() => {
     if (Array.isArray(data) && !api?.url) {
@@ -143,15 +151,31 @@ export const CippDataTable = (props) => {
     let finalColumns = [];
     let newVisibility = { ...columnVisibility };
 
+    // Check if we're in AllTenants mode and data has Tenant property
+    const isAllTenants = settings?.currentTenant === "AllTenants";
+    const hasTenantProperty = usedData.some(
+      (row) => row && typeof row === "object" && "Tenant" in row
+    );
+    const shouldShowTenant = isAllTenants && hasTenantProperty;
+
     if (columns.length === 0 && configuredSimpleColumns.length === 0) {
       finalColumns = apiColumns;
       apiColumns.forEach((col) => {
         newVisibility[col.id] = true;
       });
     } else if (configuredSimpleColumns.length > 0) {
-      finalColumns = apiColumns.map((col) => {
-        newVisibility[col.id] = configuredSimpleColumns.includes(col.id);
-        return col;
+      // Resolve any variables in the simple columns before checking visibility
+      const resolvedSimpleColumns = resolveSimpleColumnVariables(configuredSimpleColumns, usedData);
+
+      // Add Tenant to resolved columns if in AllTenants mode and not already included
+      let finalResolvedColumns = [...resolvedSimpleColumns];
+      if (shouldShowTenant && !resolvedSimpleColumns.includes("Tenant")) {
+        finalResolvedColumns = [...resolvedSimpleColumns, "Tenant"];
+      }
+
+      finalColumns = apiColumns;
+      finalColumns.forEach((col) => {
+        newVisibility[col.id] = finalResolvedColumns.includes(col.id);
       });
     } else {
       const providedColumnKeys = new Set(columns.map((col) => col.id || col.header));
@@ -159,13 +183,22 @@ export const CippDataTable = (props) => {
       finalColumns.forEach((col) => {
         newVisibility[col.accessorKey] = providedColumnKeys.has(col.id);
       });
+
+      // Handle Tenant column for custom columns case
+      if (shouldShowTenant) {
+        const tenantColumn = finalColumns.find((col) => col.id === "Tenant");
+        if (tenantColumn) {
+          // Make tenant visible
+          newVisibility["Tenant"] = true;
+        }
+      }
     }
     if (defaultSorting?.length > 0) {
       setSorting(defaultSorting);
     }
     setUsedColumns(finalColumns);
     setColumnVisibility(newVisibility);
-  }, [columns.length, usedData, queryKey]);
+  }, [columns.length, usedData, queryKey, settings?.currentTenant]);
 
   const createDialog = useDialog();
 
@@ -193,6 +226,20 @@ export const CippDataTable = (props) => {
   };
 
   const table = useMaterialReactTable({
+    muiTableBodyCellProps: {
+      onCopy: (e) => {
+        const sel = window.getSelection()?.toString() ?? "";
+        if (sel) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.nativeEvent?.stopImmediatePropagation?.();
+          e.clipboardData.setData("text/plain", sel);
+          if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(sel).catch(() => {});
+          }
+        }
+      },
+    },
     mrtTheme: (theme) => ({
       baseBackgroundColor: theme.palette.background.paper,
     }),
@@ -203,11 +250,87 @@ export const CippDataTable = (props) => {
         top: table.getState().isFullScreen ? 64 : undefined,
       },
     }),
+    // Add global styles to target the specific filter components
+    enableColumnFilterModes: true,
+    muiTableHeadCellProps: {
+      sx: {
+        // Target the filter row cells
+        "& .MuiTableCell-root": {
+          padding: "8px 16px",
+        },
+        // Target the Autocomplete component in filter cells
+        "& .MuiAutocomplete-root": {
+          width: "100%",
+        },
+        // Force the tags container to be single line with ellipsis
+        "& .MuiAutocomplete-root .MuiInputBase-root": {
+          height: "40px !important",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          display: "flex",
+          flexWrap: "nowrap",
+        },
+        // Target the tags container specifically
+        "& .MuiAutocomplete-root .MuiInputBase-root .MuiInputBase-input": {
+          height: "24px",
+          minHeight: "24px",
+          maxHeight: "24px",
+        },
+        // Target regular input fields (not in Autocomplete)
+        "& .MuiInputBase-root": {
+          height: "40px !important",
+        },
+        // Ensure all input fields have consistent styling
+        "& .MuiInputBase-input": {
+          height: "24px",
+          minHeight: "24px",
+          maxHeight: "24px",
+        },
+        // Target the specific chip class mentioned
+        "& .MuiChip-label.MuiChip-labelMedium": {
+          maxWidth: "80px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          padding: "0 4px",
+        },
+        // Make chips smaller overall and add title attribute for tooltip
+        "& .MuiChip-root": {
+          height: "24px",
+          maxHeight: "24px",
+          // This adds a tooltip effect using the browser's native tooltip
+          "&::before": {
+            content: "attr(data-label)",
+            display: "none",
+          },
+          "&:hover::before": {
+            display: "block",
+            position: "absolute",
+            top: "-25px",
+            left: "0",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "12px",
+            whiteSpace: "nowrap",
+            zIndex: 9999,
+          },
+        },
+      },
+    },
+    // Initialize the filter chips with data attributes for tooltips
+    initialState: {
+      columnFilters: columnFilters,
+      columnVisibility: columnVisibility,
+    },
     columns: memoizedColumns,
     data: memoizedData ?? [],
     state: {
       columnVisibility,
       sorting,
+      columnFilters,
       showSkeletons: getRequestData.isFetchingNextPage
         ? false
         : getRequestData.isFetching
@@ -217,6 +340,7 @@ export const CippDataTable = (props) => {
     onSortingChange: (newSorting) => {
       setSorting(newSorting ?? []);
     },
+    onColumnFiltersChange: setColumnFilters,
     renderEmptyRowsFallback: ({ table }) =>
       getRequestData.data?.pages?.[0].Metadata?.QueueMessage ? (
         <Box sx={{ py: 4 }}>
@@ -315,6 +439,8 @@ export const CippDataTable = (props) => {
               graphFilterData={graphFilterData}
               setGraphFilterData={setGraphFilterData}
               setConfiguredSimpleColumns={setConfiguredSimpleColumns}
+              queueMetadata={getRequestData.data?.pages?.[0]?.Metadata}
+              isInDialog={isInDialog}
             />
           )}
         </>
@@ -335,9 +461,152 @@ export const CippDataTable = (props) => {
         }
         return aVal > bVal ? 1 : -1;
       },
+      number: (a, b, id) => {
+        const aVal = a?.original?.[id] ?? null;
+        const bVal = b?.original?.[id] ?? null;
+        if (aVal === null && bVal === null) {
+          return 0;
+        }
+        if (aVal === null) {
+          return 1;
+        }
+        if (bVal === null) {
+          return -1;
+        }
+        return aVal - bVal;
+      },
+      boolean: (a, b, id) => {
+        const aVal = a?.original?.[id] ?? null;
+        const bVal = b?.original?.[id] ?? null;
+        if (aVal === null && bVal === null) {
+          return 0;
+        }
+        if (aVal === null) {
+          return 1;
+        }
+        if (bVal === null) {
+          return -1;
+        }
+        // Convert to numbers: true = 1, false = 0
+        const aNum = aVal === true ? 1 : 0;
+        const bNum = bVal === true ? 1 : 0;
+        return aNum - bNum;
+      },
     },
+    filterFns: {
+      notContains: (row, columnId, value) => {
+        const rowValue = row.getValue(columnId);
+        if (rowValue === null || rowValue === undefined) {
+          return false;
+        }
+
+        const stringValue = String(rowValue);
+        if (
+          stringValue.includes("[object Object]") ||
+          !stringValue.toLowerCase().includes(value.toLowerCase())
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      regex: (row, columnId, value) => {
+        try {
+          const regex = new RegExp(value, "i");
+          const rowValue = row.getValue(columnId);
+          if (typeof rowValue === "string" && !rowValue.includes("[object Object]")) {
+            return regex.test(rowValue);
+          }
+          return false;
+        } catch (error) {
+          // If regex is invalid, don't filter
+          return true;
+        }
+      },
+    },
+    globalFilterFn: "contains",
     enableGlobalFilterModes: true,
+    renderGlobalFilterModeMenuItems: ({ internalFilterOptions, onSelectFilterMode }) => {
+      // add custom filter options
+      const customFilterOptions = [
+        {
+          option: "regex",
+          label: "Regex",
+          symbol: "(.*)",
+        },
+      ];
+
+      // add to the internalFilterOptions if not already present
+      customFilterOptions.forEach((filterOption) => {
+        if (!internalFilterOptions.some((option) => option.option === filterOption.option)) {
+          internalFilterOptions.push(filterOption);
+        }
+      });
+
+      internalFilterOptions.map((filterOption) => (
+        <MenuItem
+          key={filterOption.option}
+          onClick={() => onSelectFilterMode(filterOption.option)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span style={{ width: "20px", textAlign: "center" }}>{filterOption.symbol}</span>
+          <ListItemText>{filterOption.label}</ListItemText>
+        </MenuItem>
+      ));
+    },
+    renderColumnFilterModeMenuItems: ({ internalFilterOptions, onSelectFilterMode }) => {
+      // add custom filter options
+      const customFilterOptions = [
+        {
+          option: "notContains",
+          label: "Not Contains",
+          symbol: "!*",
+        },
+        {
+          option: "regex",
+          label: "Regex",
+          symbol: "(.*)",
+        },
+      ];
+
+      // combine default and custom filter options
+      const combinedFilterOptions = [...internalFilterOptions, ...customFilterOptions];
+
+      return combinedFilterOptions.map((filterOption) => (
+        <MenuItem
+          key={filterOption.option}
+          onClick={() => onSelectFilterMode(filterOption.option)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <span style={{ width: "20px", textAlign: "center" }}>{filterOption.symbol}</span>
+          <ListItemText>{filterOption.label}</ListItemText>
+        </MenuItem>
+      ));
+    },
   });
+
+  useEffect(() => {
+    if (filters && Array.isArray(filters) && filters.length > 0 && memoizedColumns.length > 0) {
+      // Make sure the table and columns are ready
+      setTimeout(() => {
+        if (table && typeof table.setColumnFilters === "function") {
+          const formattedFilters = filters.map((filter) => ({
+            id: filter.id || filter.columnId,
+            value: filter.value,
+          }));
+          table.setColumnFilters(formattedFilters);
+        }
+      });
+    }
+  }, [filters, memoizedColumns, table]);
 
   useEffect(() => {
     if (onChange && table.getSelectedRowModel().rows) {
@@ -377,7 +646,11 @@ export const CippDataTable = (props) => {
         <Card style={{ width: "100%" }} {...props.cardProps}>
           {cardButton || !hideTitle ? (
             <>
-              <CardHeader action={cardButton} title={hideTitle ? "" : title} />
+              <CardHeader
+                action={cardButton}
+                title={hideTitle ? "" : title}
+                {...props.cardHeaderProps}
+              />
               <Divider />
             </>
           ) : null}
@@ -429,6 +702,7 @@ export const CippDataTable = (props) => {
             api={actionData.action}
             row={actionData.data}
             relatedQueryKeys={queryKey ? queryKey : title}
+            {...actionData.action}
           />
         );
       }, [actionData.ready, createDialog, actionData.action, actionData.data, queryKey, title])}

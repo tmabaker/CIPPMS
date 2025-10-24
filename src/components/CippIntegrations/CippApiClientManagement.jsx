@@ -78,12 +78,12 @@ const CippApiClientManagement = () => {
           multiple: false,
           creatable: false,
           label: "Select Role",
-          placeholder: "Choose a role from the Custom Role list.",
+          placeholder: "Choose a role from the CIPP Role list.",
           api: {
             url: "/api/ListCustomRole",
             queryKey: "CustomRoleList",
-            labelField: "RowKey",
-            valueField: "RowKey",
+            labelField: "RoleName",
+            valueField: "RoleName",
             showRefresh: true,
           },
         },
@@ -253,13 +253,13 @@ const CippApiClientManagement = () => {
           showDivider={false}
           isFetching={azureConfig.isFetching}
         />
-        {azureConfig.isSuccess && azureConfig.data?.Results?.ClientIDs && (
+        {azureConfig.isSuccess && (
           <>
             {!isEqual(
               apiClients.data?.pages?.[0]?.Results?.filter((c) => c.Enabled)
                 .map((c) => c.ClientId)
                 .sort(),
-              azureConfig.data?.Results?.ClientIDs?.sort()
+              (azureConfig.data?.Results?.ClientIDs || []).sort()
             ) && (
               <Box sx={{ px: 3 }}>
                 <Alert severity="warning">
@@ -306,6 +306,7 @@ const CippApiClientManagement = () => {
             name: "AppName",
             label: "App Name",
             placeholder: "Enter a name for this Application Registration.",
+            disableVariables: true,
           },
           {
             type: "autoComplete",
@@ -316,11 +317,11 @@ const CippApiClientManagement = () => {
             api: {
               url: "/api/ListCustomRole",
               queryKey: "CustomRoleList",
-              labelField: "RowKey",
-              valueField: "RowKey",
+              labelField: "RoleName",
+              valueField: "RoleName",
               showRefresh: true,
             },
-            placeholder: "Choose a role from the Custom Role list.",
+            placeholder: "Choose a role from the CIPP Role list.",
           },
           {
             type: "autoComplete",
@@ -380,12 +381,12 @@ const CippApiClientManagement = () => {
             multiple: false,
             creatable: false,
             label: "Select Role",
-            placeholder: "Choose a role from the Custom Role list.",
+            placeholder: "Choose a role from the CIPP Role list.",
             api: {
               url: "/api/ListCustomRole",
               queryKey: "CustomRoleList",
-              labelField: "RowKey",
-              valueField: "RowKey",
+              labelField: "RoleName",
+              valueField: "RoleName",
               showRefresh: true,
             },
           },
