@@ -10,7 +10,7 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { Block, Close, Done, DoneAll, Subject } from "@mui/icons-material";
+import { Block, Close, Done, DoneAll } from "@mui/icons-material";
 import { CippMessageViewer } from "/src/components/CippComponents/CippMessageViewer.jsx";
 import { ApiGetCall, ApiPostCall } from "/src/api/ApiCall";
 import { useSettings } from "/src/hooks/use-settings";
@@ -39,6 +39,7 @@ const Page = () => {
   const [traceDetails, setTraceDetails] = useState([]);
   const [traceMessageId, setTraceMessageId] = useState(null);
   const [messageSubject, setMessageSubject] = useState(null);
+  const [messageContentsWaiting, setMessageContentsWaiting] = useState(false);
 
   const getMessageContents = ApiGetCall({
     url: "/api/ListMailQuarantineMessage",
@@ -46,7 +47,7 @@ const Page = () => {
       tenantFilter: tenantFilter,
       Identity: messageId,
     },
-    waiting: false,
+    waiting: messageContentsWaiting,
     queryKey: `ListMailQuarantineMessage-${messageId}`,
   });
 
@@ -61,7 +62,9 @@ const Page = () => {
   const viewMessage = (row) => {
     const id = row.Identity;
     setMessageId(id);
-    getMessageContents.waiting = true;
+    if (!messageContentsWaiting) {
+      setMessageContentsWaiting(true);
+    }
     getMessageContents.refetch();
     setDialogOpen(true);
   };
@@ -85,7 +88,7 @@ const Page = () => {
     } else {
       setDialogContent(<Skeleton variant="rectangular" height={400} />);
     }
-  }, [getMessageContents.isSuccess]);
+  }, [getMessageContents.isSuccess, getMessageContents.data]);
 
   const actions = [
     {
@@ -104,6 +107,7 @@ const Page = () => {
       label: "Release",
       type: "POST",
       url: "/api/ExecQuarantineManagement",
+      multiPost: true,
       data: {
         Identity: "Identity",
         Type: "!Release",
