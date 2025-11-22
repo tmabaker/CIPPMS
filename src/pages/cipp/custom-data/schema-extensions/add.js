@@ -48,7 +48,7 @@ const Page = () => {
   });
 
   const handleAddSchema = (data) => {
-    console.log(data);
+    //console.log(data);
     if (!data.properties || data.properties.length === 0) {
       formControl.setError("properties", {
         type: "manual",
@@ -101,6 +101,7 @@ const Page = () => {
       required: true,
       placeholder:
         "Enter a schema id (e.g. cippUser). The prefix is generated automatically after creation.",
+      disableVariables: true,
     },
     {
       name: "description",
@@ -108,6 +109,7 @@ const Page = () => {
       type: "textField",
       required: true,
       placeholder: "Enter a description for the schema extension",
+      disableVariables: true,
     },
     {
       name: "status",
