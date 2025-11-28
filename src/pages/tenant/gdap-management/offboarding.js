@@ -137,6 +137,15 @@ const Page = () => {
                           (relationship) => relationship?.customer?.tenantId === tenantId.value
                         )?.length ?? 0,
                       icon: <ShieldCheckIcon />,
+                      offcanvas: {
+                        title: "GDAP Relationships",
+                        propertyItems: gdapRelationships.data?.Results?.filter(
+                          (relationship) => relationship?.customer?.tenantId === tenantId.value
+                        )?.map((relationship) => ({
+                          label: `Relationship: ${relationship?.displayName}`,
+                          value: `Id: ${relationship?.id}`,
+                        })),
+                      },
                     },
                     {
                       name: "CSP Contract",
@@ -152,11 +161,31 @@ const Page = () => {
                       name: "MSP Applications",
                       data: mspApps.data?.Results?.length ?? 0,
                       icon: <Widgets />,
+                      offcanvas: {
+                        title: "MSP Applications",
+                        propertyItems: mspApps.data?.Results?.map((app) => ({
+                          label: app?.displayName,
+                          value: app?.appId,
+                        })),
+                      },
                     },
                     {
                       name: "Vendor Applications",
-                      data: 0,
+                      data:
+                        vendorApps.data?.pages?.reduce(
+                          (sum, page) => sum + (page?.Results?.length ?? 0),
+                          0
+                        ) ?? 0,
                       icon: <Apps />,
+                      offcanvas: {
+                        title: "Vendor Applications",
+                        propertyItems: vendorApps.data?.pages
+                          ?.reduce((sum, page) => sum.concat(page?.Results ?? []), [])
+                          .map((app) => ({
+                            label: app?.displayName,
+                            value: app?.appId,
+                          })),
+                      },
                     },
                   ]}
                 />
@@ -209,6 +238,12 @@ const Page = () => {
                     label="Remove all notification contacts originating from the CSP tenant (technical, security, marketing notifications)."
                     type="switch"
                     disabled={mspApps?.data?.Results?.length > 0 ? false : true}
+                  />
+                  <CippFormComponent
+                    formControl={formControl}
+                    name="RemoveDomainAnalyserData"
+                    label="Remove all Domain Analyser results for this tenant."
+                    type="switch"
                   />
                 </Stack>
               </Grid>
