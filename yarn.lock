@@ -1927,10 +1927,10 @@
   resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.11.2.tgz#00409e743ac4eea9afe5b7708594d5fcebb00212"
   integrity sha512-vTtpNt7mKCiZ1pwU9hfKPhpdVO2sVzFQsxoVBGtOSHxlrRRzYr8iQ2TlwbAcRYCcEiZ9ECAM8kBzH0v2+VzfKw==
 
-"@tiptap/core@^2.11.5", "@tiptap/core@^2.9.1":
-  version "2.11.5"
-  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.11.5.tgz#2bf1b08c4ca2467778d0a109634c45ab475522f4"
-  integrity sha512-jb0KTdUJaJY53JaN7ooY3XAxHQNoMYti/H6ANo707PsLXVeEqJ9o8+eBup1JU5CuwzrgnDc2dECt2WIGX9f8Jw==
+"@tiptap/core@^2.11.5", "@tiptap/core@^2.27.2":
+  version "2.27.2"
+  resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-2.27.2.tgz#679eef9ce673d7243ce28d303852a98cbd1844be"
+  integrity sha512-ABL1N6eoxzDzC1bYvkMbvyexHacszsKdVPYqhl5GwHLOvpZcv9VE9QaKwDILTyz5voCA0lGcAAXZp+qnXOk5lQ==
 
 "@tiptap/extension-blockquote@^2.11.5":
   version "2.11.5"
