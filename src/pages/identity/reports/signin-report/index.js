@@ -1,8 +1,9 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
+import { Layout as DashboardLayout } from "../../../../layouts/index.js";
+import { CippTablePage } from "../../../../components/CippComponents/CippTablePage.jsx";
 import { useState } from "react";
-import { Button, Grid, TextField, Switch, FormControlLabel } from "@mui/material";
-import CippButtonCard from "/src/components/CippCards/CippButtonCard";
+import { Button, TextField, Switch, FormControlLabel } from "@mui/material";
+import { Grid } from "@mui/system";
+import CippButtonCard from "../../../../components/CippCards/CippButtonCard";
 
 const Page = () => {
   const pageTitle = "Sign Ins Report";
@@ -42,7 +43,7 @@ const Page = () => {
   const tableFilter = (
     <CippButtonCard title="Filter Options" component="accordion">
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ sm: 6, xs: 12 }}>
           <TextField
             label="Days"
             name="Days"
@@ -52,7 +53,7 @@ const Page = () => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ sm: 6, xs: 12 }}>
           <TextField
             label="Custom Filter"
             name="filter"
@@ -61,7 +62,7 @@ const Page = () => {
             fullWidth
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ sm: 6, xs: 12 }}>
           <FormControlLabel
             control={
               <Switch
@@ -74,7 +75,7 @@ const Page = () => {
           />
         </Grid>
         {filterValues.failedLogonsOnly && (
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ sm: 6, xs: 12 }}>
             <TextField
               label="Failure Threshold"
               name="FailureThreshold"
@@ -85,7 +86,7 @@ const Page = () => {
             />
           </Grid>
         )}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Button variant="contained" color="primary" onClick={handleFilterSubmit}>
             Apply Filter
           </Button>

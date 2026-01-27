@@ -1,30 +1,33 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { useSettings } from "/src/hooks/use-settings";
+import { Layout as DashboardLayout } from "../../../../../layouts/index.js";
+import { useSettings } from "../../../../../hooks/use-settings";
 import { useRouter } from "next/router";
-import { ApiGetCall, ApiPostCall } from "/src/api/ApiCall";
-import CippFormSkeleton from "/src/components/CippFormPages/CippFormSkeleton";
+import { ApiGetCall, ApiPostCall } from "../../../../../api/ApiCall";
+import CippFormSkeleton from "../../../../../components/CippFormPages/CippFormSkeleton";
 import CalendarIcon from "@heroicons/react/24/outline/CalendarIcon";
 import { AdminPanelSettings, Check, Group, Mail, Fingerprint, Launch } from "@mui/icons-material";
 import { HeaderedTabbedLayout } from "../../../../../layouts/HeaderedTabbedLayout";
 import tabOptions from "./tabOptions";
 import { CippCopyToClipBoard } from "../../../../../components/CippComponents/CippCopyToClipboard";
 import { Box, Stack } from "@mui/system";
-import Grid from "@mui/material/Grid2";
+import { Grid } from "@mui/system";
 import { CippUserInfoCard } from "../../../../../components/CippCards/CippUserInfoCard";
 import { SvgIcon, Typography } from "@mui/material";
 import { CippBannerListCard } from "../../../../../components/CippCards/CippBannerListCard";
 import { CippTimeAgo } from "../../../../../components/CippComponents/CippTimeAgo";
 import { useEffect, useState } from "react";
-import CippUserActions from "/src/components/CippComponents/CippUserActions";
+import { useCippUserActions } from "../../../../../components/CippComponents/CippUserActions";
 import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
-import { CippDataTable } from "/src/components/CippTable/CippDataTable";
+import { CippDataTable } from "../../../../../components/CippTable/CippDataTable";
 import dynamic from "next/dynamic";
-const CippMap = dynamic(() => import("/src/components/CippComponents/CippMap"), { ssr: false });
+const CippMap = dynamic(() => import("../../../../../components/CippComponents/CippMap"), {
+  ssr: false,
+});
 
 import { Button, Dialog, DialogTitle, DialogContent, IconButton } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { CippPropertyList } from "../../../../../components/CippComponents/CippPropertyList";
 import { CippCodeBlock } from "../../../../../components/CippComponents/CippCodeBlock";
+import { CippHead } from "../../../../../components/CippComponents/CippHead";
 
 const SignInLogsDialog = ({ open, onClose, userId, tenantFilter }) => {
   return (
@@ -73,6 +76,7 @@ const Page = () => {
   const { userId } = router.query;
   const [waiting, setWaiting] = useState(false);
   const [signInLogsDialogOpen, setSignInLogsDialogOpen] = useState(false);
+  const userActions = useCippUserActions();
 
   useEffect(() => {
     if (userId) {
@@ -81,41 +85,47 @@ const Page = () => {
   }, [userId]);
 
   const userRequest = ApiGetCall({
-    url: `/api/ListUsers?UserId=${userId}&tenantFilter=${userSettingsDefaults.currentTenant}`,
+    url: `/api/ListUsers?UserId=${userId}&tenantFilter=${
+      router.query.tenantFilter ?? userSettingsDefaults.currentTenant
+    }`,
     queryKey: `ListUsers-${userId}`,
     waiting: waiting,
   });
 
   const userBulkRequest = ApiPostCall({
-    urlfromdata: true,
+    urlFromData: true,
   });
+
+  function refreshFunction() {
+    userBulkRequest.mutate({
+      url: "/api/ListGraphBulkRequest",
+      data: {
+        Requests: [
+          {
+            id: "userMemberOf",
+            url: `/users/${userId}/memberOf`,
+            method: "GET",
+          },
+          {
+            id: "mfaDevices",
+            url: `/users/${userId}/authentication/methods?$top=99`,
+            method: "GET",
+          },
+          {
+            id: "signInLogs",
+            url: `/auditLogs/signIns?$filter=(userId eq '${userId}')&$top=1`,
+            method: "GET",
+          },
+        ],
+        tenantFilter: userSettingsDefaults.currentTenant,
+        noPaginateIds: ["signInLogs"],
+      },
+    });
+  }
 
   useEffect(() => {
     if (userId && userSettingsDefaults.currentTenant && !userBulkRequest.isSuccess) {
-      userBulkRequest.mutate({
-        url: "/api/ListGraphBulkRequest",
-        data: {
-          Requests: [
-            {
-              id: "userMemberOf",
-              url: `/users/${userId}/memberOf`,
-              method: "GET",
-            },
-            {
-              id: "mfaDevices",
-              url: `/users/${userId}/authentication/methods?$top=99`,
-              method: "GET",
-            },
-            {
-              id: "signInLogs",
-              url: `/auditLogs/signIns?$filter=(userId eq '${userId}')&$top=1`,
-              method: "GET",
-            },
-          ],
-          tenantFilter: userSettingsDefaults.currentTenant,
-          noPaginateIds: ["signInLogs"],
-        },
-      });
+      refreshFunction();
     }
   }, [userId, userSettingsDefaults.currentTenant, userBulkRequest.isSuccess]);
 
@@ -129,7 +139,7 @@ const Page = () => {
   const mfaDevices = mfaDevicesData?.body?.value || [];
 
   // Set the title and subtitle for the layout
-  const title = userRequest.isSuccess ? <>{userRequest.data?.[0]?.displayName}</> : "Loading...";
+  const title = userRequest.isSuccess ? userRequest.data?.[0]?.displayName : "Loading...";
 
   const subtitle = userRequest.isSuccess
     ? [
@@ -231,7 +241,7 @@ const Page = () => {
             <>
               <Typography variant="h6">Location</Typography>
               <Grid container spacing={2}>
-                <Grid item size={8}>
+                <Grid size={8}>
                   <CippMap
                     markers={[
                       {
@@ -244,7 +254,7 @@ const Page = () => {
                     ]}
                   />
                 </Grid>
-                <Grid item size={4}>
+                <Grid size={4}>
                   <CippPropertyList
                     propertyItems={[
                       { label: "City", value: signInData.location.city },
@@ -267,7 +277,7 @@ const Page = () => {
     ) {
       // Filter policies where result is "success"
       const appliedPolicies = signInData.appliedConditionalAccessPolicies.filter(
-        (policy) => policy.result === "success"
+        (policy) => policy.result === "success",
       );
 
       if (appliedPolicies.length > 0) {
@@ -412,7 +422,7 @@ const Page = () => {
   if (mfaDevices.length > 0) {
     // Exclude password authentication method
     const mfaDevicesFiltered = mfaDevices.filter(
-      (method) => method["@odata.type"] !== "#microsoft.graph.passwordAuthenticationMethod"
+      (method) => method["@odata.type"] !== "#microsoft.graph.passwordAuthenticationMethod",
     );
 
     if (mfaDevicesFiltered.length > 0) {
@@ -514,6 +524,11 @@ const Page = () => {
           },
           text: "Groups",
           subtext: "List of groups the user is a member of",
+          statusText: ` ${
+            userMemberOf?.filter((item) => item?.["@odata.type"] === "#microsoft.graph.group")
+              .length
+          } Group(s)`,
+          statusColor: "info.main",
           table: {
             title: "Group Memberships",
             hideTitle: true,
@@ -521,12 +536,13 @@ const Page = () => {
               {
                 icon: <PencilIcon />,
                 label: "Edit Group",
-                link: "/identity/administration/groups/edit?groupId=[id]",
+                link: "/identity/administration/groups/edit?groupId=[id]&groupType=[calculatedGroupType]",
               },
             ],
             data: userMemberOf?.filter(
-              (item) => item?.["@odata.type"] === "#microsoft.graph.group"
+              (item) => item?.["@odata.type"] === "#microsoft.graph.group",
             ),
+            refreshFunction: refreshFunction,
             simpleColumns: ["displayName", "groupTypes", "securityEnabled", "mailEnabled"],
           },
         },
@@ -542,13 +558,20 @@ const Page = () => {
           },
           text: "Admin Roles",
           subtext: "List of roles the user is a member of",
+          statusText: ` ${
+            userMemberOf?.filter(
+              (item) => item?.["@odata.type"] === "#microsoft.graph.directoryRole",
+            ).length
+          } Role(s)`,
+          statusColor: "info.main",
           table: {
             title: "Admin Roles",
             hideTitle: true,
             data: userMemberOf?.filter(
-              (item) => item?.["@odata.type"] === "#microsoft.graph.directoryRole"
+              (item) => item?.["@odata.type"] === "#microsoft.graph.directoryRole",
             ),
             simpleColumns: ["displayName", "description"],
+            refreshFunction: refreshFunction,
           },
         },
       ]
@@ -558,7 +581,7 @@ const Page = () => {
     <HeaderedTabbedLayout
       tabOptions={tabOptions}
       title={title}
-      actions={CippUserActions()}
+      actions={userActions}
       actionsData={data}
       subtitle={subtitle}
       isFetching={userRequest.isLoading}
@@ -571,15 +594,16 @@ const Page = () => {
             py: 4,
           }}
         >
+          <CippHead title={title} />
           <Grid container spacing={2}>
-            <Grid item size={4}>
+            <Grid size={4}>
               <CippUserInfoCard
                 user={data}
                 tenant={userSettingsDefaults.currentTenant}
                 isFetching={userRequest.isLoading}
               />
             </Grid>
-            <Grid item size={8}>
+            <Grid size={8}>
               <Stack spacing={3}>
                 <Typography variant="h6">Latest Logon</Typography>
                 <CippBannerListCard
@@ -603,12 +627,12 @@ const Page = () => {
                 <CippBannerListCard
                   isFetching={userBulkRequest.isPending}
                   items={groupMembershipItems}
-                  isCollapsible={groupMembershipItems.length > 0 ? true : false}
+                  isCollapsible={true}
                 />
                 <CippBannerListCard
                   isFetching={userBulkRequest.isPending}
                   items={roleMembershipItems}
-                  isCollapsible={roleMembershipItems.length > 0 ? true : false}
+                  isCollapsible={true}
                 />
               </Stack>
             </Grid>
