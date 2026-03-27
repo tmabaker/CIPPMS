@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GA User Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#222636;--border:#2e3248;
+    --accent:#4f8ef7;--accent2:#7c6af7;--success:#3ecf8e;--danger:#f75f5f;
+    --warn:#f7a94f;--text:#e8eaf6;--text-muted:#7b82a8;--text-dim:#4a5070;
+    --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;}
+  header .logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;}
+  header h1{font-size:15px;font-weight:600;}
+  header span{font-size:13px;color:var(--text-muted);margin-left:4px;}
+  .cipp-status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text-dim);}
+  .status-dot.connected{background:var(--success);box-shadow:0 0 6px var(--success);}
+  .status-dot.error{background:var(--danger);}
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 28px;}
+  .tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  main{display:flex;flex:1;}
+  .panel{display:none;width:100%;padding:28px;}
+  .panel.active{display:flex;gap:28px;}
+  .panel.solo.active{display:block;}
+  .form-wrap{flex:1;max-width:680px;}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:6px;letter-spacing:.03em;}
+  .field label .req{color:var(--accent);margin-left:2px;}
+  .field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none;}
+  .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .field input::placeholder{color:var(--text-dim);}
+  .select-wrap{position:relative;}
+  .select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:12px;}
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;}
+  .generated-box{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--text-muted);min-height:34px;line-height:1.6;}
+  .generated-box .val{color:var(--accent);}
+  .preview-sidebar{width:270px;flex-shrink:0;}
+  .preview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:sticky;top:28px;}
+  .preview-card .avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;margin:0 auto 12px;}
+  .preview-card .p-name{text-align:center;font-size:14px;font-weight:600;margin-bottom:3px;min-height:20px;}
+  .preview-card .p-title{text-align:center;font-size:11px;color:var(--text-muted);margin-bottom:14px;min-height:16px;}
+  .p-detail{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-top:1px solid var(--border);font-size:11px;}
+  .p-detail .icon{color:var(--text-dim);width:14px;flex-shrink:0;margin-top:1px;}
+  .p-detail .d-label{color:var(--text-dim);font-size:10px;margin-bottom:1px;}
+  .p-detail .d-val{color:var(--text);min-height:13px;word-break:break-all;}
+  .tenant-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--accent);margin-top:6px;}
+  .btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
+  .btn{padding:9px 20px;border-radius:7px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .btn-ghost:hover{border-color:var(--text-muted);color:var(--text);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#6a9ef8;}
+  .btn-primary:disabled{background:var(--text-dim);cursor:not-allowed;}
+  .btn-warn{background:var(--warn);color:#0f1117;}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .btn-sm{padding:5px 12px;font-size:12px;border-radius:6px;}
+  .result-box{border-radius:8px;padding:16px 20px;margin-top:20px;font-size:13px;line-height:1.7;display:none;}
+  .result-box.success{background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:var(--success);}
+  .result-box.error{background:rgba(247,95,95,.1);border:1px solid rgba(247,95,95,.3);color:var(--danger);}
+  .result-box.show{display:block;}
+  .result-box .result-title{font-weight:600;font-size:14px;margin-bottom:6px;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .admin-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+  .list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:6px;margin-bottom:6px;font-size:13px;}
+  .list-item .item-text{color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .list-item .item-actions{flex-shrink:0;margin-left:8px;}
+  .add-row{display:flex;gap:8px;margin-top:10px;}
+  .add-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;min-width:0;}
+  .add-row input:focus{border-color:var(--accent);}
+  .add-row input::placeholder{color:var(--text-dim);}
+  .add-addr-form{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:10px;}
+  .add-addr-form input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;margin-bottom:8px;}
+  .add-addr-form input:focus{border-color:var(--accent);}
+  .add-addr-form input::placeholder{color:var(--text-dim);}
+  .info-box{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--text-muted);line-height:1.7;margin-bottom:16px;}
+  .info-box strong{color:var(--accent);}
+  .export-row{display:flex;gap:10px;margin-top:16px;align-items:center;}
+  .export-row p{font-size:12px;color:var(--text-muted);}
+  #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:999;}
+  #toast.show{opacity:1;transform:translateY(0);}
+  @media(max-width:900px){.admin-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:700px){.panel.active{flex-direction:column;}.preview-sidebar{width:100%;}.admin-grid{grid-template-columns:1fr;}.field-row{flex-direction:column;gap:0;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">M</div>
+  <h1>GA User Setup</h1>
+  <span>— Geaux Automotive</span>
+  <div class="cipp-status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText" style="color:var(--text-muted)">Not connected</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('form')">&#10133; New User</div>
+  <div class="tab" onclick="switchTab('admin')">&#9881;&#65039; Manage Lists</div>
+  <div class="tab" onclick="switchTab('settings')">&#128273; Settings</div>
+</div>
+
+<main>
+
+  <!-- NEW USER FORM -->
+  <div class="panel active" id="panel-form">
+    <div class="form-wrap">
+
+      <div class="section-title">Client Tenant</div>
+      <div class="card" style="display:flex;align-items:center;gap:14px;padding:14px 20px;">
+        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">&#127970;</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">Geaux Automotive</div>
+          <div style="font-size:12px;color:var(--text-muted);font-family:var(--mono)">geauxautomotive.com</div>
+        </div>
+        <div style="margin-left:auto;">
+          <span style="font-size:11px;background:rgba(62,207,142,.12);border:1px solid rgba(62,207,142,.3);color:var(--success);padding:3px 10px;border-radius:20px;">&#9679; Active</span>
+        </div>
+      </div>
+
+      <div class="section-title">Identity</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field"><label>First Name <span class="req">*</span></label><input type="text" id="firstName" placeholder="Jane" oninput="updatePreview()"></div>
+          <div class="field"><label>Last Name <span class="req">*</span></label><input type="text" id="lastName" placeholder="Smith" oninput="updatePreview()"></div>
+        </div>
+        <div class="field"><label>Display Name</label><div class="generated-box" id="displayName">&#8212;</div></div>
+        <div class="field-row">
+          <div class="field" style="flex:2"><label>UPN / Email</label><div class="generated-box" id="upnPreview">&#8212;</div></div>
+          <div class="field" style="flex:1"><label>Domain <span class="req">*</span></label><div class="select-wrap"><select id="emailDomain" onchange="updatePreview()"></select></div></div>
+        </div>
+      </div>
+
+      <div class="section-title">Organization</div>
+      <div class="card">
+        <div class="field"><label>Company Name <span class="req">*</span></label><div class="select-wrap"><select id="companyName" onchange="updatePreview()"><option value="">&#8212; Select Company &#8212;</option></select></div></div>
+        <div class="field-row">
+          <div class="field"><label>Department <span class="req">*</span></label><div class="select-wrap"><select id="department" onchange="updatePreview()"><option value="">&#8212; Select Department &#8212;</option><option>Operations</option><option>Administration</option><option>Sales</option><option>Parts</option><option>Finance</option><option>IT</option><option>HR</option><option>Marketing</option></select></div></div>
+          <div class="field"><label>Job Title</label><div class="select-wrap"><select id="jobTitle" onchange="updatePreview()"><option value="">&#8212; Select Job Title &#8212;</option></select></div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Employee ID</label><input type="text" id="employeeId" placeholder="e.g. EMP-001"></div>
+          <div class="field"><label>Manager (UPN)</label><input type="text" id="manager" placeholder="manager@geauxautomotive.com"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Contact</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field"><label>Mobile Number</label><input type="text" id="mobilePhone" placeholder="+1 555 000 0000"></div>
+          <div class="field"><label>Business Phone</label><input type="text" id="businessPhone" placeholder="+1 555 000 0000"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Location</div>
+      <div class="card">
+        <div class="field"><label>Office Address</label><div class="select-wrap"><select id="officeAddress" onchange="fillAddress()"><option value="">&#8212; Select Address &#8212;</option></select></div></div>
+        <div class="field-row">
+          <div class="field"><label>Street Address</label><input type="text" id="streetAddress" placeholder="Auto-filled" oninput="updatePreview()"></div>
+          <div class="field"><label>City</label><input type="text" id="city" placeholder="Auto-filled" oninput="updatePreview()"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>State</label><input type="text" id="state" placeholder="Auto-filled" oninput="updatePreview()"></div>
+          <div class="field"><label>Postal Code</label><input type="text" id="postalCode" placeholder="Auto-filled"></div>
+          <div class="field"><label>Country</label><input type="text" id="country" value="US"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Account Settings</div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field"><label>Usage Location</label><div class="select-wrap"><select id="usageLocation"><option value="US">United States</option><option value="CA">Canada</option><option value="GB">United Kingdom</option><option value="AU">Australia</option><option value="DE">Germany</option></select></div></div>
+          <div class="field"><label>License</label><div class="select-wrap"><select id="license" onchange="updatePreview()"><option value="">&#8212; Select Tenant First &#8212;</option></select></div></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Start Date</label><input type="date" id="startDate"></div>
+          <div class="field"><label>Birthday &#8212; MM/DD <span style="color:var(--text-dim);font-weight:400">(extensionAttribute1)</span></label><input type="text" id="birthday" placeholder="MM/DD" maxlength="5" oninput="formatBirthday(this)"></div>
+        </div>
+        <div class="field"><label>Copy Permissions From (UPN)</label><input type="text" id="copyFrom" placeholder="existing.user@geauxautomotive.com (optional)"></div>
+      </div>
+
+      <div class="result-box" id="resultBox"><div class="result-title" id="resultTitle"></div><div id="resultBody"></div></div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        <button class="btn btn-primary" id="submitBtn" onclick="submitToCIPP()">Create User in CIPP &#9889;</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="section-title" style="margin-bottom:12px">Preview</div>
+        <div class="avatar" id="prev-avatar">?</div>
+        <div class="p-name" id="prev-name">&#8212;</div>
+        <div class="p-title" id="prev-title">&#8212;</div>
+        <div class="p-detail"><div class="icon">&#127962;</div><div><div class="d-label">Tenant</div><div class="d-val">Geaux Automotive</div></div></div>
+        <div class="p-detail"><div class="icon">&#9993;</div><div><div class="d-label">UPN</div><div class="d-val" id="prev-email">&#8212;</div></div></div>
+        <div class="p-detail"><div class="icon">&#127991;&#65039;</div><div><div class="d-label">Company</div><div class="d-val" id="prev-company">&#8212;</div></div></div>
+        <div class="p-detail"><div class="icon">&#128194;</div><div><div class="d-label">Department</div><div class="d-val" id="prev-dept">&#8212;</div></div></div>
+        <div class="p-detail"><div class="icon">&#128205;</div><div><div class="d-label">Location</div><div class="d-val" id="prev-location">&#8212;</div></div></div>
+        <div class="p-detail"><div class="icon">&#128241;</div><div><div class="d-label">Mobile</div><div class="d-val" id="prev-mobile">&#8212;</div></div></div>
+        <div class="p-detail"><div class="icon">&#128282;</div><div><div class="d-label">License</div><div class="d-val" id="prev-license">&#8212;</div></div></div>
+        <div class="p-detail"><div class="icon">&#128197;</div><div><div class="d-label">Start Date</div><div class="d-val" id="prev-start">&#8212;</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE LISTS -->
+  <div class="panel solo" id="panel-admin">
+    <div>
+      <div class="admin-grid">
+        <div>
+          <div class="section-title">Company Names</div>
+          <div class="card"><div id="companiesList"></div><div class="add-row"><input type="text" id="newCompany" placeholder="Add company..." onkeydown="if(event.key==='Enter')addCompany()"><button class="btn btn-primary btn-sm" onclick="addCompany()">Add</button></div></div>
+        </div>
+        <div>
+          <div class="section-title">Job Titles</div>
+          <div class="card"><div id="jobTitlesList"></div><div class="add-row"><input type="text" id="newJobTitle" placeholder="Add job title..." onkeydown="if(event.key==='Enter')addJobTitle()"><button class="btn btn-primary btn-sm" onclick="addJobTitle()">Add</button></div></div>
+        </div>
+        <div>
+          <div class="section-title">Office Addresses</div>
+          <div class="card">
+            <div id="addressesList"></div>
+            <div class="add-addr-form">
+              <input type="text" id="addrLabel" placeholder="Label (e.g. HQ - Baton Rouge)">
+              <input type="text" id="addrStreet" placeholder="Street Address">
+              <input type="text" id="addrCity" placeholder="City">
+              <input type="text" id="addrState" placeholder="State">
+              <input type="text" id="addrPostal" placeholder="Postal Code">
+              <input type="text" id="addrCountry" placeholder="Country" value="US">
+              <button class="btn btn-primary btn-sm" onclick="addAddress()" style="width:100%;margin-top:2px;">Add Address</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">UPN / Email Settings</div>
+      <div class="card" style="max-width:520px">
+        <div class="field"><label>Email Domains</label><div id="domainsList" style="margin-bottom:6px;"></div><div class="add-row" style="margin-top:0"><input type="text" id="newDomain" placeholder="Add domain (e.g. acme.com)..." onkeydown="if(event.key==='Enter')addDomain()"><button class="btn btn-primary btn-sm" onclick="addDomain()">Add</button></div></div>
+        <div class="field" style="margin-top:14px"><label>UPN Format</label><div class="select-wrap"><select id="upnFormat" onchange="updatePreview()"><option value="flast" selected>flastname - first initial + last name (e.g. jsmith)</option><option value="firstlast">firstname.lastname (e.g. jane.smith)</option><option value="firstl">firstname.l (e.g. jane.s)</option><option value="first">firstname only (e.g. jane)</option></select></div></div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">Preview: <span id="upnFormatPreview" style="color:var(--accent);font-family:var(--mono)">jsmith@geauxautomotive.com</span></p>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">Backup &amp; Restore Lists</div>
+      <div class="card" style="max-width:520px">
+        <div class="info-box" style="margin-bottom:0"><strong>Keep your lists when updating the form.</strong><br>Export saves all lists to a JSON file. Import restores them into any new version.</div>
+        <div class="export-row"><button class="btn btn-primary btn-sm" onclick="exportLists()">Export Lists</button><p>Downloads a backup of all your managed lists</p></div>
+        <div class="field" style="margin-top:14px"><label>Import Lists (paste exported JSON)</label><textarea id="importJson" style="width:100%;height:80px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;resize:vertical;" placeholder='{"companies":[...],"domains":[...],...}'></textarea></div>
+        <div class="btn-row" style="margin-top:10px"><button class="btn btn-warn btn-sm" onclick="importLists()">Import &amp; Apply</button></div>
+        <div id="importResult" style="font-size:12px;margin-top:8px;color:var(--success);display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel solo" id="panel-settings">
+    <div style="max-width:560px">
+      <div class="info-box">
+        <strong>How to find your Function Key:</strong><br>
+        Azure Portal &rarr; Function App &rarr; App Keys &rarr; Host Keys &rarr; default<br><br>
+        Leave Base URL blank when this form is hosted inside CIPP.
+      </div>
+      <div class="section-title">CIPP Connection</div>
+      <div class="card">
+        <div class="field">
+          <label>CIPP Function Key <span class="req">*</span></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="functionKey" placeholder="Paste your Host Key here..." style="font-family:var(--mono);font-size:11px;">
+            <button class="btn btn-ghost btn-sm" onclick="toggleKeyVis()" id="keyVisBtn" style="flex-shrink:0;">Hide</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>CIPP API Base URL <span style="color:var(--text-dim);font-weight:400">(leave blank if hosted inside CIPP)</span></label>
+          <input type="text" id="apiBaseUrl" placeholder="https://agreeable-stone-060c94b0f.3.azurestaticapps.net">
+        </div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn btn-ghost" onclick="clearKey()">Clear Saved Key</button>
+          <button class="btn btn-primary" onclick="saveAndTest()">Save &amp; Test Connection</button>
+        </div>
+        <div class="result-box" id="connResult" style="margin-top:16px"></div>
+      </div>
+      <div class="section-title">License SKUs</div>
+      <div class="card">
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Friendly license names matched against Geaux Automotive's available SKUs.</p>
+        <div id="licenseList"></div>
+        <div class="add-row"><input type="text" id="newLicense" placeholder="e.g. Microsoft 365 Business Premium" onkeydown="if(event.key==='Enter')addLicense()"><button class="btn btn-primary btn-sm" onclick="addLicense()">Add</button></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+<div id="toast"></div>
+
+<script src="/gausersetupv6.js"></script>
+</body>
+</html>
