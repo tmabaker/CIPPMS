@@ -56,8 +56,8 @@
     }
   ],
   "navigationFallback": {
-    "rewrite": "index.html",
-    "exclude": [
+  "rewrite": "/index.html",
+  "exclude": ["/api/*", "/*.html"]
       "_next/static/*",
       "/css/*",
       "public/*",
