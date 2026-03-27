@@ -51,21 +51,26 @@
       "allowedRoles": ["admin", "editor", "readonly", "authenticated", "anonymous"]
     },
     {
+      "route": "/*.html",
+      "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
+    },
+    {
       "route": "*",
       "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
     }
   ],
   "navigationFallback": {
-  "rewrite": "/index.html",
-  "exclude": ["/api/*", "/*.html"]
-      "_next/static/*",
+    "rewrite": "/index.html",
+    "exclude": [
+      "/api/*",
+      "/*.html",
+      "/_next/static/*",
       "/css/*",
-      "public/*",
-      "assets/*",
-      "favicon.ico",
-      "robots.txt",
-      "sitemap.xml",
-      "manifest.json"
+      "/assets/*",
+      "/favicon.ico",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/manifest.json"
     ]
   },
   "responseOverrides": {
