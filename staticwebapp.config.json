@@ -60,18 +60,19 @@
     }
   ],
   "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": [
-      "/api/*",
-      "/*.html",
-      "/_next/static/*",
-      "/css/*",
-      "/assets/*",
-      "/favicon.ico",
-      "/robots.txt",
-      "/sitemap.xml",
-      "/manifest.json"
-    ]
+  "rewrite": "/index.html",
+  "exclude": [
+    "/api/*",
+    "/*.html",
+    "/*.js",
+    "/_next/static/*",
+    "/css/*",
+    "/assets/*",
+    "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/manifest.json"
+  ]
   },
   "responseOverrides": {
     "401": {
