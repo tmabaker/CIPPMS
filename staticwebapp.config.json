@@ -55,6 +55,14 @@
       "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
     },
     {
+  "route": "/gausersetupv6.js",
+  "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
+},
+{
+  "route": "/gausersetupv6.html",
+  "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
+},
+    {
       "route": "*",
       "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
     }
