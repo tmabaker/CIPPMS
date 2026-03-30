@@ -1,0 +1,41 @@
+{
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/7fb15bf6-9cea-4c72-89bd-1ab9f16eec8e/v2.0",
+          "clientIdSettingName": "AZURE_CLIENT_ID",
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
+        }
+      }
+    }
+  },
+  "routes": [
+    {
+      "route": "/.auth/login/github",
+      "statusCode": 404
+    },
+    {
+      "route": "/techportal.html",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/gausersetupv6.html",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/levelusersetup.html",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/useronboarding.html",
+      "allowedRoles": ["authenticated"]
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad?post_login_redirect_uri=.referrer",
+      "statusCode": 302
+    }
+  }
+}
