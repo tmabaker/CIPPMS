@@ -74,7 +74,7 @@
   .result-box .result-title{font-weight:600;font-size:14px;margin-bottom:6px;}
   .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  .admin-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
+  .admin-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:24px;}
   .list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:6px;margin-bottom:6px;font-size:13px;}
   .list-item .item-text{color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .list-item .item-actions{flex-shrink:0;margin-left:8px;}
@@ -92,6 +92,7 @@
   .export-row p{font-size:12px;color:var(--text-muted);}
   #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:999;}
   #toast.show{opacity:1;transform:translateY(0);}
+  @media(max-width:1100px){.admin-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:900px){.admin-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:700px){.panel.active{flex-direction:column;}.preview-sidebar{width:100%;}.admin-grid{grid-template-columns:1fr;}.field-row{flex-direction:column;gap:0;}}
 </style>
@@ -149,7 +150,7 @@
       <div class="card">
         <div class="field"><label>Company Name <span class="req">*</span></label><div class="select-wrap"><select id="companyName" onchange="updatePreview()"><option value="">&#8212; Select Company &#8212;</option></select></div></div>
         <div class="field-row">
-          <div class="field"><label>Department <span class="req">*</span></label><div class="select-wrap"><select id="department" onchange="updatePreview()"><option value="">&#8212; Select Department &#8212;</option><option>Operations</option><option>Administration</option><option>Sales</option><option>Parts</option><option>Finance</option><option>IT</option><option>HR</option><option>Marketing</option></select></div></div>
+          <div class="field"><label>Department <span class="req">*</span></label><div class="select-wrap"><select id="department" onchange="updatePreview()"><option value="">&#8212; Select Department &#8212;</option></select></div></div>
           <div class="field"><label>Job Title</label><div class="select-wrap"><select id="jobTitle" onchange="updatePreview()"><option value="">&#8212; Select Job Title &#8212;</option></select></div></div>
         </div>
         <div class="field-row">
@@ -227,6 +228,10 @@
         <div>
           <div class="section-title">Company Names</div>
           <div class="card"><div id="companiesList"></div><div class="add-row"><input type="text" id="newCompany" placeholder="Add company..." onkeydown="if(event.key==='Enter')addCompany()"><button class="btn btn-primary btn-sm" onclick="addCompany()">Add</button></div></div>
+        </div>
+        <div>
+          <div class="section-title">Departments</div>
+          <div class="card"><div id="departmentsList"></div><div class="add-row"><input type="text" id="newDepartment" placeholder="Add department..." onkeydown="if(event.key==='Enter')addDepartment()"><button class="btn btn-primary btn-sm" onclick="addDepartment()">Add</button></div></div>
         </div>
         <div>
           <div class="section-title">Job Titles</div>

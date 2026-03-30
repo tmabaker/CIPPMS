@@ -11,11 +11,12 @@ var TENANT_NAME   = 'Geaux Automotive';
 var STORE_KEY = 'ga_userform_v1';
 
 var defaultData = {
-  companies: ['Aco','Bco Industries','Cco Group'],
-  domains:   ['geauxautomotive.com'],
-  jobTitles: ['Administrator','Analyst','Coordinator','Director','Manager','Parts Specialist','Sales Representative','Supervisor','Technician'],
-  licenses:  ['Microsoft 365 Business Basic','Microsoft 365 Business Standard','Microsoft 365 Business Premium','Microsoft 365 E3','Microsoft 365 E5'],
-  addresses: [
+  companies:   ['Aco','Bco Industries','Cco Group'],
+  domains:     ['geauxautomotive.com'],
+  departments: ['Operations','Administration','Sales','Parts','Finance','IT','HR','Marketing'],
+  jobTitles:   ['Administrator','Analyst','Coordinator','Director','Manager','Parts Specialist','Sales Representative','Supervisor','Technician'],
+  licenses:    ['Microsoft 365 Business Basic','Microsoft 365 Business Standard','Microsoft 365 Business Premium','Microsoft 365 E3','Microsoft 365 E5'],
+  addresses:   [
     {label:'Main Office', street:'100 Main Street', city:'Baton Rouge', state:'LA', postal:'70801', country:'US'}
   ]
 };
@@ -24,10 +25,10 @@ var data;
 try {
   var _s = localStorage.getItem(STORE_KEY);
   data = _s ? JSON.parse(_s) : JSON.parse(JSON.stringify(defaultData));
-  ['companies','domains','jobTitles','licenses','addresses'].forEach(function(k){
+  ['companies','domains','departments','jobTitles','licenses','addresses'].forEach(function(k){
     if (!data[k]) data[k] = defaultData[k];
   });
-  ['companies','domains','jobTitles','licenses'].forEach(function(k){ data[k].sort(); });
+  ['companies','domains','departments','jobTitles','licenses'].forEach(function(k){ data[k].sort(); });
 } catch(e) { data = JSON.parse(JSON.stringify(defaultData)); }
 
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }catch(e){} }
@@ -160,48 +161,68 @@ function submitToCIPP(){
   if (!first || !last)   { showResult('error', 'Missing Name',     'Please enter first and last name.'); return; }
   if (!company || !dept) { showResult('error', 'Missing Fields',   'Please select a Company and Department.'); return; }
 
+  // -------------------------------------------------------
+  // Build payload matching CIPP's expected field names.
+  // Reference: CIPP source → New-CIPPUser.ps1 $BodyToShip
+  //   givenName, surname, displayName, department, jobTitle,
+  //   mobilePhone, streetAddress, city, state, country,
+  //   postalCode, companyName, usageLocation, businessPhones
+  //
+  // Reference: New-CIPPUserTask.ps1
+  //   setManager  → { value: "upn" }
+  //   copyFrom    → { value: "upn" }
+  //   licenses    → { value: [skuId, ...] }  (NOT an array of objects)
+  // -------------------------------------------------------
   var payload = {
     tenantFilter:   TENANT_ID,
-    DisplayName:    display,
-    UserName:       alias,
+    tenantID:       TENANT_ID,
+    displayName:    display,
     username:       alias,
+    mailNickname:   alias,
     givenName:      first,
     surname:        last,
     Domain:         domain,
-    AutoPassword:   true,
+    primDomain:     { label: domain, value: domain },
+    Autopassword:   true,
     MustChangePass: true,
     companyName:    company,
     department:     dept,
     jobTitle:       title,
     mobilePhone:    mobile,
-    businessPhones: [bizPhone],
     streetAddress:  street,
     city:           city,
     state:          state,
     country:        country,
     postalCode:     postal,
-    usageLocation:  loc,
-    CopyFrom:       copyFrom
+    usageLocation:  { label: loc, value: loc }
   };
 
-  // Manager must be passed as { value: "upn" } for CIPP's Set-CIPPManager
-  if (manager)   payload.setManager = { value: manager };
+  // businessPhones: only add if provided
+  if (bizPhone) payload.businessPhones = [bizPhone];
 
-  // employeeId, employeeHireDate, and extensionAttributes are not in CIPP's
-  // default $BodyToShip, so we pass them via defaultAttributes which CIPP
-  // iterates and adds to the Graph request body.
-  // Each key becomes a top-level Graph property; .value is the actual value sent.
+  // Manager: CIPP expects { value: "manager@domain.com" }
+  if (manager) payload.setManager = { value: manager };
+
+  // Copy from: CIPP expects { value: "user@domain.com" }
+  if (copyFrom) payload.copyFrom = { value: copyFrom };
+
+  // Licenses: CIPP checks $UserObj.licenses.value (expects .value to be array of SKU IDs)
+  if (licId) payload.licenses = { value: [licId] };
+
+  // employeeId and employeeHireDate are not in CIPP's default $BodyToShip,
+  // but New-CIPPUser.ps1 iterates defaultAttributes and adds each to the
+  // Graph API request body as: propertyName = defaultAttributes.propertyName.value
   var extraAttrs = {};
   if (empId)     extraAttrs.employeeId       = { value: empId };
   if (startDate) extraAttrs.employeeHireDate = { value: startDate };
-  // Birthday stored in extensionAttribute1 via Graph's onPremisesExtensionAttributes object
+  // Birthday stored in extensionAttribute1 via Graph's onPremisesExtensionAttributes
   if (birthday)  extraAttrs.onPremisesExtensionAttributes = {
     value: { extensionAttribute1: birthday }
   };
   if (Object.keys(extraAttrs).length > 0) payload.defaultAttributes = extraAttrs;
-  if (licId)     payload.licenses            = [{ SkuId: licId, skuPartNumber: licName }];
-  // Also send tenantID for backwards compat
-  payload.tenantID = TENANT_ID;
+
+  // Debug: log the payload so we can verify what's being sent
+  console.log('CIPP AddUser payload:', JSON.stringify(payload, null, 2));
 
   var btn = document.getElementById('submitBtn');
   btn.disabled = true;
@@ -214,7 +235,7 @@ function submitToCIPP(){
     })
     .then(function(res){
       btn.disabled = false;
-      btn.innerHTML = 'Create User in CIPP';
+      btn.innerHTML = 'Create User in CIPP &#9889;';
 
       var results = res.body && res.body.Results ? res.body.Results : null;
       var msgText  = '';
@@ -222,7 +243,8 @@ function submitToCIPP(){
       var success  = false;
 
       if (Array.isArray(results)){
-        // CIPP returns array of strings and objects
+        // CIPP returns an array that can contain BOTH strings and objects.
+        // We must type-check each item before calling string methods.
         results.forEach(function(item){
           if (typeof item === 'string'){
             msgText += item + '\n';
@@ -231,16 +253,29 @@ function submitToCIPP(){
             if (item.state === 'success') success = true;
             if (item.resultText) {
               msgText += item.resultText + '\n';
-              // Extract password if present
-              if (item.resultText.toLowerCase().indexOf('password') !== -1 && item.copyField){
+              if (typeof item.resultText === 'string' && item.resultText.toLowerCase().indexOf('password') !== -1 && item.copyField){
                 password = item.copyField;
               }
+            } else {
+              // Fallback: stringify the object so nothing is silently lost
+              msgText += JSON.stringify(item) + '\n';
             }
+          } else if (item !== null && item !== undefined) {
+            // Catch any other types (numbers, booleans, etc.)
+            msgText += String(item) + '\n';
           }
         });
-      } else if (typeof results === 'string'){
-        msgText = results;
-        success = results.toLowerCase().indexOf('created') !== -1 || results.toLowerCase().indexOf('success') !== -1;
+      } else if (results !== null && results !== undefined){
+        if (typeof results === 'string'){
+          msgText = results;
+          success = results.toLowerCase().indexOf('created') !== -1 || results.toLowerCase().indexOf('success') !== -1;
+        } else if (typeof results === 'object'){
+          msgText = JSON.stringify(results);
+          success = res.ok;
+        } else {
+          msgText = String(results);
+          success = res.ok;
+        }
       } else {
         msgText = JSON.stringify(res.body);
         success = res.ok;
@@ -263,9 +298,10 @@ function submitToCIPP(){
     })
     .catch(function(err){
       btn.disabled = false;
-      btn.innerHTML = 'Create User in CIPP';
+      btn.innerHTML = 'Create User in CIPP &#9889;';
       showResult('error', 'Request Failed',
-        err.message + '\n\nEnsure your Function Key is correct and you are accessing this page from your CIPP domain.'
+        (err && err.message ? err.message : String(err)) +
+        '\n\nEnsure your Function Key is correct and you are accessing this page from your CIPP domain.'
       );
     });
 }
@@ -333,6 +369,18 @@ function populateAllSelects(){
     });
   }
 
+  var dp = document.getElementById('department');
+  if (dp){
+    var prevD = dp.value;
+    dp.innerHTML = '<option value="">-- Select Department --</option>';
+    data.departments.forEach(function(d){
+      var o = document.createElement('option');
+      o.value = d; o.textContent = d;
+      if (d === prevD) o.selected = true;
+      dp.appendChild(o);
+    });
+  }
+
   var jt = document.getElementById('jobTitle');
   if (jt){
     var prevJ = jt.value;
@@ -347,12 +395,12 @@ function populateAllSelects(){
 
   var ds = document.getElementById('emailDomain');
   if (ds){
-    var prevD = ds.value;
+    var prevDm = ds.value;
     ds.innerHTML = '';
     data.domains.forEach(function(d){
       var o = document.createElement('option');
       o.value = d; o.textContent = d;
-      if (d === prevD) o.selected = true;
+      if (d === prevDm) o.selected = true;
       ds.appendChild(o);
     });
     if (!ds.value && data.domains.length) ds.value = data.domains[0];
@@ -476,6 +524,28 @@ function addCompany(){
 function removeCompany(i){ data.companies.splice(i, 1); save(); renderCompanies(); populateAllSelects(); }
 
 // =============================================
+// ADMIN: DEPARTMENTS
+// =============================================
+function renderDepartments(){
+  var el = document.getElementById('departmentsList'); if (!el) return;
+  el.innerHTML = '';
+  if (!data.departments.length){ el.innerHTML = '<p style="color:var(--text-dim);font-size:12px;padding:6px 0;">No departments yet.</p>'; return; }
+  data.departments.forEach(function(d, i){
+    var div = document.createElement('div'); div.className = 'list-item';
+    div.innerHTML = '<span class="item-text">' + escHtml(d) + '</span><div class="item-actions"><button class="btn btn-danger btn-sm" onclick="removeDepartment(' + i + ')">X</button></div>';
+    el.appendChild(div);
+  });
+}
+function addDepartment(){
+  var inp = document.getElementById('newDepartment'); var val = inp.value.trim();
+  if (!val) return;
+  if (data.departments.indexOf(val) !== -1){ showToast('Already exists!', true); return; }
+  data.departments.push(val); data.departments.sort();
+  save(); renderDepartments(); populateAllSelects(); inp.value = '';
+}
+function removeDepartment(i){ data.departments.splice(i, 1); save(); renderDepartments(); populateAllSelects(); }
+
+// =============================================
 // ADMIN: JOB TITLES
 // =============================================
 function renderJobTitles(){
@@ -595,7 +665,7 @@ function importLists(){
   if (!raw){ showToast('Paste your exported JSON first', true); return; }
   try {
     var imported = JSON.parse(raw);
-    var keys = ['companies','domains','jobTitles','licenses','addresses'];
+    var keys = ['companies','domains','departments','jobTitles','licenses','addresses'];
     var count = 0;
     keys.forEach(function(k){
       if (imported[k] && Array.isArray(imported[k])){
@@ -633,7 +703,7 @@ function switchTab(name){
   var target = document.getElementById('panel-' + name);
   if (target) target.classList.add('active');
 
-  if (name === 'admin')    { renderCompanies(); renderJobTitles(); renderAddresses(); renderDomains(); }
+  if (name === 'admin')    { renderCompanies(); renderDepartments(); renderJobTitles(); renderAddresses(); renderDomains(); }
   if (name === 'settings') { renderLicenses(); }
 }
 
