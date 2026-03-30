@@ -164,28 +164,41 @@ function submitToCIPP(){
     tenantFilter:   TENANT_ID,
     DisplayName:    display,
     UserName:       alias,
-    FirstName:      first,
-    LastName:       last,
+    username:       alias,
+    givenName:      first,
+    surname:        last,
     Domain:         domain,
     AutoPassword:   true,
     MustChangePass: true,
     companyName:    company,
-    Department:     dept,
+    department:     dept,
     jobTitle:       title,
-    employeeId:     empId,
     mobilePhone:    mobile,
     businessPhones: [bizPhone],
     streetAddress:  street,
     city:           city,
+    state:          state,
     country:        country,
     postalCode:     postal,
     usageLocation:  loc,
     CopyFrom:       copyFrom
   };
 
-  if (manager)   payload.manager             = manager;
-  if (startDate) payload.employeeHireDate    = startDate;
-  if (birthday)  payload.extensionAttribute1 = birthday;
+  // Manager must be passed as { value: "upn" } for CIPP's Set-CIPPManager
+  if (manager)   payload.setManager = { value: manager };
+
+  // employeeId, employeeHireDate, and extensionAttributes are not in CIPP's
+  // default $BodyToShip, so we pass them via defaultAttributes which CIPP
+  // iterates and adds to the Graph request body.
+  // Each key becomes a top-level Graph property; .value is the actual value sent.
+  var extraAttrs = {};
+  if (empId)     extraAttrs.employeeId       = { value: empId };
+  if (startDate) extraAttrs.employeeHireDate = { value: startDate };
+  // Birthday stored in extensionAttribute1 via Graph's onPremisesExtensionAttributes object
+  if (birthday)  extraAttrs.onPremisesExtensionAttributes = {
+    value: { extensionAttribute1: birthday }
+  };
+  if (Object.keys(extraAttrs).length > 0) payload.defaultAttributes = extraAttrs;
   if (licId)     payload.licenses            = [{ SkuId: licId, skuPartNumber: licName }];
   // Also send tenantID for backwards compat
   payload.tenantID = TENANT_ID;
