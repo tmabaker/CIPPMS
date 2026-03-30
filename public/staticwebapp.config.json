@@ -1,9 +1,0 @@
-{
-  "routes": [
-    {
-      "route": "/.auth/login/github",
-      "statusCode": 404
-    }
-  ],
-  "navigationFallback": null
-}
