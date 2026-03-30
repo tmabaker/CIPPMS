@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIT Tech Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #141820;
+    --surface2: #1a1f2b;
+    --border: #252b3b;
+    --accent: #4f8ef7;
+    --accent-glow: rgba(79,142,247,.15);
+    --accent2: #7c6af7;
+    --success: #3ecf8e;
+    --warn: #f7a94f;
+    --text: #e8eaf6;
+    --text-muted: #7b82a8;
+    --text-dim: #4a5070;
+    --radius: 12px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .header h1 { font-size: 18px; font-weight: 600; }
+  .header .subtitle { font-size: 13px; color: var(--text-muted); margin-left: 2px; }
+  .header-right {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* Content */
+  .content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 36px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  .section-title-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-left: 8px;
+  }
+
+  /* Button Grid */
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .portal-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    color: var(--text);
+    text-decoration: none;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .portal-btn:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    box-shadow: 0 0 0 1px var(--accent), 0 4px 20px rgba(79,142,247,.08);
+    transform: translateY(-1px);
+  }
+  .portal-btn:active {
+    transform: translateY(0);
+  }
+  .portal-btn .btn-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .portal-btn .btn-label {
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .portal-btn .btn-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  /* Icon backgrounds */
+  .icon-blue    { background: rgba(79,142,247,.12); color: var(--accent); }
+  .icon-purple  { background: rgba(124,106,247,.12); color: var(--accent2); }
+  .icon-green   { background: rgba(62,207,142,.12); color: var(--success); }
+  .icon-orange  { background: rgba(247,169,79,.12); color: var(--warn); }
+  .icon-red     { background: rgba(247,95,95,.12); color: #f75f5f; }
+  .icon-teal    { background: rgba(56,189,248,.12); color: #38bdf8; }
+  .icon-pink    { background: rgba(236,72,153,.12); color: #ec4899; }
+
+  /* External link indicator */
+  .portal-btn .ext-arrow {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .portal-btn:hover .ext-arrow {
+    opacity: 1;
+  }
+
+  /* Empty section placeholder */
+  .coming-soon {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .content { padding: 20px 16px; }
+    .btn-grid { grid-template-columns: 1fr; }
+    .header { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">N</div>
+  <div>
+    <h1>Tech Portal</h1>
+    <div class="subtitle">New Orleans &amp; SE IT Group</div>
+  </div>
+  <div class="header-right">Internal Use Only</div>
+</div>
+
+<div class="content">
+
+  <!-- ADD USER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue">&#128100;</div>
+      <div class="section-title">Add User</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="btn-grid">
+      <a class="portal-btn" href="https://agreeable-stone-060c94b0f.3.azurestaticapps.net/gausersetupv6.html" target="_blank">
+        <div class="btn-icon icon-blue">&#127970;</div>
+        <div>
+          <div class="btn-label">Geaux Auto</div>
+          <div class="btn-sub">geauxautomotive.com</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://agreeable-stone-060c94b0f.3.azurestaticapps.net/levelusersetup.html" target="_blank">
+        <div class="btn-icon icon-green">&#127968;</div>
+        <div>
+          <div class="btn-label">Level Homes</div>
+          <div class="btn-sub">levelbr.com</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://agreeable-stone-060c94b0f.3.azurestaticapps.net/useronboarding.html" target="_blank">
+        <div class="btn-icon icon-purple">&#127760;</div>
+        <div>
+          <div class="btn-label">Other Tenants</div>
+          <div class="btn-sub">13 client tenants</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- MODIFY USER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-orange">&#9998;</div>
+      <div class="section-title">Modify User</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="coming-soon">Links coming soon</div>
+  </div>
+
+  <!-- REMOVE USER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-red">&#128683;</div>
+      <div class="section-title">Remove User</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="coming-soon">Links coming soon</div>
+  </div>
+
+  <!-- PASSWORDS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">&#128272;</div>
+      <div class="section-title">Passwords</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="coming-soon">Links coming soon</div>
+  </div>
+
+  <!-- OOO & VACATION MODE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-teal">&#9992;&#65039;</div>
+      <div class="section-title">OOO &amp; Vacation Mode</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="coming-soon">Links coming soon</div>
+  </div>
+
+  <!-- MANAGEMENT TOOLS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-orange">&#9881;&#65039;</div>
+      <div class="section-title">Management Tools</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="btn-grid">
+      <a class="portal-btn" href="https://cipp.noitgroup.com" target="_blank">
+        <div class="btn-icon icon-orange">&#9889;</div>
+        <div>
+          <div class="btn-label">CIPP</div>
+          <div class="btn-sub">M365 Tenant Management</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://noitgroup.vsax.net" target="_blank">
+        <div class="btn-icon icon-teal">&#128421;</div>
+        <div>
+          <div class="btn-label">VSAX / Datto RMM</div>
+          <div class="btn-sub">Remote Monitoring</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://www.autotask.net" target="_blank">
+        <div class="btn-icon icon-purple">&#128203;</div>
+        <div>
+          <div class="btn-label">Autotask</div>
+          <div class="btn-sub">PSA / Ticketing</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://noitgroup.itglue.com" target="_blank">
+        <div class="btn-icon icon-blue">&#128218;</div>
+        <div>
+          <div class="btn-label">IT Glue</div>
+          <div class="btn-sub">Documentation</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://portal.threatlocker.com" target="_blank">
+        <div class="btn-icon icon-red">&#128737;</div>
+        <div>
+          <div class="btn-label">ThreatLocker</div>
+          <div class="btn-sub">Zero Trust / Approvals</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://app.myglue.com" target="_blank">
+        <div class="btn-icon icon-green">&#128272;</div>
+        <div>
+          <div class="btn-label">MyGlue</div>
+          <div class="btn-sub">Password Vault</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-red">&#128737;&#65039;</div>
+      <div class="section-title">Security</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="btn-grid">
+      <a class="portal-btn" href="https://rocketcyber.com" target="_blank">
+        <div class="btn-icon icon-red">&#128640;</div>
+        <div>
+          <div class="btn-label">RocketCyber</div>
+          <div class="btn-sub">MDR / SOC</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://portal.office.com" target="_blank">
+        <div class="btn-icon icon-blue">&#128274;</div>
+        <div>
+          <div class="btn-label">Microsoft Security</div>
+          <div class="btn-sub">Defender / Entra</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://app.phinsec.io" target="_blank">
+        <div class="btn-icon icon-pink">&#127907;</div>
+        <div>
+          <div class="btn-label">Phinsec</div>
+          <div class="btn-sub">Security Awareness Training</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- MICROSOFT -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue">&#9729;&#65039;</div>
+      <div class="section-title">Microsoft</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="btn-grid">
+      <a class="portal-btn" href="https://partner.microsoft.com" target="_blank">
+        <div class="btn-icon icon-blue">&#129309;</div>
+        <div>
+          <div class="btn-label">Partner Center</div>
+          <div class="btn-sub">Microsoft Partner Portal</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://admin.microsoft.com" target="_blank">
+        <div class="btn-icon icon-blue">&#127963;</div>
+        <div>
+          <div class="btn-label">M365 Admin</div>
+          <div class="btn-sub">Admin Center</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://entra.microsoft.com" target="_blank">
+        <div class="btn-icon icon-teal">&#128101;</div>
+        <div>
+          <div class="btn-label">Entra ID</div>
+          <div class="btn-sub">Identity &amp; Access</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://portal.azure.com" target="_blank">
+        <div class="btn-icon icon-blue">&#9889;</div>
+        <div>
+          <div class="btn-label">Azure Portal</div>
+          <div class="btn-sub">Cloud Resources</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- BACKUP & BCDR -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-green">&#128190;</div>
+      <div class="section-title">Backup &amp; BCDR</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="btn-grid">
+      <div class="portal-btn" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="btn-icon icon-green">&#9729;</div>
+          <div>
+            <div class="btn-label">M365 Backup via Spanning</div>
+            <div class="btn-sub">Select tenant to open Spanning</div>
+          </div>
+        </div>
+        <div class="select-wrap" style="margin-top:4px;">
+          <select id="spanningTenant" onchange="openSpanning()" style="width:100%;background:#1a1f2b;border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;">
+            <option value="">— Select Tenant —</option>
+            <option value="brindis-smile-effect">Brindis Smile Effect</option>
+            <option value="crescent-city-dentistry">Crescent City Dentistry</option>
+            <option value="fishman-haygood">Fishman Haygood</option>
+            <option value="geaux-automotive">Geaux Automotive</option>
+            <option value="gertler-law-firm">Gertler Law Firm</option>
+            <option value="irby-investments">Irby Investments</option>
+            <option value="level-homes">Level Homes</option>
+            <option value="pac-gulf">Pac Gulf</option>
+            <option value="plotkin-vincent">Plotkin Vincent</option>
+            <option value="provident-resources-group">Provident Resources Group</option>
+            <option value="true-title">True Title</option>
+            <option value="vezina-gattuso">Vezina Gattuso</option>
+          </select>
+        </div>
+      </div>
+      <div class="portal-btn" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="btn-icon icon-green">&#128190;</div>
+          <div>
+            <div class="btn-label">Datto BCDR</div>
+            <div class="btn-sub">Select client / device</div>
+          </div>
+        </div>
+        <div class="select-wrap" style="margin-top:4px;">
+          <select id="dattoBcdrDevice" onchange="openDattoBcdr()" style="width:100%;background:#1a1f2b;border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;">
+            <option value="">— Select Client —</option>
+            <option value="https://bailey-yxvixbkh2jofh0an.dattoweb.com/home">Bailey Investments</option>
+            <option value="https://portal.dattobackup.com/device/6C92CF26DDE0">Brindis</option>
+            <option value="https://portal.dattobackup.com/device/C45AB1DA8D7E">Crescent City Dentistry</option>
+            <option value="https://portal.dattobackup.com/device/C45AB1DAD3FB">Drolla</option>
+            <option value="https://portal.dattobackup.com/device/C45AB1E5F003">Irby Investments</option>
+            <option value="https://portal.dattobackup.com/device/A8A159C026AE">Level Homes</option>
+            <option value="https://portal.dattobackup.com/device/84160C30316C">Provident</option>
+            <option value="https://portal.dattobackup.com/device/C45AB1DB1159">True Title Gretna</option>
+            <option value="https://portal.dattobackup.com/device/C45AB1DA9315">True Title Metairie</option>
+            <option value="https://portal.dattobackup.com/device/089204EEA2AC">Vezina &amp; Gattuso</option>
+          </select>
+        </div>
+      </div>
+      <a class="portal-btn" href="https://portal.dattobackup.com" target="_blank">
+        <div class="btn-icon icon-green">&#128230;</div>
+        <div>
+          <div class="btn-label">Datto EPBU</div>
+          <div class="btn-sub">Endpoint Backup</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+  // Spanning deep links — placeholder mapping until we get actual URLs
+  // Update these with real Spanning tenant deep links when available
+  var SPANNING_LINKS = {
+    'brindis-smile-effect':      'https://spanning.com',
+    'crescent-city-dentistry':   'https://spanning.com',
+    'fishman-haygood':           'https://spanning.com',
+    'geaux-automotive':          'https://spanning.com',
+    'gertler-law-firm':          'https://spanning.com',
+    'irby-investments':          'https://spanning.com',
+    'level-homes':               'https://spanning.com',
+    'pac-gulf':                  'https://spanning.com',
+    'plotkin-vincent':            'https://spanning.com',
+    'provident-resources-group': 'https://spanning.com',
+    'true-title':                'https://spanning.com',
+    'vezina-gattuso':            'https://spanning.com'
+  };
+  function openDattoBcdr(){
+    var sel = document.getElementById('dattoBcdrDevice');
+    var val = sel.value;
+    if (!val) return;
+    window.open(val, '_blank');
+    sel.value = '';
+  }
+  function openSpanning(){
+    var sel = document.getElementById('spanningTenant');
+    var val = sel.value;
+    if (!val) return;
+    var url = SPANNING_LINKS[val] || 'https://spanning.com';
+    window.open(url, '_blank');
+    sel.value = '';
+  }
+  </script>
+
+  <!-- REMOTE ACCESS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-teal">&#128421;</div>
+      <div class="section-title">Remote Access</div>
+      <div class="section-title-line"></div>
+    </div>
+    <div class="btn-grid">
+      <a class="portal-btn" href="https://noitgroup.screenconnect.com" target="_blank">
+        <div class="btn-icon icon-teal">&#128433;</div>
+        <div>
+          <div class="btn-label">ScreenConnect</div>
+          <div class="btn-sub">Remote Support Sessions</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+      <a class="portal-btn" href="https://noitgroup.vsax.net" target="_blank">
+        <div class="btn-icon icon-teal">&#128421;</div>
+        <div>
+          <div class="btn-label">VSAX</div>
+          <div class="btn-sub">Remote Monitoring &amp; Management</div>
+        </div>
+        <span class="ext-arrow">&#8599;</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  NOIT Group &mdash; Tech Portal &mdash; Internal Use Only
+</div>
+
+</body>
+</html>
