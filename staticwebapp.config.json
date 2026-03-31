@@ -36,57 +36,86 @@
     },
     {
       "route": "/authredirect",
-      "allowedRoles": ["admin", "editor", "readonly", "authenticated", "anonymous"]
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated",
+        "anonymous"
+      ]
     },
     {
       "route": "/LogoutRedirect",
-      "allowedRoles": ["admin", "editor", "readonly", "authenticated", "anonymous"]
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated",
+        "anonymous"
+      ]
     },
     {
       "route": "/404",
-      "allowedRoles": ["admin", "editor", "readonly", "authenticated", "anonymous"]
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated",
+        "anonymous"
+      ]
     },
     {
       "route": "/api/Public*",
-      "allowedRoles": ["admin", "editor", "readonly", "authenticated", "anonymous"]
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated",
+        "anonymous"
+      ]
     },
     {
       "route": "/*.html",
-      "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated"
+      ]
     },
     {
-  "route": "/gausersetupv6.js",
-  "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
-},
-{
-  "route": "/gausersetupv6.html",
-  "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
-},
-    {
       "route": "*",
-      "allowedRoles": ["admin", "editor", "readonly", "authenticated"]
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated"
+      ]
     }
   ],
   "navigationFallback": {
-  "rewrite": "/index.html",
-  "exclude": [
-    "/api/*",
-    "/*.html",
-    "/*.js",
-    "/_next/static/*",
-    "/css/*",
-    "/assets/*",
-    "/favicon.ico",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/manifest.json"
-  ]
+    "rewrite": "/index.html",
+    "exclude": [
+      "/api/*",
+      "/*.html",
+      "/*.js",
+      "/_next/static/*",
+      "/css/*",
+      "/assets/*",
+      "/favicon.ico",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/manifest.json"
+    ]
   },
   "responseOverrides": {
     "401": {
       "redirect": "/.auth/login/aad?post_login_redirect_uri=.referrer",
       "statusCode": 302,
-      "exclude": ["/assets/illustrations/*.{png,jpg,gif}", "/css/*"]
+      "exclude": [
+        "/assets/illustrations/*.{png,jpg,gif}",
+        "/css/*"
+      ]
     },
     "403": {
       "rewrite": "/403"
