@@ -96,7 +96,7 @@ function resetToDefaults() {
 }
 
 // Auth - Hardcoded as specified
-function getKey()     { return localStorage.getItem('cipp_fkey') || ''; }
+function getKey()     { return '_MNhh4ZlkdwQfRurLGXkWs0MGshcx18cheGXZYNt6F9RAzFuacKCWg=='; }
 function getBaseUrl() { return ''; }
 
 // Auto-check connection status on page load
