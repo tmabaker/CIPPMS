@@ -33,3 +33,6 @@ app.log
 # AI rules
 .*/rules
 AGENTS.md
+
+# Sensitive client config (tenant IDs, company names)
+public/ga-config.json
