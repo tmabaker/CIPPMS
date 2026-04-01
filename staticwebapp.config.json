@@ -75,6 +75,16 @@
       ]
     },
     {
+      "route": "/api/*",
+      "allowedRoles": [
+        "admin",
+        "editor",
+        "readonly",
+        "authenticated",
+        "anonymous"
+      ]
+    },
+    {
       "route": "/*.html",
       "allowedRoles": [
         "admin",
