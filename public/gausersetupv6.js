@@ -8,55 +8,31 @@ var TENANT_NAME   = 'Geaux Automotive';
 // =============================================
 // DATA STORE
 // =============================================
-var STORE_KEY = 'ga_userform_v1';
+var STORE_KEY = 'ga_userform_v7';
 
-// This will be loaded from ga-config.json
-var defaultData = {};
-var configData = {};
+var defaultData = {
+  companies: ["Express Chevrolet - Brownsville","Express Chevrolet - Dyersburg","Express Chevrolet - Terry","Geaux Automotive - Corporate","Geaux CDJR - Plaquemine","Geaux Chevrolet - Laplace","Geaux Chevrolet - West","Geaux Ford - Waveland","Gulf Auto Direct - Waveland"],
+  domains: ["expressautogroup.com","geauxautomotive.com","gulfautodirect.com"],
+  departments: ["Accounting","Administration","Collision","Executive Operations","Fixed Operations","Information Technology","Marketing","Operations","Parts","Parts and Service","Remote","Sales","Service"],
+  jobTitles: ["Accounting - Billing","Accounting - Clerk","Accounting - Payables","BDC Sales","BDC Service","Body Shop Estimator","Body Shop Manager","Body Shop Technician","Cashier","Chief Executive Officer","Chief Financial Officer","Chief Marketing Officer","Chief Operating Officer","Controller","Detailer","Executive Assistant","F&I Manager","Fixed Operations Manager","Fleet Sales Advisor","Fleet Sales Manager","General Manager","General Sales Manager","Human Resources Assistant","Human Resources Director","Human Resources Intern","Inventory Manager","Marketing Assistant","Marketing Director","Office Manager","Parts Advisor","Parts Manager","Porter","Receptionist","Runner","Sales Advisor","Sales Manager","Service Advisor","Service Lube Technician","Service Manager","Service Technician"],
+  licenses: ["Microsoft 365 Business Basic","Microsoft 365 Business Premium","Microsoft 365 Business Standard","Microsoft 365 E3","Microsoft 365 E5"],
+  addresses: [{"label":"Brownsville","street":"1336 S Dupree Street","city":"Brownsville","state":"Tennessee","postal":"38012","country":"US"},{"label":"Dyersburg","street":"125 US-51 Bypass","city":"Dyersburg","state":"Tennessee","postal":"38024","country":"US"},{"label":"Terry","street":"12580 I-55 Service Road","city":"Terry","state":"Mississippi","postal":"39170","country":"US"},{"label":"Corporate","street":"11408 Lake Sherwood Ave N Suite A","city":"Baton Rouge","state":"Louisiana","postal":"70816","country":"US"},{"label":"Laplace","street":"2020 West Airline Highway","city":"Laplace","state":"Louisiana","postal":"70068","country":"US"},{"label":"Plq - West","street":"23085 LA-1","city":"Plaquemine","state":"Louisiana","postal":"70764","country":"US"},{"label":"Plq - CDJR","street":"24945 LA-1","city":"Plaquemine","state":"Louisiana","postal":"70764","country":"US"},{"label":"Waveland - Ford","street":"105 US-90","city":"Waveland","state":"Mississippi","postal":"39576","country":"US"},{"label":"Waveland - GAD","street":"9050 MS-603","city":"Waveland","state":"Mississippi","postal":"39576","country":"US"}]
+};
+var configData = JSON.parse(JSON.stringify(defaultData));
 
-var data = {};
-
-// Load configuration from ga-config.json
-function loadConfig() {
-  return fetch('/ga-config.json')
-    .then(function(r) { return r.json(); })
-    .then(function(config) {
-      configData = config;
-      defaultData = JSON.parse(JSON.stringify(config));
-      
-      // Merge with localStorage overrides
-      try {
-        var _s = localStorage.getItem(STORE_KEY);
-        var localOverrides = _s ? JSON.parse(_s) : {};
-        data = JSON.parse(JSON.stringify(configData));
-        
-        // Apply localStorage overrides on top of config defaults
-        ['companies','domains','departments','jobTitles','licenses','addresses'].forEach(function(k){
-          if (localOverrides[k]) {
-            data[k] = localOverrides[k];
-          }
-        });
-        
-        ['companies','domains','departments','jobTitles','licenses'].forEach(function(k){ 
-          if (data[k] && Array.isArray(data[k])) data[k].sort(); 
-        });
-      } catch(e) { 
-        data = JSON.parse(JSON.stringify(configData)); 
-      }
-    })
-    .catch(function(err) {
-      console.error('Failed to load ga-config.json, using fallback data:', err);
-      // Fallback to basic data if config file fails to load
-      configData = defaultData = {
-        companies: ["Express Chevrolet - Brownsville","Express Chevrolet - Dyersburg","Express Chevrolet - Terry","Geaux Automotive - Corporate","Geaux CDJR - Plaquemine","Geaux Chevrolet - Laplace","Geaux Chevrolet - West","Geaux Ford - Waveland","Gulf Auto Direct - Waveland"],
-        domains: ["expressautogroup.com","geauxautomotive.com","gulfautodirect.com"],
-        departments: ["Accounting","Administration","Collision","Executive Operations","Fixed Operations","Information Technology","Marketing","Operations","Parts","Parts and Service","Remote","Sales","Service"],
-        jobTitles: ["Accounting - Billing","Accounting - Clerk","Accounting - Payables","BDC Sales","BDC Service","Body Shop Estimator","Body Shop Manager","Body Shop Technician","Cashier","Chief Executive Officer","Chief Financial Officer","Chief Marketing Officer","Chief Operating Officer","Controller","Detailer","Executive Assistant","F&I Manager","Fixed Operations Manager","Fleet Sales Advisor","Fleet Sales Manager","General Manager","General Sales Manager","Human Resources Assistant","Human Resources Director","Human Resources Intern","Inventory Manager","Marketing Assistant","Marketing Director","Office Manager","Parts Advisor","Parts Manager","Porter","Receptionist","Runner","Sales Advisor","Sales Manager","Service Advisor","Service Lube Technician","Service Manager","Service Technician"],
-        licenses: ["Microsoft 365 Business Basic","Microsoft 365 Business Premium","Microsoft 365 Business Standard","Microsoft 365 E3","Microsoft 365 E5"],
-        addresses: [{"label":"Brownsville","street":"1336 S Dupree Street","city":"Brownsville","state":"Tennessee","postal":"38012","country":"US"},{"label":"Dyersburg","street":"125 US-51 Bypass","city":"Dyersburg","state":"Tennessee","postal":"38024","country":"US"},{"label":"Terry","street":"12580 I-55 Service Road","city":"Terry","state":"Mississippi","postal":"39170","country":"US"},{"label":"Corporate","street":"11408 Lake Sherwood Ave N Suite A","city":"Baton Rouge","state":"Louisiana","postal":"70816","country":"US"},{"label":"Laplace","street":"2020 West Airline Highway","city":"Laplace","state":"Louisiana","postal":"70068","country":"US"},{"label":"Plq - West","street":"23085 LA-1","city":"Plaquemine","state":"Louisiana","postal":"70764","country":"US"},{"label":"Plq - CDJR","street":"24945 LA-1","city":"Plaquemine","state":"Louisiana","postal":"70764","country":"US"},{"label":"Waveland - Ford","street":"105 US-90","city":"Waveland","state":"Mississippi","postal":"39576","country":"US"},{"label":"Waveland - GAD","street":"9050 MS-603","city":"Waveland","state":"Mississippi","postal":"39576","country":"US"}]
-      };
-      data = JSON.parse(JSON.stringify(configData));
+// Load data: defaults + any localStorage overrides
+function loadData() {
+  data = JSON.parse(JSON.stringify(defaultData));
+  try {
+    var _s = localStorage.getItem(STORE_KEY);
+    var overrides = _s ? JSON.parse(_s) : {};
+    ['companies','domains','departments','jobTitles','licenses','addresses'].forEach(function(k){
+      if (overrides[k]) data[k] = overrides[k];
     });
+  } catch(e) {}
+  ['companies','domains','departments','jobTitles','licenses'].forEach(function(k){ 
+    if (data[k] && Array.isArray(data[k])) data[k].sort(); 
+  });
 }
 
 function save(){ 
@@ -78,10 +54,10 @@ function save(){
 
 // Reset to defaults function
 function resetToDefaults() {
-  if (!confirm('This will reset all lists to defaults from ga-config.json. Are you sure?')) return;
+  if (!confirm('This will reset all lists to defaults. Are you sure?')) return;
   try {
     localStorage.removeItem(STORE_KEY);
-    data = JSON.parse(JSON.stringify(configData));
+    data = JSON.parse(JSON.stringify(defaultData));
     populateAllSelects();
     renderCompanies(); 
     renderDepartments(); 
@@ -120,26 +96,25 @@ function checkConnectionStatus() {
 // INIT
 // =============================================
 window.addEventListener('DOMContentLoaded', function(){
-  // Load configuration first, then initialize everything else
-  loadConfig().then(function() {
-    // Ensure tenant domain is in domains list
-    if (data.domains && data.domains.indexOf(TENANT_DOMAIN) === -1) {
-      data.domains.unshift(TENANT_DOMAIN);
-      data.domains.sort();
-      save();
-    }
+  loadData();
 
-    populateAllSelects();
-    updatePreview();
+  // Ensure tenant domain is in domains list
+  if (data.domains && data.domains.indexOf(TENANT_DOMAIN) === -1) {
+    data.domains.unshift(TENANT_DOMAIN);
+    data.domains.sort();
+    save();
+  }
 
-    // Auto-check connection status on page load
-    checkConnectionStatus();
-    
-    // Auto-load licenses on page load
-    if (getKey()) {
-      loadLicenses(TENANT_ID);
-    }
-  });
+  populateAllSelects();
+  updatePreview();
+
+  // Auto-check connection status on page load
+  checkConnectionStatus();
+  
+  // Auto-load licenses on page load
+  if (getKey()) {
+    loadLicenses(TENANT_ID);
+  }
 });
 
 // =============================================
