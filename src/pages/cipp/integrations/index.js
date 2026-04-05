@@ -1,4 +1,4 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
+import { Layout as DashboardLayout } from '../../../layouts/index.js'
 import {
   Box,
   Button,
@@ -7,36 +7,38 @@ import {
   CardActions,
   CardContent,
   Container,
-  Grid,
   Skeleton,
   Stack,
   Typography,
-} from "@mui/material";
-import extensions from "/src/data/Extensions";
-import { Sync } from "@mui/icons-material";
-import { useSettings } from "/src/hooks/use-settings";
-import { ApiGetCall } from "/src/api/ApiCall";
-import Link from "next/link";
+} from '@mui/material'
+import extensions from '../../../data/Extensions'
+import { Sync } from '@mui/icons-material'
+import { useSettings } from '../../../hooks/use-settings'
+import { ApiGetCall } from '../../../api/ApiCall'
+import Link from 'next/link'
+import { Grid } from '@mui/system'
+import { CippHead } from '../../../components/CippComponents/CippHead'
 
 const Page = () => {
-  const settings = useSettings();
-  const preferredTheme = settings.currentTheme?.value;
+  const settings = useSettings()
+  const preferredTheme = settings.currentTheme?.value
 
   const integrations = ApiGetCall({
-    url: "/api/ListExtensionsConfig",
-    queryKey: "Integrations",
+    url: '/api/ListExtensionsConfig',
+    queryKey: 'Integrations',
     refetchOnMount: false,
     refetchOnReconnect: false,
-  });
+  })
 
   return (
-    <Container maxWidth={"xl"}>
+    <Container maxWidth={'xl'}>
+      <CippHead title="Integrations" noTenant={true} />
       <Stack
         direction="row"
         justifyContent="space-between"
         alignItems="center"
         spacing={4}
-        sx={{ mb: 3, mt: 3 }}
+        sx={{ mb: 3 }}
       >
         <Typography variant="h4">Integrations</Typography>
         <Button
@@ -52,50 +54,48 @@ const Page = () => {
 
       <Grid container spacing={3}>
         {extensions.map((extension) => {
-          var logo = extension.logo;
-          if (preferredTheme === "dark" && extension?.logoDark) {
-            logo = extension.logoDark;
+          var logo = extension.logo
+          if (preferredTheme === 'dark' && extension?.logoDark) {
+            logo = extension.logoDark
           }
 
-          var integrationConfig = integrations?.data?.[extension.id];
-          var isEnabled = integrationConfig?.Enabled || extension.id === "cippapi";
-          var status = "Unconfigured";
+          var integrationConfig = integrations?.data?.[extension.id]
+          var isEnabled = integrationConfig?.Enabled || extension.id === 'cippapi'
+          var status = 'Unconfigured'
           if (integrationConfig && !isEnabled) {
-            status = "Disabled";
-          } else if ((integrationConfig && isEnabled) || extension.id === "cippapi") {
-            status = "Enabled";
+            status = 'Disabled'
+          } else if ((integrationConfig && isEnabled) || extension.id === 'cippapi') {
+            status = 'Enabled'
           }
 
           return (
-            <Grid item sm={12} md={6} xl={3} key={extension.id}>
+            <Grid size={{ md: 6, sm: 12, xl: 3 }} key={extension.id}>
               <CardActionArea
                 component={Link}
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
                 }}
                 href={`/cipp/integrations/configure?id=${extension.id}`}
               >
                 <Card
                   align="center"
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
                   }}
                 >
                   <CardContent>
                     {extension?.logo && (
                       <Box
                         component="img"
-                        layout="responsive"
-                        objectFit="contain"
-                        gutterBottom
                         src={logo}
                         alt={extension.name}
                         width="90%"
-                        height={"auto"}
+                        height={'auto'}
+                        sx={{ objectFit: 'contain' }}
                         marginBottom={1}
                         flex={1}
                       />
@@ -110,8 +110,8 @@ const Page = () => {
                       {integrations.isSuccess ? (
                         <Box
                           sx={{
-                            backgroundColor: isEnabled ? "success.main" : "warning.main",
-                            borderRadius: "50%",
+                            backgroundColor: isEnabled ? 'success.main' : 'warning.main',
+                            borderRadius: '50%',
                             width: 8,
                             height: 8,
                           }}
@@ -121,20 +121,20 @@ const Page = () => {
                       )}
 
                       <Typography variant="body2">
-                        {integrations.isSuccess ? status : "Loading"}
+                        {integrations.isSuccess ? status : 'Loading'}
                       </Typography>
                     </Stack>
                   </CardActions>
                 </Card>
               </CardActionArea>
             </Grid>
-          );
+          )
         })}
       </Grid>
     </Container>
-  );
-};
+  )
+}
 
-Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
+Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>
 
-export default Page;
+export default Page

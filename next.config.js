@@ -4,18 +4,25 @@ const config = {
   images: {
     unoptimized: true,
   },
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ["@svgr/webpack"],
-    });
-    return config;
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+  },
+  experimental: {
+    webpackMemoryOptimizations: true,
+    preloadEntriesOnStart: false,
+    turbopackFileSystemCacheForDev: false,
+    turbopackMemoryLimit: 4096,
   },
   async redirects() {
-    return [];
+    return []
   },
-  output: "export",
-  distDir: "./out",
-};
+  output: 'export',
+  distDir: './out',
+}
 
-module.exports = config;
+module.exports = config
