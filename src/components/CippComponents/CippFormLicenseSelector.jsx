@@ -1,4 +1,3 @@
-import React from "react";
 import { CippFormComponent } from "./CippFormComponent";
 import { getCippLicenseTranslation } from "../../utils/get-cipp-license-translation";
 import { useSettings } from "../../hooks/use-settings";
@@ -10,6 +9,7 @@ export const CippFormLicenseSelector = ({
   multiple = true,
   select,
   addedField,
+  showRefresh = false,
   ...other
 }) => {
   const userSettingsDefaults = useSettings();
@@ -33,6 +33,7 @@ export const CippFormLicenseSelector = ({
           Endpoint: "subscribedSkus",
           $count: true,
         },
+        showRefresh,
       }}
     />
   );

@@ -2,7 +2,7 @@ import { Button, Stack, SvgIcon, Menu, MenuItem, ListItemText, Alert } from "@mu
 import { useState } from "react";
 import isEqual from "lodash/isEqual";
 import { useForm } from "react-hook-form";
-import { ApiGetCall, ApiGetCallWithPagination, ApiPostCall } from "/src/api/ApiCall";
+import { ApiGetCall, ApiGetCallWithPagination, ApiPostCall } from "../../api/ApiCall";
 import { CippDataTable } from "../CippTable/CippDataTable";
 import {
   ChevronDownIcon,
@@ -21,6 +21,7 @@ import { Box } from "@mui/system";
 const CippApiClientManagement = () => {
   const [openAddClientDialog, setOpenAddClientDialog] = useState(false);
   const [openAddExistingAppDialog, setOpenAddExistingAppDialog] = useState(false);
+  const [addClientRetryPayload, setAddClientRetryPayload] = useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
 
   const formControl = useForm({
@@ -60,6 +61,33 @@ const CippApiClientManagement = () => {
     handleMenuClose();
   };
 
+  const getRetryPayload = (result) => {
+    const firstResult = result?.Results?.[0];
+    if (firstResult?.retryAvailable === true) {
+      return firstResult.retryPayload;
+    }
+    return null;
+  };
+
+  const mergeApiDataWithRetry = (baseData, retryPayload) => {
+    if (!retryPayload) {
+      return baseData;
+    }
+
+    return {
+      ...baseData,
+      ...retryPayload,
+      CIPPAPI: {
+        ...(baseData.CIPPAPI || {}),
+        ...(retryPayload.CIPPAPI || {}),
+      },
+    };
+  };
+
+  const handleAddClientAfterEffect = (result) => {
+    setAddClientRetryPayload(getRetryPayload(result));
+  };
+
   const actions = [
     {
       label: "Edit",
@@ -78,12 +106,12 @@ const CippApiClientManagement = () => {
           multiple: false,
           creatable: false,
           label: "Select Role",
-          placeholder: "Choose a role from the Custom Role list.",
+          placeholder: "Choose a role from the CIPP Role list.",
           api: {
             url: "/api/ListCustomRole",
             queryKey: "CustomRoleList",
-            labelField: "RowKey",
-            valueField: "RowKey",
+            labelField: "RoleName",
+            valueField: "RoleName",
             showRefresh: true,
           },
         },
@@ -177,6 +205,7 @@ const CippApiClientManagement = () => {
                 <MenuItem
                   onClick={() => {
                     handleMenuClose();
+                    setAddClientRetryPayload(null);
                     setOpenAddClientDialog(true);
                   }}
                 >
@@ -253,18 +282,20 @@ const CippApiClientManagement = () => {
           showDivider={false}
           isFetching={azureConfig.isFetching}
         />
-        {azureConfig.isSuccess && azureConfig.data?.Results?.ClientIDs && (
+        {azureConfig.isSuccess && apiClients.isSuccess && (
           <>
             {!isEqual(
-              apiClients.data?.pages?.[0]?.Results?.filter((c) => c.Enabled)
+              (apiClients.data?.pages?.[0]?.Results || [])
+                .filter((c) => c.Enabled)
                 .map((c) => c.ClientId)
                 .sort(),
-              azureConfig.data?.Results?.ClientIDs?.sort()
+              (azureConfig.data?.Results?.ClientIDs || []).sort()
             ) && (
               <Box sx={{ px: 3 }}>
                 <Alert severity="warning">
                   You have unsaved changes. Click Actions &gt; Save Azure Configuration to update
-                  the allowed API Clients.
+                  the allowed API Clients. If you've just saved your API clients, try refreshing the
+                  configuration first.
                 </Alert>
               </Box>
             )}
@@ -297,8 +328,13 @@ const CippApiClientManagement = () => {
       <CippApiDialog
         createDialog={{
           open: openAddClientDialog,
-          handleClose: () => setOpenAddClientDialog(false),
+          handleClose: () => {
+            setOpenAddClientDialog(false);
+            setAddClientRetryPayload(null);
+          },
         }}
+        allowResubmit={true}
+        dialogAfterEffect={handleAddClientAfterEffect}
         title="Add Client"
         fields={[
           {
@@ -306,6 +342,7 @@ const CippApiClientManagement = () => {
             name: "AppName",
             label: "App Name",
             placeholder: "Enter a name for this Application Registration.",
+            disableVariables: true,
           },
           {
             type: "autoComplete",
@@ -316,11 +353,11 @@ const CippApiClientManagement = () => {
             api: {
               url: "/api/ListCustomRole",
               queryKey: "CustomRoleList",
-              labelField: "RowKey",
-              valueField: "RowKey",
+              labelField: "RoleName",
+              valueField: "RoleName",
               showRefresh: true,
             },
-            placeholder: "Choose a role from the Custom Role list.",
+            placeholder: "Choose a role from the CIPP Role list.",
           },
           {
             type: "autoComplete",
@@ -341,14 +378,16 @@ const CippApiClientManagement = () => {
         api={{
           type: "POST",
           url: "/api/ExecApiClient",
-          data: { Action: "AddUpdate" },
+          data: mergeApiDataWithRetry({ Action: "AddUpdate" }, addClientRetryPayload),
           relatedQueryKeys: [`ApiClients`],
         }}
       />
       <CippApiDialog
         createDialog={{
           open: openAddExistingAppDialog,
-          handleClose: () => setOpenAddExistingAppDialog(false),
+          handleClose: () => {
+            setOpenAddExistingAppDialog(false);
+          },
         }}
         title="Add Existing App"
         fields={[
@@ -380,12 +419,12 @@ const CippApiClientManagement = () => {
             multiple: false,
             creatable: false,
             label: "Select Role",
-            placeholder: "Choose a role from the Custom Role list.",
+            placeholder: "Choose a role from the CIPP Role list.",
             api: {
               url: "/api/ListCustomRole",
               queryKey: "CustomRoleList",
-              labelField: "RowKey",
-              valueField: "RowKey",
+              labelField: "RoleName",
+              valueField: "RoleName",
               showRefresh: true,
             },
           },
@@ -408,7 +447,7 @@ const CippApiClientManagement = () => {
         api={{
           type: "POST",
           url: "/api/ExecApiClient",
-          data: { Action: "!AddUpdate" },
+          data: { Action: "!AddUpdate", CIPPAPI: { ResetSecret: true } },
           relatedQueryKeys: [`ApiClients`],
         }}
       />
