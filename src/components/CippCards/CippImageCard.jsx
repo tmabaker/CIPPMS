@@ -2,6 +2,13 @@ import NextLink from "next/link";
 import ArrowRightIcon from "@heroicons/react/24/outline/ArrowRightIcon";
 import { Box, Button, LinearProgress, Skeleton, Stack, SvgIcon, Typography } from "@mui/material";
 
+// Links that aren't Next.js routes (auth/platform endpoints, absolute URLs) must
+// trigger a full-page browser navigation. Routing them through NextLink results in
+// a client-side transition to a non-existent route, so the click appears to do nothing.
+const isExternalLink = (link) =>
+  typeof link === "string" &&
+  (/^(https?:)?\/\//.test(link) || link.startsWith("mailto:") || link.startsWith("/.auth/"));
+
 export const CippImageCard = ({
   isFetching,
   imageUrl = "/assets/illustration-reports.png",
@@ -52,7 +59,7 @@ export const CippImageCard = ({
       </Stack>
       {link && (
         <Button
-          component={NextLink}
+          {...(isExternalLink(link) ? { component: "a" } : { component: NextLink })}
           endIcon={
             <SvgIcon fontSize="small">
               <ArrowRightIcon />
