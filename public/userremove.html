@@ -581,16 +581,34 @@ function onTenantChange(){
   var val = document.getElementById('tenantSelect').value;
   currentTenant = TENANTS.find(function(t){ return t.id === val; }) || null;
   document.getElementById('btn1Next').disabled = !currentTenant;
+  // Reset users so they reload fresh for the new tenant
+  allUsers = [];
+  selectedUser = null;
+  document.getElementById('btn2Next').disabled = true;
+  document.getElementById('userList').innerHTML = '';
 
   if(currentTenant){
-    document.getElementById('hdrTitle').textContent = '🚫 Remove User — ' + currentTenant.name + ' (' + currentTenant.domain + ')';
+    document.getElementById('hdrTitle').textContent = '\uD83D\uDEAB Remove User \u2014 ' + currentTenant.name + ' (' + currentTenant.domain + ')';
     document.getElementById('hdrSub').textContent = currentTenant.domain;
-    setStatus(true, 'Connected to ' + currentTenant.name);
+    checkCippConnection();
   } else {
     document.getElementById('hdrTitle').textContent = 'Remove User';
     document.getElementById('hdrSub').textContent = 'Select a tenant to begin';
     setStatus(false, 'Not connected');
   }
+}
+
+function checkCippConnection(){
+  if(!currentTenant) return;
+  setStatus(false, 'Connecting\u2026');
+  fetch(BASE_URL + '/api/ListLicenses?tenantFilter=' + encodeURIComponent(currentTenant.domain), {
+    headers: { 'x-functions-key': API_KEY }
+  })
+  .then(function(r){
+    if(r.ok) setStatus(true, 'Connected to ' + currentTenant.name);
+    else     setStatus(false, 'Error ' + r.status);
+  })
+  .catch(function(){ setStatus(false, 'Unreachable'); });
 }
 
 function setStatus(connected, text){
@@ -831,8 +849,9 @@ document.addEventListener('click', function(e){
 // STEP NAVIGATION
 // ═══════════════════════════════════════════════════════
 function goStep(n){
-  if(n === 2 && !currentTenant) return;
-  if(n === 3 && !selectedUser)   return;
+  // Guards only apply when moving FORWARD, not back
+  if(n > currentStep && n === 2 && !currentTenant) return;
+  if(n > currentStep && n === 3 && !selectedUser)  return;
 
   // Load users when entering step 2 (once per tenant)
   if(n === 2 && currentTenant && allUsers.length === 0){
