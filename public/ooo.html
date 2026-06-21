@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOO & Vacation Mode — NOIT Tech Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#222636;--border:#2e3248;
+    --accent:#4f8ef7;--accent2:#7c6af7;--success:#3ecf8e;--danger:#f75f5f;
+    --warn:#f7a94f;--text:#e8eaf6;--text-muted:#7b82a8;--text-dim:#4a5070;
+    --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ── Header ── */
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;}
+  header .logo{width:32px;height:32px;background:linear-gradient(135deg,#4f8ef7,#7c6af7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  header h1{font-size:15px;font-weight:600;}
+  header .header-sub{font-size:13px;color:var(--text-muted);margin-left:2px;}
+  .cipp-status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text-dim);flex-shrink:0;}
+  .status-dot.connected{background:var(--success);box-shadow:0 0 6px var(--success);}
+  .status-dot.error{background:var(--danger);}
+
+  /* ── Progress Bar ── */
+  .progress-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:center;gap:0;}
+  .step-block{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:90px;}
+  .step-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;border:2px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .3s;}
+  .step-circle.active{border-color:var(--accent);background:var(--accent);color:#fff;}
+  .step-circle.done{border-color:var(--success);background:var(--success);color:#fff;}
+  .step-label{font-size:11px;font-weight:500;color:var(--text-dim);white-space:nowrap;transition:color .3s;text-align:center;}
+  .step-label.active{color:var(--accent);}
+  .step-label.done{color:var(--success);}
+  .step-connector{height:2px;width:48px;background:var(--border);margin-bottom:20px;transition:background .3s;flex-shrink:0;}
+  .step-connector.done{background:var(--success);}
+  @media(max-width:660px){.step-connector{width:20px;}.step-block{min-width:56px;}.step-label{font-size:9px;}}
+
+  /* ── Main ── */
+  main{flex:1;padding:28px;display:flex;justify-content:center;}
+  .wizard-wrap{width:100%;max-width:980px;}
+
+  /* ── Cards ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+  .card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;margin-top:20px;display:flex;align-items:center;gap:8px;}
+  .section-title:first-child{margin-top:0;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* ── Collapsible action cards ── */
+  .action-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+  .action-card-header{display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;}
+  .action-card-header:hover{background:rgba(79,142,247,.04);}
+  .action-card-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0;}
+  .action-card-title{font-size:14px;font-weight:600;color:var(--text);flex:1;}
+  .action-card-sub{font-size:12px;color:var(--text-muted);}
+  .action-card-chevron{color:var(--text-dim);font-size:12px;transition:transform .25s;}
+  .action-card-body{display:none;padding:0 20px 20px;}
+  .action-card-body.open{display:block;}
+
+  /* ── Toggle Switches ── */
+  .toggle-wrap{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+  .toggle-wrap:last-child{border-bottom:none;}
+  .toggle-wrap label.toggle-label{flex:1;font-size:13px;color:var(--text);cursor:pointer;user-select:none;}
+  .toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;}
+  .toggle input{opacity:0;width:0;height:0;position:absolute;}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--surface2);border:1px solid var(--border);border-radius:22px;transition:.3s;}
+  .slider:before{position:absolute;content:"";height:16px;width:16px;left:2px;bottom:2px;background:var(--text-muted);border-radius:50%;transition:.3s;}
+  input:checked+.slider{background:var(--accent);border-color:var(--accent);}
+  input:checked+.slider:before{transform:translateX(18px);background:#fff;}
+  .toggle-section{margin-top:12px;display:none;}
+  .toggle-section.show{display:block;}
+
+  /* ── Fields ── */
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:6px;letter-spacing:.03em;}
+  .field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .field input::placeholder,.field textarea::placeholder{color:var(--text-dim);}
+  .field textarea{resize:vertical;}
+  .field input[type="datetime-local"]{color-scheme:dark;}
+  .select-wrap{position:relative;}
+  .select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:12px;}
+
+  /* ── Heading ── */
+  .step-heading{font-size:20px;font-weight:600;margin-bottom:6px;}
+  .step-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+
+  /* ── Buttons ── */
+  .btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;flex-wrap:wrap;}
+  .btn{padding:9px 22px;border-radius:7px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .btn-ghost:hover{border-color:var(--text-muted);color:var(--text);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#6a9ef8;}
+  .btn-primary:disabled{background:var(--text-dim);cursor:not-allowed;opacity:.7;}
+  .btn-success{background:var(--success);color:#fff;}
+  .btn-success:hover{background:#55d99f;}
+  .btn-success:disabled{background:var(--text-dim);cursor:not-allowed;opacity:.7;}
+  .btn-back{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);}
+  .btn-back:hover{color:var(--text);border-color:var(--text-muted);}
+
+  /* ── Search + User list (Step 2) ── */
+  .search-input-wrap{position:relative;margin-bottom:16px;}
+  .search-input-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px 9px 36px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
+  .search-input-wrap input:focus{border-color:var(--accent);}
+  .search-input-wrap input::placeholder{color:var(--text-dim);}
+  .search-input-wrap .si-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:14px;}
+  .user-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;}
+  .user-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;}
+  .user-item:hover{border-color:var(--accent);background:rgba(79,142,247,.06);}
+  .user-item.selected{border-color:var(--accent);background:rgba(79,142,247,.12);}
+  .user-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-upn{font-size:11px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-check{color:var(--accent);font-size:18px;flex-shrink:0;}
+  .loading-row{text-align:center;padding:28px;color:var(--text-muted);font-size:13px;}
+  .empty-row{text-align:center;padding:28px;color:var(--text-dim);font-size:13px;}
+
+  /* ── Chips ── */
+  .chips-area{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;min-height:28px;}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);border-radius:5px;padding:3px 8px;font-size:12px;color:var(--accent);white-space:nowrap;}
+  .chip .chip-x{cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1;margin-left:2px;transition:color .15s;}
+  .chip .chip-x:hover{color:var(--danger);}
+  .chip-success{background:rgba(62,207,142,.12);border-color:rgba(62,207,142,.3);color:var(--success);}
+  .chip-warn{background:rgba(247,169,79,.12);border-color:rgba(247,169,79,.3);color:var(--warn);}
+
+  /* ── Info boxes ── */
+  .info-box{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.3);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--accent);line-height:1.6;margin-bottom:14px;}
+  .info-box-warn{background:rgba(247,169,79,.1);border:1px solid rgba(247,169,79,.3);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--warn);line-height:1.6;margin-bottom:14px;}
+  .info-box-note{background:rgba(62,207,142,.08);border:1px solid rgba(62,207,142,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--success);line-height:1.6;margin-top:10px;}
+
+  /* ── Country search ── */
+  .country-search{position:relative;margin-bottom:10px;}
+  .country-search input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;transition:border-color .2s;}
+  .country-search input:focus{border-color:var(--accent);}
+  .country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:200px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px;}
+  .country-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;cursor:pointer;font-size:12px;transition:background .15s;}
+  .country-item:hover{background:rgba(79,142,247,.1);}
+  .country-item.selected{background:rgba(79,142,247,.15);color:var(--accent);}
+  .country-item .ci-check{font-size:12px;color:var(--accent);}
+
+  /* ── Delegate autocomplete ── */
+  .ac-wrap{position:relative;}
+  .ac-chips-box{display:flex;flex-wrap:wrap;gap:6px;min-height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;transition:border-color .2s;cursor:text;}
+  .ac-chips-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .ac-input{border:none;outline:none;background:transparent;color:var(--text);font-family:var(--font);font-size:13px;min-width:120px;flex:1;padding:2px 4px;}
+  .ac-input::placeholder{color:var(--text-dim);}
+  .ac-dropdown{position:absolute;top:calc(100%+4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:200;max-height:220px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .ac-dropdown.show{display:block;}
+  .ac-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .15s;}
+  .ac-opt:hover,.ac-opt.focused{background:var(--surface2);}
+  .ac-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+  .ac-opt .ac-name{font-size:13px;color:var(--text);}
+  .ac-opt .ac-upn{font-size:11px;color:var(--text-muted);font-family:var(--mono);}
+  .ac-empty{padding:12px;text-align:center;color:var(--text-dim);font-size:12px;}
+
+  /* ── Checkboxes ── */
+  .checkbox-group{display:flex;flex-wrap:wrap;gap:10px 20px;}
+  .cb-item{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text);}
+  .cb-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
+
+  /* ── Review step ── */
+  .review-section{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;}
+  .review-section h3{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .review-section h3::after{content:'';flex:1;height:1px;background:var(--border);}
+  .rev-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;gap:12px;}
+  .rev-row:last-child{border-bottom:none;}
+  .rev-lbl{color:var(--text-muted);flex-shrink:0;}
+  .rev-val{color:var(--text);font-weight:500;text-align:right;word-break:break-word;}
+  .rev-val.yes{color:var(--success);}
+  .rev-val.no{color:var(--text-dim);}
+  .rev-val.mono{font-family:var(--mono);font-size:11px;}
+
+  /* ── Result boxes ── */
+  .result-box{border-radius:8px;padding:16px 20px;margin-top:14px;font-size:13px;line-height:1.7;display:none;}
+  .result-box.success{background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:var(--success);}
+  .result-box.error{background:rgba(247,95,95,.1);border:1px solid rgba(247,95,95,.3);color:var(--danger);}
+  .result-box.show{display:block;}
+  .result-box .result-title{font-weight:600;font-size:14px;margin-bottom:6px;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+  .spinner-dark{border:2px solid rgba(79,142,247,.25);border-top-color:var(--accent);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ── Step panels ── */
+  .step-panel{display:none;}
+  .step-panel.active{display:block;}
+
+  /* ── Two-col ── */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:820px){.two-col{grid-template-columns:1fr;}}
+
+  /* ── Note banner ── */
+  .note-banner{background:rgba(124,106,247,.1);border:1px solid rgba(124,106,247,.3);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--accent2);margin-top:12px;display:none;}
+  .note-banner.show{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="logo">✈️</div>
+  <div>
+    <h1 id="hdrTitle">OOO &amp; Vacation Mode</h1>
+    <span class="header-sub" id="hdrSub">Select a tenant to begin</span>
+  </div>
+  <div class="cipp-status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Connecting…</span>
+  </div>
+</header>
+
+<!-- ═══════════════ PROGRESS BAR ═══════════════ -->
+<div class="progress-bar">
+  <div class="step-block">
+    <div class="step-circle active" id="sc1">1</div>
+    <div class="step-label active" id="sl1">Tenant</div>
+  </div>
+  <div class="step-connector" id="cx1"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc2">2</div>
+    <div class="step-label" id="sl2">Users</div>
+  </div>
+  <div class="step-connector" id="cx2"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc3">3</div>
+    <div class="step-label" id="sl3">Actions</div>
+  </div>
+  <div class="step-connector" id="cx3"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc4">4</div>
+    <div class="step-label" id="sl4">Schedule</div>
+  </div>
+  <div class="step-connector" id="cx4"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc5">5</div>
+    <div class="step-label" id="sl5">Review</div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main>
+<div class="wizard-wrap">
+
+  <!-- ══════════ STEP 1: TENANT ══════════ -->
+  <div class="step-panel active" id="step1">
+    <h2 class="step-heading">Select a tenant</h2>
+    <p class="step-sub">Choose the Microsoft 365 tenant to configure vacation mode for.</p>
+    <div class="card">
+      <div class="field">
+        <label>Tenant</label>
+        <div class="select-wrap">
+          <select id="tenantSelect">
+            <option value="">— Select a tenant —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="s1Next" disabled>Next Step →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 2: USERS ══════════ -->
+  <div class="step-panel" id="step2">
+    <h2 class="step-heading">Select users</h2>
+    <p class="step-sub">Choose one or more users to apply vacation mode for.</p>
+
+    <!-- Selected chips -->
+    <div id="selectedUsersArea" class="chips-area" style="display:none"></div>
+    <div id="multiNote" class="note-banner">📅 Selecting 3+ users requires scheduling — ensure you set dates in Step 4.</div>
+
+    <div class="card">
+      <div class="search-input-wrap">
+        <span class="si-icon">🔍</span>
+        <input type="text" id="userSearch" placeholder="Search by name or email…">
+      </div>
+      <div class="user-list" id="userList">
+        <div class="loading-row"><span class="spinner spinner-dark"></span> Loading users…</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-back" id="s2Back">← Back</button>
+      <button class="btn btn-primary" id="s2Next" disabled>Next Step →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 3: ACTIONS ══════════ -->
+  <div class="step-panel" id="step3">
+    <h2 class="step-heading">Vacation actions</h2>
+    <p class="step-sub">Configure which actions to perform during the vacation period. At least one must be enabled.</p>
+
+    <!-- Card 1: CA Policy Exclusion -->
+    <div class="action-card" id="caCard">
+      <div class="action-card-header" onclick="toggleCard('ca')">
+        <div class="action-card-icon">🔐</div>
+        <div>
+          <div class="action-card-title">Conditional Access Policy Exclusion</div>
+          <div class="action-card-sub">Exclude users from CA policies during vacation</div>
+        </div>
+        <div class="action-card-chevron" id="caChevron">▼</div>
+      </div>
+      <div class="action-card-body" id="caBody">
+        <div class="toggle-wrap">
+          <label class="toggle-label" for="enableCAExclusion">Enable CA Policy Exclusion</label>
+          <label class="toggle">
+            <input type="checkbox" id="enableCAExclusion" onchange="onCAToggle()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-section" id="caSection">
+          <div class="info-box" style="margin-top:12px">
+            🛡️ Vacation mode uses group-based exclusions. CIPP will create a group named <strong>"Vacation Exclusion — [Policy Name]"</strong> and add users to it.
+          </div>
+          <div class="field">
+            <label>CA Policy</label>
+            <div class="select-wrap">
+              <select id="caPolicy">
+                <option value="">— Select a policy —</option>
+              </select>
+            </div>
+            <div id="caPolicyLoading" style="display:none;margin-top:6px;font-size:12px;color:var(--text-muted)"><span class="spinner spinner-dark"></span> Loading policies…</div>
+          </div>
+          <div class="toggle-wrap">
+            <label class="toggle-label" for="excludeLocationAuditAlerts">Exclude from location-based audit alerts</label>
+            <label class="toggle">
+              <input type="checkbox" id="excludeLocationAuditAlerts">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <!-- Country Allowlist -->
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+            <div class="toggle-wrap">
+              <label class="toggle-label" for="enableCountryPolicy">Create country-restricted access policy</label>
+              <label class="toggle">
+                <input type="checkbox" id="enableCountryPolicy" onchange="onCountryPolicyToggle()">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-section" id="countrySection">
+              <div class="info-box-warn" style="margin-top:12px">
+                ⚠️ A new Conditional Access policy will be created during the vacation period allowing sign-ins <strong>ONLY</strong> from the selected countries.
+              </div>
+              <div class="field">
+                <label>Allowed Countries</label>
+                <div id="selectedCountriesArea" class="chips-area" style="min-height:32px"></div>
+                <div class="country-search">
+                  <input type="text" id="countrySearch" placeholder="Search countries…" oninput="filterCountries()">
+                </div>
+                <div class="country-grid" id="countryGrid"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Mailbox Permissions -->
+    <div class="action-card" id="mbCard">
+      <div class="action-card-header" onclick="toggleCard('mb')">
+        <div class="action-card-icon">📬</div>
+        <div>
+          <div class="action-card-title">Mailbox Permissions</div>
+          <div class="action-card-sub">Grant delegate access during vacation</div>
+        </div>
+        <div class="action-card-chevron" id="mbChevron">▼</div>
+      </div>
+      <div class="action-card-body" id="mbBody">
+        <div class="toggle-wrap">
+          <label class="toggle-label" for="enableMailboxPermissions">Enable Mailbox Permissions</label>
+          <label class="toggle">
+            <input type="checkbox" id="enableMailboxPermissions" onchange="onMailboxToggle()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-section" id="mbSection">
+          <!-- Delegates -->
+          <div class="field" style="margin-top:12px">
+            <label>Delegates (search from loaded users)</label>
+            <div class="ac-wrap">
+              <div class="ac-chips-box" id="delegateChipsBox" onclick="document.getElementById('delegateInput').focus()">
+                <input type="text" class="ac-input" id="delegateInput" placeholder="Type to search delegates…" oninput="onDelegateInput()" onkeydown="onDelegateKey(event)" autocomplete="off">
+              </div>
+              <div class="ac-dropdown" id="delegateDropdown"></div>
+            </div>
+          </div>
+          <!-- Permission types -->
+          <div class="field">
+            <label>Permission Types</label>
+            <div class="checkbox-group">
+              <label class="cb-item"><input type="checkbox" id="permFullAccess"> FullAccess</label>
+              <label class="cb-item"><input type="checkbox" id="permSendAs"> SendAs</label>
+              <label class="cb-item"><input type="checkbox" id="permSendOnBehalf"> SendOnBehalf</label>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <label class="toggle-label" for="autoMap">Auto-map mailbox</label>
+            <label class="toggle">
+              <input type="checkbox" id="autoMap" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-wrap">
+            <label class="toggle-label" for="includeCalendar">Include Calendar</label>
+            <label class="toggle">
+              <input type="checkbox" id="includeCalendar" onchange="onCalendarToggle()">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-section" id="calendarSection">
+            <div class="field" style="margin-top:12px">
+              <label>Calendar Permission Level</label>
+              <div class="select-wrap">
+                <select id="calendarPermission">
+                  <option value="Owner">Owner</option>
+                  <option value="Editor">Editor</option>
+                  <option value="Reviewer" selected>Reviewer</option>
+                  <option value="Author">Author</option>
+                  <option value="PublishingEditor">PublishingEditor</option>
+                  <option value="PublishingAuthor">PublishingAuthor</option>
+                  <option value="NonEditingAuthor">NonEditingAuthor</option>
+                  <option value="AvailabilityOnly">AvailabilityOnly</option>
+                  <option value="LimitedDetails">LimitedDetails</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <label class="toggle-label" for="canViewPrivateItems">Can view private items</label>
+            <label class="toggle">
+              <input type="checkbox" id="canViewPrivateItems">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: OOO Message -->
+    <div class="action-card" id="oooCard">
+      <div class="action-card-header" onclick="toggleCard('ooo')">
+        <div class="action-card-icon">💬</div>
+        <div>
+          <div class="action-card-title">Out of Office Message</div>
+          <div class="action-card-sub">Set automatic reply messages for the vacation period</div>
+        </div>
+        <div class="action-card-chevron" id="oooChevron">▼</div>
+      </div>
+      <div class="action-card-body" id="oooBody">
+        <div class="toggle-wrap">
+          <label class="toggle-label" for="enableOOO">Enable Out of Office Message</label>
+          <label class="toggle">
+            <input type="checkbox" id="enableOOO" onchange="onOOOToggle()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-section" id="oooSection">
+          <div class="field" style="margin-top:12px">
+            <label>Internal OOO Message</label>
+            <textarea id="oooInternalMessage" rows="4" placeholder="Message shown to users in your organization"></textarea>
+          </div>
+          <div class="field">
+            <label>External OOO Message</label>
+            <textarea id="oooExternalMessage" rows="4" placeholder="Message shown to users outside your organization"></textarea>
+          </div>
+          <div class="info-box">
+            ℹ️ Current OOO messages will be loaded if available when you enter your dates.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="actionsError" style="display:none;color:var(--danger);font-size:12px;margin-top:6px;">Please enable at least one action.</div>
+    <div class="btn-row">
+      <button class="btn btn-back" id="s3Back">← Back</button>
+      <button class="btn btn-primary" id="s3Next">Next Step →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 4: SCHEDULE ══════════ -->
+  <div class="step-panel" id="step4">
+    <h2 class="step-heading">Schedule</h2>
+    <p class="step-sub">Set the vacation start and end dates.</p>
+    <div class="card">
+      <div class="two-col">
+        <div class="field">
+          <label>Scheduled Start Date &amp; Time</label>
+          <input type="datetime-local" id="startDate">
+        </div>
+        <div class="field">
+          <label>Scheduled End Date &amp; Time</label>
+          <input type="datetime-local" id="endDate">
+        </div>
+      </div>
+      <div id="dateError" style="display:none;color:var(--danger);font-size:12px;margin-top:6px;">End date must be after start date.</div>
+
+      <div class="section-title" style="margin-top:20px">Post Execution Actions</div>
+      <div class="checkbox-group">
+        <label class="cb-item"><input type="checkbox" id="postWebhook"> Webhook</label>
+        <label class="cb-item"><input type="checkbox" id="postEmail"> Email</label>
+        <label class="cb-item"><input type="checkbox" id="postPSA"> PSA</label>
+      </div>
+
+      <div class="field" style="margin-top:20px">
+        <label>Reference</label>
+        <input type="text" id="refNote" placeholder="Optional note added to notification titles and scheduled tasks">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-back" id="s4Back">← Back</button>
+      <button class="btn btn-primary" id="s4Next">Review →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 5: REVIEW & SUBMIT ══════════ -->
+  <div class="step-panel" id="step5">
+    <h2 class="step-heading">Review &amp; Submit</h2>
+    <p class="step-sub">Confirm everything looks correct, then submit.</p>
+
+    <div id="reviewContent"></div>
+
+    <div id="submitResults"></div>
+
+    <div class="btn-row" id="submitBtnRow">
+      <button class="btn btn-back" id="s5Back">← Back</button>
+      <button class="btn btn-success" id="submitBtn" onclick="doSubmit()">🚀 Submit Vacation Mode</button>
+    </div>
+  </div>
+
+</div><!-- /.wizard-wrap -->
+</main>
+
+<script>
+/* ══════════════════════════════════════════
+   DATA
+══════════════════════════════════════════ */
+var CIPP_BASE = 'https://agreeable-stone-060c94b0f.3.azurestaticapps.net';
+var CIPP_KEY  = '_MNhh4ZlkdwQfRurLGXkWs0MGshcx18cheGXZYNt6F9RAzFuacKCWg==';
+
+var TENANTS = [
+  {name:'Geaux Automotive',domain:'geauxautomotive.com',id:'4ceb1a80-7fd3-4760-a827-aedf07b8d4fa'},
+  {name:'Level Homes',domain:'levelbr.com',id:'6444fec1-ccb7-43e6-a075-ba259750173f'},
+  {name:'Bailey Investments',domain:'jjbiii.com',id:'3d9de324-5169-4438-aa46-16ffa112196d'},
+  {name:'Brindis Smile Effect',domain:'brindissmileeffect.com',id:'e5937982-3451-4e41-8049-fc446ac5df1d'},
+  {name:'City Pork Deli',domain:'citypork.com',id:'221e67fd-a985-41ab-9e40-508b2e4f2c91'},
+  {name:'Community Association Management',domain:'camgmttlc.com',id:'3cbaf35e-e56c-4aee-993a-ddb12651da43'},
+  {name:'Convergent Processing',domain:'convergentprocessing.com',id:'ad44e991-3922-4946-88fb-949bbd5c4601'},
+  {name:'Crescent City Dentistry',domain:'crescentcitydentistry.com',id:'5dc53393-fc1c-4be1-9c74-01dc26eebb26'},
+  {name:'Engquist Development',domain:'engquistcap.com',id:'aa5be8ed-d9e8-485d-a596-66bd1cec417a'},
+  {name:'Georgia Proton',domain:'georgiaproton.org',id:'b898ded5-f17a-46be-a6e2-4585a7736e88'},
+  {name:'Gertler Firm',domain:'gertlerfirm.com',id:'ff05afc0-faa2-46bb-8739-f6d03aefb6dc'},
+  {name:'Irby Investments',domain:'irbyinvestments.com',id:'e951bbc6-d33e-4471-b006-48e389fda2e5'},
+  {name:'Plotkin Vincent',domain:'plotkinvincent.com',id:'c6a26024-94d9-4bb4-81df-9484ec100baa'},
+  {name:'Sibille Legal Services',domain:'sibillelaw.com',id:'89f0c68f-054b-49c2-85ac-cb5912237916'},
+  {name:'True Title',domain:'truetitle.net',id:'5e17b006-ba85-4bc8-8638-441a4d4264e6'}
+];
+
+var COUNTRIES = [
+  {code:'US',name:'United States'},{code:'GB',name:'United Kingdom'},
+  {code:'CA',name:'Canada'},{code:'AU',name:'Australia'},
+  {code:'FR',name:'France'},{code:'DE',name:'Germany'},
+  {code:'IT',name:'Italy'},{code:'ES',name:'Spain'},
+  {code:'PT',name:'Portugal'},{code:'NL',name:'Netherlands'},
+  {code:'CH',name:'Switzerland'},{code:'IE',name:'Ireland'},
+  {code:'GR',name:'Greece'},{code:'MX',name:'Mexico'},
+  {code:'BR',name:'Brazil'},{code:'JP',name:'Japan'},
+  {code:'NZ',name:'New Zealand'},{code:'TH',name:'Thailand'},
+  {code:'BS',name:'Bahamas'},{code:'DO',name:'Dominican Republic'},
+  {code:'JM',name:'Jamaica'},{code:'CR',name:'Costa Rica'},
+  {code:'PA',name:'Panama'},{code:'CU',name:'Cuba'},
+  {code:'PR',name:'Puerto Rico'},{code:'VI',name:'US Virgin Islands'},
+  {code:'AR',name:'Argentina'},{code:'CL',name:'Chile'},
+  {code:'CO',name:'Colombia'},{code:'PE',name:'Peru'},
+  {code:'AT',name:'Austria'},{code:'BE',name:'Belgium'},
+  {code:'DK',name:'Denmark'},{code:'FI',name:'Finland'},
+  {code:'NO',name:'Norway'},{code:'SE',name:'Sweden'},
+  {code:'PL',name:'Poland'},{code:'CZ',name:'Czech Republic'},
+  {code:'HU',name:'Hungary'},{code:'RO',name:'Romania'},
+  {code:'HR',name:'Croatia'},{code:'SK',name:'Slovakia'},
+  {code:'SI',name:'Slovenia'},{code:'EE',name:'Estonia'},
+  {code:'LV',name:'Latvia'},{code:'LT',name:'Lithuania'},
+  {code:'MT',name:'Malta'},{code:'CY',name:'Cyprus'},
+  {code:'LU',name:'Luxembourg'},{code:'IN',name:'India'},
+  {code:'CN',name:'China'},{code:'KR',name:'South Korea'},
+  {code:'SG',name:'Singapore'},{code:'HK',name:'Hong Kong'},
+  {code:'TW',name:'Taiwan'},{code:'AE',name:'United Arab Emirates'},
+  {code:'SA',name:'Saudi Arabia'},{code:'IL',name:'Israel'},
+  {code:'ZA',name:'South Africa'},{code:'NG',name:'Nigeria'},
+  {code:'KE',name:'Kenya'},{code:'EG',name:'Egypt'},
+  {code:'MA',name:'Morocco'}
+];
+// Deduplicate by code
+COUNTRIES = COUNTRIES.filter(function(c,i,a){return a.findIndex(function(x){return x.code===c.code;})===i;});
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+var state = {
+  step: 1,
+  tenant: null,           // {name, domain, id}
+  users: [],              // [{id, displayName, userPrincipalName}]
+  selectedUsers: [],      // array of user objects
+  allUsers: [],           // full loaded list
+  caPolicies: [],
+  caPoliciesLoaded: false,
+  delegates: [],          // [{userPrincipalName, displayName}]
+  selectedCountries: [],  // [{code, name}]
+};
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', function(){
+  populateTenants();
+  renderCountryGrid();
+  checkConnection();
+
+  // Handle ?tenant= param
+  var params = new URLSearchParams(window.location.search);
+  var tid = params.get('tenant');
+  if (tid) {
+    var sel = document.getElementById('tenantSelect');
+    if (sel) {
+      sel.value = tid;
+      if (sel.value === tid) {
+        onTenantChange();
+        // Auto-advance after short delay
+        setTimeout(function(){
+          if (state.tenant) goStep(2);
+        }, 100);
+      }
+    }
+  }
+
+  document.getElementById('tenantSelect').addEventListener('change', onTenantChange);
+  document.getElementById('userSearch').addEventListener('input', filterUsers);
+  document.getElementById('s1Next').addEventListener('click', function(){ goStep(2); });
+  document.getElementById('s2Back').addEventListener('click', function(){ goStep(1); });
+  document.getElementById('s2Next').addEventListener('click', function(){ goStep(3); });
+  document.getElementById('s3Back').addEventListener('click', function(){ goStep(2); });
+  document.getElementById('s3Next').addEventListener('click', function(){ validateStep3() && goStep(4); });
+  document.getElementById('s4Back').addEventListener('click', function(){ goStep(3); });
+  document.getElementById('s4Next').addEventListener('click', function(){ validateStep4() && goStep(5); });
+  document.getElementById('s5Back').addEventListener('click', function(){ goStep(4); });
+});
+
+/* ══════════════════════════════════════════
+   CIPP PING
+══════════════════════════════════════════ */
+function checkConnection(){
+  fetch(CIPP_BASE+'/api/ListTenants',{
+    method:'GET',
+    headers:{'x-functions-key':CIPP_KEY}
+  }).then(function(r){
+    setStatus(r.ok ? 'connected' : 'error', r.ok ? 'Connected' : 'Error '+r.status);
+  }).catch(function(){
+    setStatus('error','Offline');
+  });
+}
+
+function setStatus(cls, txt){
+  var dot = document.getElementById('statusDot');
+  var span = document.getElementById('statusText');
+  dot.className = 'status-dot ' + cls;
+  span.textContent = txt;
+}
+
+/* ══════════════════════════════════════════
+   TENANT
+══════════════════════════════════════════ */
+function populateTenants(){
+  var sel = document.getElementById('tenantSelect');
+  TENANTS.forEach(function(t){
+    var o = document.createElement('option');
+    o.value = t.id;
+    o.textContent = t.name + ' — ' + t.domain;
+    sel.appendChild(o);
+  });
+}
+
+function onTenantChange(){
+  var val = document.getElementById('tenantSelect').value;
+  var t = TENANTS.find(function(x){ return x.id === val; });
+  state.tenant = t || null;
+  // Reset downstream state
+  state.selectedUsers = [];
+  state.allUsers = [];
+  state.caPolicies = [];
+  state.caPoliciesLoaded = false;
+  state.delegates = [];
+  // Reset UI
+  document.getElementById('selectedUsersArea').innerHTML = '';
+  document.getElementById('selectedUsersArea').style.display = 'none';
+  document.getElementById('multiNote').classList.remove('show');
+  document.getElementById('userList').innerHTML = '<div class="loading-row"><span class="spinner spinner-dark"></span> Loading users…</div>';
+  document.getElementById('userSearch').value = '';
+  document.getElementById('caPolicy').innerHTML = '<option value="">— Select a policy —</option>';
+  document.getElementById('s1Next').disabled = !t;
+  if (t) {
+    document.getElementById('hdrSub').textContent = t.name;
+    document.getElementById('hdrTitle').textContent = 'OOO & Vacation Mode — ' + t.name;
+  } else {
+    document.getElementById('hdrSub').textContent = 'Select a tenant to begin';
+    document.getElementById('hdrTitle').textContent = 'OOO & Vacation Mode';
+  }
+}
+
+/* ══════════════════════════════════════════
+   STEP NAVIGATION
+══════════════════════════════════════════ */
+function goStep(n){
+  // Leave current
+  document.getElementById('step'+state.step).classList.remove('active');
+  state.step = n;
+  document.getElementById('step'+n).classList.add('active');
+  updateProgress(n);
+
+  if (n === 2) loadUsers();
+  if (n === 3) renderStep3();
+  if (n === 5) renderReview();
+}
+
+function updateProgress(current){
+  for (var i=1;i<=5;i++){
+    var circle = document.getElementById('sc'+i);
+    var label  = document.getElementById('sl'+i);
+    if (i < current){
+      circle.className = 'step-circle done';
+      label.className  = 'step-label done';
+    } else if (i === current){
+      circle.className = 'step-circle active';
+      label.className  = 'step-label active';
+    } else {
+      circle.className = 'step-circle';
+      label.className  = 'step-label';
+    }
+    if (i < 5){
+      var cx = document.getElementById('cx'+i);
+      cx.className = 'step-connector' + (i < current ? ' done' : '');
+    }
+  }
+  circle.textContent = (current <= 5 && current > 0 && document.getElementById('sc'+current).classList.contains('done'))
+    ? '✓' : String(current);
+  // Fix all done circles
+  for (var j=1;j<current;j++){
+    document.getElementById('sc'+j).textContent = '✓';
+  }
+  for (var k=current;k<=5;k++){
+    document.getElementById('sc'+k).textContent = String(k);
+  }
+}
+
+/* ══════════════════════════════════════════
+   LOAD USERS
+══════════════════════════════════════════ */
+function loadUsers(){
+  if (!state.tenant) return;
+  if (state.allUsers.length > 0){
+    renderUserList(state.allUsers);
+    return;
+  }
+  document.getElementById('userList').innerHTML = '<div class="loading-row"><span class="spinner spinner-dark"></span> Loading users for '+state.tenant.name+'…</div>';
+  cippPost('/api/ListGraphRequest', {
+    tenantFilter: state.tenant.domain,
+    Endpoint: 'users',
+    '$select': 'id,displayName,userPrincipalName',
+    '$top': 999,
+    '$count': true,
+    '$orderby': 'displayName'
+  }).then(function(data){
+    var users = (data && data.Results) ? data.Results : (Array.isArray(data) ? data : []);
+    // Filter out service accounts / non-mailbox users
+    state.allUsers = users.filter(function(u){
+      return u.userPrincipalName && !u.userPrincipalName.includes('#EXT#');
+    });
+    renderUserList(state.allUsers);
+  }).catch(function(e){
+    document.getElementById('userList').innerHTML = '<div class="empty-row">⚠️ Failed to load users: '+escHtml(e.message)+'</div>';
+  });
+}
+
+function renderUserList(users){
+  var q = document.getElementById('userSearch').value.toLowerCase().trim();
+  var filtered = q ? users.filter(function(u){
+    return (u.displayName||'').toLowerCase().includes(q) || (u.userPrincipalName||'').toLowerCase().includes(q);
+  }) : users;
+
+  var ul = document.getElementById('userList');
+  if (!filtered.length){
+    ul.innerHTML = '<div class="empty-row">No users found</div>';
+    return;
+  }
+  ul.innerHTML = '';
+  filtered.forEach(function(u){
+    var isSelected = state.selectedUsers.some(function(x){return x.id === u.id;});
+    var li = document.createElement('div');
+    li.className = 'user-item' + (isSelected ? ' selected' : '');
+    li.dataset.uid = u.id;
+    var initials = getInitials(u.displayName || u.userPrincipalName);
+    li.innerHTML = '<div class="user-avatar">'+escHtml(initials)+'</div>'+
+      '<div class="user-info"><div class="user-name">'+escHtml(u.displayName||'')+'</div>'+
+      '<div class="user-upn">'+escHtml(u.userPrincipalName||'')+'</div></div>'+
+      (isSelected ? '<div class="user-check">✓</div>' : '');
+    li.addEventListener('click', function(){ toggleUserSelection(u); });
+    ul.appendChild(li);
+  });
+}
+
+function filterUsers(){
+  renderUserList(state.allUsers);
+}
+
+function toggleUserSelection(u){
+  var idx = state.selectedUsers.findIndex(function(x){ return x.id === u.id; });
+  if (idx >= 0){
+    state.selectedUsers.splice(idx,1);
+  } else {
+    state.selectedUsers.push(u);
+  }
+  renderSelectedUsers();
+  renderUserList(state.allUsers);
+  document.getElementById('s2Next').disabled = state.selectedUsers.length === 0;
+  var note = document.getElementById('multiNote');
+  if (state.selectedUsers.length >= 3){
+    note.classList.add('show');
+  } else {
+    note.classList.remove('show');
+  }
+}
+
+function renderSelectedUsers(){
+  var area = document.getElementById('selectedUsersArea');
+  if (!state.selectedUsers.length){
+    area.style.display = 'none';
+    area.innerHTML = '';
+    return;
+  }
+  area.style.display = 'flex';
+  area.innerHTML = '';
+  state.selectedUsers.forEach(function(u){
+    var chip = document.createElement('div');
+    chip.className = 'chip chip-success';
+    chip.innerHTML = escHtml(u.displayName || u.userPrincipalName)+
+      '<span class="chip-x" data-uid="'+escHtml(u.id)+'">×</span>';
+    chip.querySelector('.chip-x').addEventListener('click', function(){
+      toggleUserSelection(u);
+    });
+    area.appendChild(chip);
+  });
+}
+
+/* ══════════════════════════════════════════
+   STEP 3 LOGIC
+══════════════════════════════════════════ */
+function renderStep3(){
+  // nothing special — toggles handle their own visibility
+}
+
+function toggleCard(which){
+  var body = document.getElementById(which+'Body');
+  var chevron = document.getElementById(which+'Chevron');
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.textContent = isOpen ? '▼' : '▲';
+}
+
+function onCAToggle(){
+  var on = document.getElementById('enableCAExclusion').checked;
+  document.getElementById('caSection').classList.toggle('show', on);
+  if (on && !state.caPoliciesLoaded) loadCAPolicies();
+}
+
+function onCountryPolicyToggle(){
+  var on = document.getElementById('enableCountryPolicy').checked;
+  document.getElementById('countrySection').classList.toggle('show', on);
+}
+
+function onMailboxToggle(){
+  var on = document.getElementById('enableMailboxPermissions').checked;
+  document.getElementById('mbSection').classList.toggle('show', on);
+}
+
+function onCalendarToggle(){
+  var on = document.getElementById('includeCalendar').checked;
+  document.getElementById('calendarSection').classList.toggle('show', on);
+}
+
+function onOOOToggle(){
+  var on = document.getElementById('enableOOO').checked;
+  document.getElementById('oooSection').classList.toggle('show', on);
+}
+
+function loadCAPolicies(){
+  if (!state.tenant) return;
+  var sel = document.getElementById('caPolicy');
+  var loading = document.getElementById('caPolicyLoading');
+  sel.disabled = true;
+  loading.style.display = 'block';
+
+  cippPost('/api/ListGraphRequest',{
+    tenantFilter: state.tenant.domain,
+    Endpoint: 'conditionalAccess/policies',
+    AsApp: true
+  }).then(function(data){
+    var policies = (data && data.Results) ? data.Results : (Array.isArray(data) ? data : []);
+    state.caPolicies = policies;
+    state.caPoliciesLoaded = true;
+    sel.innerHTML = '<option value="">— Select a policy —</option>';
+    policies.forEach(function(p){
+      var o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p.displayName;
+      sel.appendChild(o);
+    });
+    sel.disabled = false;
+    loading.style.display = 'none';
+  }).catch(function(e){
+    loading.innerHTML = '<span style="color:var(--danger)">Failed to load policies: '+escHtml(e.message)+'</span>';
+    sel.disabled = false;
+  });
+}
+
+/* ── Country grid ── */
+function renderCountryGrid(){
+  var grid = document.getElementById('countryGrid');
+  grid.innerHTML = '';
+  var q = (document.getElementById('countrySearch')||{value:''}).value.toLowerCase();
+  var list = q ? COUNTRIES.filter(function(c){return c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q);}) : COUNTRIES;
+  list.forEach(function(c){
+    var sel = state.selectedCountries.some(function(x){return x.code===c.code;});
+    var item = document.createElement('div');
+    item.className = 'country-item' + (sel ? ' selected' : '');
+    item.innerHTML = (sel?'<span class="ci-check">✓</span>':'')+' '+escHtml(c.name)+' <span style="color:var(--text-dim);font-size:10px;font-family:var(--mono)">'+c.code+'</span>';
+    item.addEventListener('click', function(){ toggleCountry(c); });
+    grid.appendChild(item);
+  });
+}
+
+function filterCountries(){
+  renderCountryGrid();
+}
+
+function toggleCountry(c){
+  var idx = state.selectedCountries.findIndex(function(x){return x.code===c.code;});
+  if (idx>=0){
+    state.selectedCountries.splice(idx,1);
+  } else {
+    state.selectedCountries.push(c);
+  }
+  renderCountryGrid();
+  renderSelectedCountries();
+}
+
+function renderSelectedCountries(){
+  var area = document.getElementById('selectedCountriesArea');
+  area.innerHTML = '';
+  state.selectedCountries.forEach(function(c){
+    var chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = escHtml(c.name)+
+      '<span class="chip-x" >×</span>';
+    chip.querySelector('.chip-x').addEventListener('click', function(){ toggleCountry(c); });
+    area.appendChild(chip);
+  });
+}
+
+/* ── Delegate autocomplete ── */
+function onDelegateInput(){
+  var q = document.getElementById('delegateInput').value.toLowerCase().trim();
+  var dd = document.getElementById('delegateDropdown');
+  if (!q){ dd.classList.remove('show'); dd.innerHTML=''; return; }
+  var results = state.allUsers.filter(function(u){
+    return !state.delegates.some(function(d){return d.userPrincipalName===u.userPrincipalName;}) &&
+      ((u.displayName||'').toLowerCase().includes(q)||(u.userPrincipalName||'').toLowerCase().includes(q));
+  }).slice(0,10);
+  if (!results.length){
+    dd.innerHTML = '<div class="ac-empty">No matches</div>';
+    dd.classList.add('show');
+    return;
+  }
+  dd.innerHTML = '';
+  results.forEach(function(u){
+    var opt = document.createElement('div');
+    opt.className = 'ac-opt';
+    opt.innerHTML = '<div class="ac-av">'+escHtml(getInitials(u.displayName||u.userPrincipalName))+'</div>'+
+      '<div><div class="ac-name">'+escHtml(u.displayName||'')+'</div>'+
+      '<div class="ac-upn">'+escHtml(u.userPrincipalName||'')+'</div></div>';
+    opt.addEventListener('mousedown', function(e){ e.preventDefault(); addDelegate(u); });
+    dd.appendChild(opt);
+  });
+  dd.classList.add('show');
+}
+
+function onDelegateKey(e){
+  if (e.key==='Escape') document.getElementById('delegateDropdown').classList.remove('show');
+}
+
+document.addEventListener('click', function(e){
+  if (!e.target.closest('#delegateChipsBox') && !e.target.closest('#delegateDropdown')){
+    var dd = document.getElementById('delegateDropdown');
+    if (dd) dd.classList.remove('show');
+  }
+});
+
+function addDelegate(u){
+  if (!state.delegates.some(function(d){return d.userPrincipalName===u.userPrincipalName;})){
+    state.delegates.push({userPrincipalName:u.userPrincipalName, displayName:u.displayName});
+  }
+  document.getElementById('delegateInput').value = '';
+  document.getElementById('delegateDropdown').classList.remove('show');
+  renderDelegateChips();
+}
+
+function renderDelegateChips(){
+  var box = document.getElementById('delegateChipsBox');
+  var inp = document.getElementById('delegateInput');
+  // Remove old chips, keep input
+  Array.from(box.querySelectorAll('.chip')).forEach(function(c){c.remove();});
+  state.delegates.forEach(function(d){
+    var chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = escHtml(d.displayName||d.userPrincipalName)+
+      '<span class="chip-x">×</span>';
+    chip.querySelector('.chip-x').addEventListener('click', function(){
+      state.delegates = state.delegates.filter(function(x){return x.userPrincipalName!==d.userPrincipalName;});
+      renderDelegateChips();
+    });
+    box.insertBefore(chip, inp);
+  });
+}
+
+/* ── Step 3 validation ── */
+function validateStep3(){
+  var ca  = document.getElementById('enableCAExclusion').checked;
+  var mb  = document.getElementById('enableMailboxPermissions').checked;
+  var ooo = document.getElementById('enableOOO').checked;
+  if (!ca && !mb && !ooo){
+    document.getElementById('actionsError').style.display='block';
+    return false;
+  }
+  document.getElementById('actionsError').style.display='none';
+  return true;
+}
+
+/* ══════════════════════════════════════════
+   STEP 4 VALIDATION
+══════════════════════════════════════════ */
+function validateStep4(){
+  var s = document.getElementById('startDate').value;
+  var e = document.getElementById('endDate').value;
+  var err = document.getElementById('dateError');
+  if (!s || !e){ err.style.display='block'; err.textContent='Start and end dates are required.'; return false; }
+  if (new Date(e) <= new Date(s)){ err.style.display='block'; err.textContent='End date must be after start date.'; return false; }
+  err.style.display='none';
+  return true;
+}
+
+/* ══════════════════════════════════════════
+   STEP 5: REVIEW
+══════════════════════════════════════════ */
+function renderReview(){
+  var ca  = document.getElementById('enableCAExclusion').checked;
+  var mb  = document.getElementById('enableMailboxPermissions').checked;
+  var ooo = document.getElementById('enableOOO').checked;
+  var startVal = document.getElementById('startDate').value;
+  var endVal   = document.getElementById('endDate').value;
+  var ref      = document.getElementById('refNote').value;
+
+  var html = '';
+
+  // Tenant & Users
+  html += '<div class="review-section">';
+  html += '<h3>Tenant &amp; Users</h3>';
+  html += '<div class="rev-row"><span class="rev-lbl">Tenant</span><span class="rev-val">'+escHtml(state.tenant.name)+'</span></div>';
+  html += '<div class="rev-row"><span class="rev-lbl">Domain</span><span class="rev-val mono">'+escHtml(state.tenant.domain)+'</span></div>';
+  html += '<div class="rev-row"><span class="rev-lbl">Users</span><span class="rev-val"><div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end">';
+  state.selectedUsers.forEach(function(u){
+    html += '<span class="chip chip-success">'+escHtml(u.displayName||u.userPrincipalName)+'</span>';
+  });
+  html += '</div></span></div>';
+  html += '</div>';
+
+  // Actions
+  html += '<div class="review-section">';
+  html += '<h3>Actions Enabled</h3>';
+
+  if (ca){
+    var policyName = '—';
+    var policyId = document.getElementById('caPolicy').value;
+    var pol = state.caPolicies.find(function(p){return p.id===policyId;});
+    if (pol) policyName = pol.displayName;
+    var exclLoc = document.getElementById('excludeLocationAuditAlerts').checked;
+    var hasCountry = document.getElementById('enableCountryPolicy').checked;
+    html += '<div class="rev-row"><span class="rev-lbl">CA Policy Exclusion</span><span class="rev-val yes">✓ Enabled</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Policy</span><span class="rev-val">'+escHtml(policyName)+'</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Exclude Location Alerts</span><span class="rev-val '+(exclLoc?'yes':'no')+'">'+(exclLoc?'Yes':'No')+'</span></div>';
+    if (hasCountry){
+      html += '<div class="rev-row"><span class="rev-lbl">Country Policy</span><span class="rev-val yes">✓ Enabled</span></div>';
+      html += '<div class="rev-row"><span class="rev-lbl">Allowed Countries</span><span class="rev-val"><div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end">';
+      state.selectedCountries.forEach(function(c){
+        html += '<span class="chip">'+escHtml(c.name)+'</span>';
+      });
+      if (!state.selectedCountries.length) html += '<span style="color:var(--text-dim)">None selected</span>';
+      html += '</div></span></div>';
+    } else {
+      html += '<div class="rev-row"><span class="rev-lbl">Country Policy</span><span class="rev-val no">No</span></div>';
+    }
+  } else {
+    html += '<div class="rev-row"><span class="rev-lbl">CA Policy Exclusion</span><span class="rev-val no">Disabled</span></div>';
+  }
+
+  if (mb){
+    var perms = [];
+    if (document.getElementById('permFullAccess').checked) perms.push('FullAccess');
+    if (document.getElementById('permSendAs').checked) perms.push('SendAs');
+    if (document.getElementById('permSendOnBehalf').checked) perms.push('SendOnBehalf');
+    var inclCal = document.getElementById('includeCalendar').checked;
+    html += '<div class="rev-row"><span class="rev-lbl">Mailbox Permissions</span><span class="rev-val yes">✓ Enabled</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Delegates</span><span class="rev-val"><div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end">';
+    state.delegates.forEach(function(d){
+      html += '<span class="chip">'+escHtml(d.displayName||d.userPrincipalName)+'</span>';
+    });
+    if (!state.delegates.length) html += '<span style="color:var(--text-dim)">None</span>';
+    html += '</div></span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Permissions</span><span class="rev-val">'+(perms.length?perms.join(', '):'<span style="color:var(--text-dim)">None</span>')+'</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Auto-map</span><span class="rev-val '+(document.getElementById('autoMap').checked?'yes':'no')+'">'+(document.getElementById('autoMap').checked?'Yes':'No')+'</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Include Calendar</span><span class="rev-val '+(inclCal?'yes':'no')+'">'+(inclCal?'Yes ('+escHtml(document.getElementById('calendarPermission').value)+')':'No')+'</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">View Private Items</span><span class="rev-val '+(document.getElementById('canViewPrivateItems').checked?'yes':'no')+'">'+(document.getElementById('canViewPrivateItems').checked?'Yes':'No')+'</span></div>';
+  } else {
+    html += '<div class="rev-row"><span class="rev-lbl">Mailbox Permissions</span><span class="rev-val no">Disabled</span></div>';
+  }
+
+  if (ooo){
+    var intMsg = document.getElementById('oooInternalMessage').value;
+    var extMsg = document.getElementById('oooExternalMessage').value;
+    html += '<div class="rev-row"><span class="rev-lbl">Out of Office</span><span class="rev-val yes">✓ Enabled</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">Internal Message</span><span class="rev-val">'+(intMsg?escHtml(intMsg.substring(0,100))+(intMsg.length>100?'…':''):'<span style="color:var(--text-dim)">—</span>')+'</span></div>';
+    html += '<div class="rev-row"><span class="rev-lbl">External Message</span><span class="rev-val">'+(extMsg?escHtml(extMsg.substring(0,100))+(extMsg.length>100?'…':''):'<span style="color:var(--text-dim)">—</span>')+'</span></div>';
+  } else {
+    html += '<div class="rev-row"><span class="rev-lbl">Out of Office</span><span class="rev-val no">Disabled</span></div>';
+  }
+  html += '</div>';
+
+  // Schedule
+  html += '<div class="review-section">';
+  html += '<h3>Schedule</h3>';
+  html += '<div class="rev-row"><span class="rev-lbl">Start</span><span class="rev-val">'+fmtDT(startVal)+'</span></div>';
+  html += '<div class="rev-row"><span class="rev-lbl">End</span><span class="rev-val">'+fmtDT(endVal)+'</span></div>';
+
+  var postExec = [];
+  if (document.getElementById('postWebhook').checked) postExec.push('Webhook');
+  if (document.getElementById('postEmail').checked) postExec.push('Email');
+  if (document.getElementById('postPSA').checked) postExec.push('PSA');
+  html += '<div class="rev-row"><span class="rev-lbl">Post Execution</span><span class="rev-val">'+(postExec.length?postExec.join(', '):'None')+'</span></div>';
+  html += '<div class="rev-row"><span class="rev-lbl">Reference</span><span class="rev-val">'+(ref?escHtml(ref):'<span style="color:var(--text-dim)">—</span>')+'</span></div>';
+  html += '</div>';
+
+  document.getElementById('reviewContent').innerHTML = html;
+  document.getElementById('submitResults').innerHTML = '';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').innerHTML = '🚀 Submit Vacation Mode';
+}
+
+/* ══════════════════════════════════════════
+   SUBMIT
+══════════════════════════════════════════ */
+function doSubmit(){
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+  var startEpoch = toEpoch(document.getElementById('startDate').value);
+  var endEpoch   = toEpoch(document.getElementById('endDate').value);
+  var ref        = document.getElementById('refNote').value;
+  var domain     = state.tenant.domain;
+
+  var postExec = [];
+  if (document.getElementById('postWebhook').checked) postExec.push('webhook');
+  if (document.getElementById('postEmail').checked) postExec.push('email');
+  if (document.getElementById('postPSA').checked) postExec.push('psa');
+
+  var usersList = state.selectedUsers.map(function(u){
+    return {userPrincipalName: u.userPrincipalName, displayName: u.displayName};
+  });
+
+  var resultsDiv = document.getElementById('submitResults');
+  resultsDiv.innerHTML = '';
+
+  var promises = [];
+
+  // 1. CA Exclusion
+  if (document.getElementById('enableCAExclusion').checked){
+    var policyId = document.getElementById('caPolicy').value;
+    var body1 = {
+      tenantFilter: domain,
+      Users: usersList,
+      PolicyId: policyId,
+      StartDate: startEpoch,
+      EndDate: endEpoch,
+      vacation: true,
+      reference: ref,
+      postExecution: postExec,
+      excludeLocationAuditAlerts: document.getElementById('excludeLocationAuditAlerts').checked
+    };
+    if (document.getElementById('enableCountryPolicy').checked){
+      body1.countryPolicy = {
+        enabled: true,
+        allowedCountries: state.selectedCountries.map(function(c){return c.code;})
+      };
+    }
+    var box1 = addResultBox(resultsDiv, 'CA Policy Exclusion', 'loading');
+    var p1 = cippPost('/api/ExecCAExclusion', body1)
+      .then(function(d){ setResultBox(box1,'success','CA Policy Exclusion','Scheduled successfully.'+(d&&d.Results?'<br>'+escHtml(JSON.stringify(d.Results).substring(0,200)):'')); })
+      .catch(function(e){ setResultBox(box1,'error','CA Policy Exclusion',e.message); });
+    promises.push(p1);
+  }
+
+  // 2. Mailbox Permissions
+  if (document.getElementById('enableMailboxPermissions').checked){
+    var perms = [];
+    if (document.getElementById('permFullAccess').checked) perms.push('FullAccess');
+    if (document.getElementById('permSendAs').checked) perms.push('SendAs');
+    if (document.getElementById('permSendOnBehalf').checked) perms.push('SendOnBehalf');
+    var inclCal = document.getElementById('includeCalendar').checked;
+    var body2 = {
+      tenantFilter: domain,
+      mailboxOwners: usersList,
+      delegates: state.delegates,
+      permissionTypes: perms,
+      autoMap: document.getElementById('autoMap').checked,
+      includeCalendar: inclCal,
+      calendarPermission: inclCal ? document.getElementById('calendarPermission').value : null,
+      canViewPrivateItems: document.getElementById('canViewPrivateItems').checked,
+      startDate: startEpoch,
+      endDate: endEpoch,
+      reference: ref
+    };
+    var box2 = addResultBox(resultsDiv, 'Mailbox Permissions', 'loading');
+    var p2 = cippPost('/api/ExecScheduleMailboxVacation', body2)
+      .then(function(d){ setResultBox(box2,'success','Mailbox Permissions','Scheduled successfully.'+(d&&d.Results?'<br>'+escHtml(JSON.stringify(d.Results).substring(0,200)):'')); })
+      .catch(function(e){ setResultBox(box2,'error','Mailbox Permissions',e.message); });
+    promises.push(p2);
+  }
+
+  // 3. OOO Message
+  if (document.getElementById('enableOOO').checked){
+    var body3 = {
+      tenantFilter: domain,
+      Users: usersList,
+      internalMessage: document.getElementById('oooInternalMessage').value,
+      externalMessage: document.getElementById('oooExternalMessage').value,
+      startDate: startEpoch,
+      endDate: endEpoch,
+      reference: ref
+    };
+    var box3 = addResultBox(resultsDiv, 'Out of Office Message', 'loading');
+    var p3 = cippPost('/api/ExecScheduleOOOVacation', body3)
+      .then(function(d){ setResultBox(box3,'success','Out of Office Message','Scheduled successfully.'+(d&&d.Results?'<br>'+escHtml(JSON.stringify(d.Results).substring(0,200)):'')); })
+      .catch(function(e){ setResultBox(box3,'error','Out of Office Message',e.message); });
+    promises.push(p3);
+  }
+
+  Promise.allSettled(promises).then(function(){
+    btn.innerHTML = '✓ Done';
+    document.getElementById('submitBtnRow').querySelector('.btn-back').style.display='none';
+  });
+}
+
+function addResultBox(container, title, status){
+  var box = document.createElement('div');
+  box.className = 'result-box show ' + (status==='loading' ? '' : status);
+  box.innerHTML = '<div class="result-title"><span class="spinner"></span> '+escHtml(title)+'…</div>';
+  container.appendChild(box);
+  return box;
+}
+
+function setResultBox(box, status, title, msg){
+  box.className = 'result-box show ' + status;
+  box.innerHTML = '<div class="result-title">'+(status==='success'?'✓':'✗')+' '+escHtml(title)+'</div>'+msg;
+}
+
+/* ══════════════════════════════════════════
+   CIPP API
+══════════════════════════════════════════ */
+function cippPost(endpoint, body){
+  return fetch(CIPP_BASE + endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-functions-key': CIPP_KEY
+    },
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP '+r.status+' '+r.statusText);
+    return r.json().catch(function(){ return {}; });
+  });
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function getInitials(name){
+  var parts = (name||'').split(/[\s.@_-]+/).filter(Boolean);
+  if (parts.length>=2) return (parts[0][0]+(parts[1][0]||'')).toUpperCase();
+  return (name||'?')[0].toUpperCase();
+}
+function toEpoch(dtLocal){
+  if (!dtLocal) return null;
+  return Math.floor(new Date(dtLocal).getTime()/1000);
+}
+function fmtDT(dtLocal){
+  if (!dtLocal) return '—';
+  try{
+    return new Date(dtLocal).toLocaleString('en-US',{
+      month:'short',day:'numeric',year:'numeric',
+      hour:'numeric',minute:'2-digit',hour12:true
+    });
+  }catch(e){ return dtLocal; }
+}
+</script>
+</body>
+</html>
