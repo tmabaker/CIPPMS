@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modify User — NOIT Tech Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#222636;--border:#2e3248;
+    --accent:#4f8ef7;--accent2:#7c6af7;--success:#3ecf8e;--danger:#f75f5f;
+    --warn:#f7a94f;--text:#e8eaf6;--text-muted:#7b82a8;--text-dim:#4a5070;
+    --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;}
+  header .logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;}
+  header h1{font-size:15px;font-weight:600;}
+  header span{font-size:13px;color:var(--text-muted);margin-left:4px;}
+  .cipp-status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text-dim);}
+  .status-dot.connected{background:var(--success);box-shadow:0 0 6px var(--success);}
+  .status-dot.error{background:var(--danger);}
+  .tenant-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .tenant-bar label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap;}
+  .tenant-select-wrap{position:relative;min-width:260px;}
+  .tenant-select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:12px;}
+  .tenant-select-wrap select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 32px 8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;appearance:none;transition:border-color .2s;}
+  .tenant-select-wrap select:focus{border-color:var(--accent);}
+  .tenant-domain{font-size:12px;color:var(--text-muted);font-family:var(--mono);}
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 28px;}
+  .tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  main{display:flex;flex:1;}
+  .panel{display:none;width:100%;padding:28px;}
+  .panel.flex-active{display:flex;gap:28px;}
+  .panel.block-active{display:block;}
+  .form-wrap{flex:1;max-width:720px;}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:6px;letter-spacing:.03em;}
+  .field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none;}
+  .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .field input::placeholder{color:var(--text-dim);}
+  .field input[readonly]{background:var(--bg);color:var(--text-muted);cursor:default;}
+  .select-wrap{position:relative;}
+  .select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:12px;}
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;}
+  .btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
+  .btn{padding:9px 20px;border-radius:7px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .btn-ghost:hover{border-color:var(--text-muted);color:var(--text);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#6a9ef8;}
+  .btn-primary:disabled{background:var(--text-dim);cursor:not-allowed;opacity:.7;}
+  .btn-sm{padding:5px 12px;font-size:12px;border-radius:6px;}
+  .result-box{border-radius:8px;padding:16px 20px;margin-top:20px;font-size:13px;line-height:1.7;display:none;}
+  .result-box.success{background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:var(--success);}
+  .result-box.error{background:rgba(247,95,95,.1);border:1px solid rgba(247,95,95,.3);color:var(--danger);}
+  .result-box.show{display:block;}
+  .result-box .result-title{font-weight:600;font-size:14px;margin-bottom:6px;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .search-bar{display:flex;gap:10px;margin-bottom:16px;}
+  .search-bar input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
+  .search-bar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .search-bar input::placeholder{color:var(--text-dim);}
+  .user-list{max-height:280px;overflow-y:auto;}
+  .user-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;margin-bottom:6px;cursor:pointer;transition:border-color .2s,background .2s;}
+  .user-item:hover{border-color:var(--accent);background:rgba(79,142,247,.06);}
+  .user-item.selected{border-color:var(--accent);background:rgba(79,142,247,.1);}
+  .user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-upn{font-size:11px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-dept{font-size:11px;color:var(--text-dim);}
+  .preview-sidebar{width:270px;flex-shrink:0;}
+  .preview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:sticky;top:28px;}
+  .preview-card .avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;margin:0 auto 12px;}
+  .preview-card .p-name{text-align:center;font-size:14px;font-weight:600;margin-bottom:3px;min-height:20px;}
+  .preview-card .p-title{text-align:center;font-size:11px;color:var(--text-muted);margin-bottom:14px;min-height:16px;}
+  .p-detail{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-top:1px solid var(--border);font-size:11px;}
+  .p-detail .icon{color:var(--text-dim);width:14px;flex-shrink:0;margin-top:1px;}
+  .p-detail .d-label{color:var(--text-dim);font-size:10px;margin-bottom:1px;}
+  .p-detail .d-val{color:var(--text);min-height:13px;word-break:break-all;}
+  .p-detail .d-val.changed{color:var(--warn);}
+  .field input.changed,.field select.changed{border-color:var(--warn);box-shadow:0 0 0 3px rgba(247,169,79,.1);}
+  .empty-state{text-align:center;padding:36px 20px;color:var(--text-dim);font-size:13px;}
+  .empty-state .icon{font-size:28px;margin-bottom:10px;display:block;}
+  .changes-badge{background:var(--warn);color:#0f1117;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:6px;}
+  #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:999;}
+  #toast.show{opacity:1;transform:translateY(0);}
+  @media(max-width:1000px){.panel.flex-active{flex-direction:column;}.preview-sidebar{width:100%;}.field-row{flex-direction:column;gap:0;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✏</div>
+  <h1>Modify User</h1>
+  <span>— NOIT Tech Portal</span>
+  <div class="cipp-status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText" style="color:var(--text-muted)">Not connected</span>
+  </div>
+</header>
+
+<div class="tenant-bar">
+  <label>Tenant:</label>
+  <div class="tenant-select-wrap">
+    <select id="tenantSelect" onchange="onTenantChange()">
+      <option value="">— Select a tenant —</option>
+    </select>
+  </div>
+  <span class="tenant-domain" id="tenantDomain"></span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-search" onclick="switchTab('search')">🔍 Search &amp; Edit</div>
+  <div class="tab" id="tab-results" onclick="switchTab('results')">📋 Results</div>
+</div>
+
+<main>
+
+  <!-- SEARCH & EDIT PANEL -->
+  <div class="panel flex-active" id="panel-search">
+
+    <div class="form-wrap">
+
+      <div class="section-title">Find User</div>
+      <div class="card">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Display name or UPN…" onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="btn btn-primary btn-sm" id="searchBtn" onclick="doSearch()">Search</button>
+        </div>
+        <div id="userListWrap">
+          <div class="empty-state"><span class="icon">👥</span>Select a tenant and search for a user</div>
+        </div>
+      </div>
+
+      <!-- Edit form — hidden until user selected -->
+      <div id="editFormWrap" style="display:none;">
+
+        <div class="section-title">Identity</div>
+        <div class="card">
+          <div class="field">
+            <label>User Principal Name (UPN) — read only</label>
+            <input type="text" id="upnDisplay" readonly>
+          </div>
+          <div class="field">
+            <label>Display Name</label>
+            <input type="text" id="editDisplayName" placeholder="Jane Smith"
+              oninput="markChanged(this,'prev-displayname');updatePreview()">
+          </div>
+          <div class="field-row">
+            <div class="field"><label>First Name</label>
+              <input type="text" id="editFirstName" placeholder="Jane"
+                oninput="markChanged(this,'prev-fname');updatePreview()"></div>
+            <div class="field"><label>Last Name</label>
+              <input type="text" id="editLastName" placeholder="Smith"
+                oninput="markChanged(this,'prev-lname');updatePreview()"></div>
+          </div>
+        </div>
+
+        <div class="section-title">Organization</div>
+        <div class="card">
+          <div class="field"><label>Job Title</label>
+            <input type="text" id="editJobTitle" placeholder="Account Manager"
+              oninput="markChanged(this,'prev-title');updatePreview()">
+          </div>
+          <div class="field"><label>Department</label>
+            <input type="text" id="editDepartment" placeholder="Sales"
+              oninput="markChanged(this,'prev-dept');updatePreview()">
+          </div>
+          <div class="field"><label>Company Name</label>
+            <input type="text" id="editCompanyName" placeholder="Geaux Automotive"
+              oninput="markChanged(this,'prev-company');updatePreview()">
+          </div>
+          <div class="field"><label>Manager (UPN)</label>
+            <input type="text" id="editManager" placeholder="manager@domain.com"
+              oninput="markChanged(this,'prev-manager');updatePreview()">
+          </div>
+        </div>
+
+        <div class="section-title">Contact</div>
+        <div class="card">
+          <div class="field-row">
+            <div class="field"><label>Mobile Phone</label>
+              <input type="text" id="editMobilePhone" placeholder="+1 555 000 0000"
+                oninput="markChanged(this,'prev-mobile');updatePreview()">
+            </div>
+            <div class="field"><label>Business Phone</label>
+              <input type="text" id="editBusinessPhone" placeholder="+1 555 000 0000"
+                oninput="markChanged(this,'prev-biz');updatePreview()">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Account Settings</div>
+        <div class="card">
+          <div class="field-row">
+            <div class="field">
+              <label>Usage Location</label>
+              <div class="select-wrap">
+                <select id="editUsageLocation"
+                  onchange="markChanged(this,'prev-location');updatePreview()">
+                  <option value="US">United States (US)</option>
+                  <option value="CA">Canada (CA)</option>
+                  <option value="GB">United Kingdom (GB)</option>
+                  <option value="AU">Australia (AU)</option>
+                  <option value="DE">Germany (DE)</option>
+                  <option value="FR">France (FR)</option>
+                  <option value="JP">Japan (JP)</option>
+                  <option value="IN">India (IN)</option>
+                  <option value="BR">Brazil (BR)</option>
+                  <option value="MX">Mexico (MX)</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>License</label>
+              <div class="select-wrap">
+                <select id="editLicense"
+                  onchange="markChanged(this,'prev-license');updatePreview()">
+                  <option value="">— Keep current —</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="currentLicenseInfo" style="font-size:11px;color:var(--text-muted);margin-top:8px;font-family:var(--mono);display:none;padding:6px 10px;background:var(--bg);border-radius:5px;"></div>
+        </div>
+
+        <div class="result-box" id="resultBox">
+          <div class="result-title" id="resultTitle"></div>
+          <div id="resultBody"></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="clearEdit()">Clear Selection</button>
+          <button class="btn btn-primary" id="submitBtn" onclick="submitEdit()" disabled>Save Changes ⚡</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PREVIEW SIDEBAR -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="section-title" style="margin-bottom:12px">Preview</div>
+        <div class="avatar" id="prev-avatar">?</div>
+        <div class="p-name" id="prev-name">—</div>
+        <div class="p-title" id="prev-title-display">—</div>
+        <div class="p-detail"><div class="icon">📧</div><div><div class="d-label">UPN</div><div class="d-val" id="prev-email">—</div></div></div>
+        <div class="p-detail"><div class="icon">👤</div><div><div class="d-label">Display Name</div><div class="d-val" id="prev-displayname">—</div></div></div>
+        <div class="p-detail"><div class="icon">🏢</div><div><div class="d-label">Company</div><div class="d-val" id="prev-company">—</div></div></div>
+        <div class="p-detail"><div class="icon">📁</div><div><div class="d-label">Department</div><div class="d-val" id="prev-dept">—</div></div></div>
+        <div class="p-detail"><div class="icon">📱</div><div><div class="d-label">Mobile</div><div class="d-val" id="prev-mobile">—</div></div></div>
+        <div class="p-detail"><div class="icon">📞</div><div><div class="d-label">Business</div><div class="d-val" id="prev-biz">—</div></div></div>
+        <div class="p-detail"><div class="icon">🌍</div><div><div class="d-label">Location</div><div class="d-val" id="prev-location">—</div></div></div>
+        <div class="p-detail"><div class="icon">🔑</div><div><div class="d-label">License</div><div class="d-val" id="prev-license">—</div></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div class="panel" id="panel-results" style="padding:28px;">
+    <div style="width:100%;max-width:800px;">
+      <div class="section-title">Operation Results</div>
+      <div id="resultsContent">
+        <div class="empty-state"><span class="icon">📋</span>No results yet — submit a change to see results here</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+<div id="toast"></div>
+
+<script>
+// =============================================
+// CONFIG
+// =============================================
+var CIPP_BASE = 'https://agreeable-stone-060c94b0f.3.azurestaticapps.net';
+var CIPP_KEY  = '_MNhh4ZlkdwQfRurLGXkWs0MGshcx18cheGXZYNt6F9RAzFuacKCWg==';
+
+var TENANTS = [
+  { name:'Geaux Automotive',             domain:'geauxautomotive.com',       id:'4ceb1a80-7fd3-4760-a827-aedf07b8d4fa' },
+  { name:'Level Homes',                  domain:'levelbr.com',               id:'6444fec1-ccb7-43e6-a075-ba259750173f' },
+  { name:'Bailey Investments',           domain:'jjbiii.com',                id:'3d9de324-5169-4438-aa46-16ffa112196d' },
+  { name:'Brindis Smile Effect',         domain:'brindissmileeffect.com',    id:'e5937982-3451-4e41-8049-fc446ac5df1d' },
+  { name:'City Pork Deli',              domain:'citypork.com',              id:'221e67fd-a985-41ab-9e40-508b2e4f2c91' },
+  { name:'Community Assoc. Management', domain:'camgmttlc.com',             id:'3cbaf35e-e56c-4aee-993a-ddb12651da43' },
+  { name:'Convergent Processing',        domain:'convergentprocessing.com',  id:'ad44e991-3922-4946-88fb-949bbd5c4601' },
+  { name:'Crescent City Dentistry',      domain:'crescentcitydentistry.com', id:'5dc53393-fc1c-4be1-9c74-01dc26eebb26' },
+  { name:'Engquist Development',         domain:'engquistcap.com',           id:'aa5be8ed-d9e8-485d-a596-66bd1cec417a' },
+  { name:'Georgia Proton',              domain:'georgiaproton.org',         id:'b898ded5-f17a-46be-a6e2-4585a7736e88' },
+  { name:'Gertler Firm',                 domain:'gertlerfirm.com',           id:'ff05afc0-faa2-46bb-8739-f6d03aefb6dc' },
+  { name:'Irby Investments',             domain:'irbyinvestments.com',       id:'e951bbc6-d33e-4471-b006-48e389fda2e5' },
+  { name:'Plotkin Vincent',              domain:'plotkinvincent.com',        id:'c6a26024-94d9-4bb4-81df-9484ec100baa' },
+  { name:'Sibille Legal Services',       domain:'sibillelaw.com',            id:'89f0c68f-054b-49c2-85ac-cb5912237916' },
+  { name:'True Title',                   domain:'truetitle.net',             id:'5e17b006-ba85-4bc8-8638-441a4d4264e6' }
+];
+
+// =============================================
+// STATE
+// =============================================
+var currentTenant      = null;
+var allUsers           = [];
+var filteredUsers      = [];
+var selectedUser       = null;
+var originalValues     = {};
+var availableLicenses  = [];
+var currentLicenses    = [];
+var resultsLog         = [];
+var debounceTimer      = null;
+
+// =============================================
+// INIT
+// =============================================
+document.addEventListener('DOMContentLoaded', function(){
+  var sel = document.getElementById('tenantSelect');
+  TENANTS.forEach(function(t){
+    var opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.name;
+    sel.appendChild(opt);
+  });
+  // Pre-select from query param
+  var params = new URLSearchParams(window.location.search);
+  var pre = params.get('tenant');
+  if (pre) { sel.value = pre; onTenantChange(); }
+});
+
+// =============================================
+// CIPP FETCH
+// =============================================
+function cippFetch(path, method, body){
+  var opts = { method: method||'GET', headers: { 'Content-Type':'application/json', 'x-functions-key':CIPP_KEY } };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(CIPP_BASE + path, opts);
+}
+
+function checkConnection(){
+  var dot = document.getElementById('statusDot');
+  var txt = document.getElementById('statusText');
+  dot.className = 'status-dot';
+  txt.textContent = 'Connecting…';
+  txt.style.color = 'var(--text-muted)';
+  cippFetch('/api/ListTenants','GET')
+    .then(function(r){
+      if (r.ok){ dot.className='status-dot connected'; txt.textContent='Connected'; txt.style.color='var(--success)'; }
+      else { dot.className='status-dot error'; txt.textContent='Error '+r.status; txt.style.color='var(--danger)'; }
+    })
+    .catch(function(){
+      dot.className='status-dot error'; txt.textContent='Unreachable'; txt.style.color='var(--danger)';
+    });
+}
+
+// =============================================
+// TENANT CHANGE
+// =============================================
+function onTenantChange(){
+  var id = document.getElementById('tenantSelect').value;
+  if (!id){ currentTenant=null; document.getElementById('tenantDomain').textContent=''; return; }
+  currentTenant = TENANTS.find(function(t){ return t.id===id; });
+  document.getElementById('tenantDomain').textContent = currentTenant ? currentTenant.domain : '';
+  allUsers=[]; filteredUsers=[]; selectedUser=null;
+  clearEdit();
+  document.getElementById('userListWrap').innerHTML =
+    '<div class="empty-state"><span class="icon">🔍</span>Search for a user in '+esc(currentTenant.name)+'</div>';
+  checkConnection();
+  loadTenantLicenses(id);
+}
+
+// =============================================
+// LICENSES
+// =============================================
+function loadTenantLicenses(tenantId){
+  availableLicenses = [];
+  var sel = document.getElementById('editLicense');
+  sel.innerHTML = '<option value="">— Keep current —</option>';
+  cippFetch('/api/ListLicenses?tenantFilter='+encodeURIComponent(tenantId),'GET')
+    .then(function(r){ return r.json(); })
+    .then(function(result){
+      var list = Array.isArray(result) ? result : (result.Results||result.value||[]);
+      availableLicenses = list;
+      list.forEach(function(lic){
+        var skuId = lic.skuId||lic.SkuId||'';
+        if (!skuId) return;
+        var opt = document.createElement('option');
+        opt.value = skuId;
+        opt.textContent = lic.displayName||lic.skuPartNumber||lic.SkuPartNumber||skuId;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(function(e){ console.warn('License load failed:',e); });
+}
+
+// =============================================
+// SEARCH
+// =============================================
+function doSearch(){
+  if (!currentTenant){ showToast('Select a tenant first','warn'); return; }
+  var q   = document.getElementById('searchInput').value.trim();
+  var btn = document.getElementById('searchBtn');
+  var wrap = document.getElementById('userListWrap');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  wrap.innerHTML='<div class="empty-state"><span class="icon">⏳</span>Loading users…</div>';
+  cippFetch('/api/ListUsers?tenantFilter='+encodeURIComponent(currentTenant.id)+'&top=200','GET')
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(result){
+      allUsers = Array.isArray(result) ? result : (result.Results||result.value||[]);
+      filterAndRender(q);
+    })
+    .catch(function(e){
+      wrap.innerHTML='<div class="empty-state"><span class="icon">❌</span>Failed: '+esc(e.message)+'</div>';
+    })
+    .finally(function(){ btn.disabled=false; btn.textContent='Search'; });
+}
+
+function filterAndRender(q){
+  var wrap = document.getElementById('userListWrap');
+  if (!allUsers.length){
+    wrap.innerHTML='<div class="empty-state"><span class="icon">👥</span>No users found</div>'; return;
+  }
+  var query = (q||'').toLowerCase();
+  filteredUsers = query
+    ? allUsers.filter(function(u){
+        return (u.displayName||u.DisplayName||'').toLowerCase().includes(query) ||
+               (u.userPrincipalName||u.UserPrincipalName||'').toLowerCase().includes(query);
+      })
+    : allUsers;
+  if (!filteredUsers.length){
+    wrap.innerHTML='<div class="empty-state"><span class="icon">🔍</span>No matches for "'+esc(q)+'"</div>'; return;
+  }
+  var html='<div class="user-list">';
+  filteredUsers.slice(0,50).forEach(function(u,i){
+    var dn  = u.displayName||u.DisplayName||'—';
+    var upn = u.userPrincipalName||u.UserPrincipalName||'';
+    var dep = u.department||u.Department||'';
+    var ini = dn.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase()||'?';
+    html+='<div class="user-item" onclick="selectUser('+i+')" id="uitem-'+i+'">';
+    html+='<div class="user-avatar">'+ini+'</div>';
+    html+='<div class="user-info"><div class="user-name">'+esc(dn)+'</div>';
+    html+='<div class="user-upn">'+esc(upn)+'</div>';
+    if(dep) html+='<div class="user-dept">'+esc(dep)+'</div>';
+    html+='</div></div>';
+  });
+  if (filteredUsers.length>50) html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--text-dim)">Showing 50 of '+filteredUsers.length+' — refine your search</div>';
+  html+='</div>';
+  wrap.innerHTML=html;
+}
+
+// =============================================
+// SELECT USER
+// =============================================
+function selectUser(idx){
+  document.querySelectorAll('.user-item').forEach(function(el){ el.classList.remove('selected'); });
+  var item=document.getElementById('uitem-'+idx);
+  if(item) item.classList.add('selected');
+  selectedUser=filteredUsers[idx];
+  var u=selectedUser;
+
+  document.getElementById('upnDisplay').value      = u.userPrincipalName||u.UserPrincipalName||'';
+  document.getElementById('editDisplayName').value = u.displayName||u.DisplayName||'';
+  document.getElementById('editFirstName').value   = u.givenName||u.GivenName||'';
+  document.getElementById('editLastName').value    = u.surname||u.Surname||'';
+  document.getElementById('editJobTitle').value    = u.jobTitle||u.JobTitle||'';
+  document.getElementById('editDepartment').value  = u.department||u.Department||'';
+  document.getElementById('editCompanyName').value = u.companyName||u.CompanyName||'';
+  document.getElementById('editMobilePhone').value = u.mobilePhone||u.MobilePhone||'';
+  document.getElementById('editManager').value     = (u.manager&&u.manager.userPrincipalName)||u.managerUpn||'';
+
+  var phones = u.businessPhones||u.BusinessPhones||[];
+  document.getElementById('editBusinessPhone').value = Array.isArray(phones)?(phones[0]||''):phones;
+
+  var loc=u.usageLocation||u.UsageLocation||'US';
+  var locSel=document.getElementById('editUsageLocation');
+  locSel.value=loc; if(!locSel.value) locSel.value='US';
+
+  currentLicenses=u.assignedLicenses||u.AssignedLicenses||[];
+  var licInfo=document.getElementById('currentLicenseInfo');
+  if(currentLicenses.length){
+    licInfo.textContent='Current licenses: '+currentLicenses.length+' assigned';
+    licInfo.style.display='block';
+  } else {
+    licInfo.textContent='No licenses currently assigned'; licInfo.style.display='block';
+  }
+
+  // Save originals for change detection
+  originalValues={
+    displayName:   document.getElementById('editDisplayName').value,
+    firstName:     document.getElementById('editFirstName').value,
+    lastName:      document.getElementById('editLastName').value,
+    jobTitle:      document.getElementById('editJobTitle').value,
+    department:    document.getElementById('editDepartment').value,
+    companyName:   document.getElementById('editCompanyName').value,
+    mobilePhone:   document.getElementById('editMobilePhone').value,
+    businessPhone: document.getElementById('editBusinessPhone').value,
+    manager:       document.getElementById('editManager').value,
+    usageLocation: document.getElementById('editUsageLocation').value,
+    license:       ''
+  };
+
+  // Clear any leftover changed styles
+  document.querySelectorAll('.changed').forEach(function(el){ el.classList.remove('changed'); });
+
+  document.getElementById('editFormWrap').style.display='block';
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('resultBox').className='result-box';
+  updatePreview();
+  document.getElementById('editFormWrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// =============================================
+// CHANGE TRACKING
+// =============================================
+var origKeyMap={
+  'editDisplayName':'displayName','editFirstName':'firstName','editLastName':'lastName',
+  'editJobTitle':'jobTitle','editDepartment':'department','editCompanyName':'companyName',
+  'editMobilePhone':'mobilePhone','editBusinessPhone':'businessPhone',
+  'editManager':'manager','editUsageLocation':'usageLocation','editLicense':'license'
+};
+function markChanged(el,previewId){
+  var origKey=origKeyMap[el.id];
+  var changed=origKey!==undefined && el.value!==(originalValues[origKey]||'');
+  el.classList.toggle('changed',changed);
+  var pEl=document.getElementById(previewId);
+  if(pEl) pEl.classList.toggle('changed',changed);
+}
+
+// =============================================
+// PREVIEW UPDATE
+// =============================================
+function updatePreview(){
+  var dn=document.getElementById('editDisplayName').value||'—';
+  var fn=document.getElementById('editFirstName').value||'';
+  var ln=document.getElementById('editLastName').value||'';
+  var ini=((fn[0]||'')+(ln[0]||'')).toUpperCase()||dn.substring(0,2).toUpperCase()||'?';
+  document.getElementById('prev-avatar').textContent=ini;
+  document.getElementById('prev-name').textContent=dn;
+  document.getElementById('prev-title-display').textContent=document.getElementById('editJobTitle').value||'—';
+  document.getElementById('prev-email').textContent=document.getElementById('upnDisplay').value||'—';
+  document.getElementById('prev-displayname').textContent=dn;
+  document.getElementById('prev-company').textContent=document.getElementById('editCompanyName').value||'—';
+  document.getElementById('prev-dept').textContent=document.getElementById('editDepartment').value||'—';
+  document.getElementById('prev-mobile').textContent=document.getElementById('editMobilePhone').value||'—';
+  document.getElementById('prev-biz').textContent=document.getElementById('editBusinessPhone').value||'—';
+  document.getElementById('prev-location').textContent=document.getElementById('editUsageLocation').value||'—';
+  var licSel=document.getElementById('editLicense');
+  document.getElementById('prev-license').textContent=licSel.value?licSel.options[licSel.selectedIndex].text:'— unchanged —';
+}
+
+// =============================================
+// SUBMIT
+// =============================================
+function submitEdit(){
+  if(!selectedUser||!currentTenant) return;
+  var upn=document.getElementById('upnDisplay').value;
+  var btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Saving…';
+  document.getElementById('resultBox').className='result-box';
+
+  var payload={
+    tenantFilter: currentTenant.id,
+    id:           upn,
+    displayName:  document.getElementById('editDisplayName').value,
+    givenName:    document.getElementById('editFirstName').value,
+    surname:      document.getElementById('editLastName').value,
+    jobTitle:     document.getElementById('editJobTitle').value,
+    department:   document.getElementById('editDepartment').value,
+    companyName:  document.getElementById('editCompanyName').value,
+    mobilePhone:  document.getElementById('editMobilePhone').value,
+    businessPhones:[document.getElementById('editBusinessPhone').value].filter(Boolean),
+    usageLocation:{label:document.getElementById('editUsageLocation').value,value:document.getElementById('editUsageLocation').value}
+  };
+
+  var mgr=document.getElementById('editManager').value.trim();
+  if(mgr) payload.manager=mgr;
+
+  var licSel=document.getElementById('editLicense');
+  if(licSel.value){
+    payload.addedLicenses=[{value:licSel.value}];
+    if(currentLicenses.length){
+      payload.removedLicenses=currentLicenses.map(function(l){ return {value:l.skuId||l.SkuId}; }).filter(function(l){return l.value;});
+    }
+  }
+
+  cippFetch('/api/EditUser','POST',payload)
+    .then(function(r){
+      if(!r.ok) return r.text().then(function(t){ throw new Error('HTTP '+r.status+': '+t); });
+      return r.json().catch(function(){ return {}; });
+    })
+    .then(function(result){
+      var msg=(result&&(result.Results||result.Message||result.message))||'User updated successfully.';
+      var msgStr=typeof msg==='string'?msg:JSON.stringify(msg);
+      showResult('success','✅ User Updated',msgStr);
+      showToast('User updated!','success');
+      // Refresh originals so changes deselect
+      originalValues.displayName=document.getElementById('editDisplayName').value;
+      originalValues.firstName=document.getElementById('editFirstName').value;
+      originalValues.lastName=document.getElementById('editLastName').value;
+      originalValues.jobTitle=document.getElementById('editJobTitle').value;
+      originalValues.department=document.getElementById('editDepartment').value;
+      originalValues.companyName=document.getElementById('editCompanyName').value;
+      originalValues.mobilePhone=document.getElementById('editMobilePhone').value;
+      originalValues.businessPhone=document.getElementById('editBusinessPhone').value;
+      originalValues.manager=document.getElementById('editManager').value;
+      document.querySelectorAll('.changed').forEach(function(el){ el.classList.remove('changed'); });
+      addToResults(upn,'success',msgStr);
+    })
+    .catch(function(e){
+      showResult('error','❌ Update Failed',e.message);
+      addToResults(upn,'error',e.message);
+    })
+    .finally(function(){ btn.disabled=false; btn.textContent='Save Changes ⚡'; });
+}
+
+// =============================================
+// RESULTS LOG
+// =============================================
+function addToResults(upn,status,msg){
+  var now=new Date().toLocaleTimeString();
+  resultsLog.unshift({upn:upn,status:status,msg:msg,time:now});
+  var content=document.getElementById('resultsContent');
+  var html='';
+  resultsLog.forEach(function(r){
+    var cls=r.status==='success'?'success':'error';
+    html+='<div class="result-box '+cls+' show" style="margin-bottom:12px;">';
+    html+='<div class="result-title">'+(r.status==='success'?'✅ ':'❌ ')+esc(r.upn)+
+          '<span style="font-size:11px;font-weight:400;float:right;color:var(--text-dim)">'+r.time+'</span></div>';
+    html+='<div>'+esc(r.msg)+'</div></div>';
+  });
+  content.innerHTML=html;
+  document.getElementById('tab-results').innerHTML=
+    '📋 Results<span class="changes-badge">'+resultsLog.length+'</span>';
+}
+
+// =============================================
+// HELPERS
+// =============================================
+function clearEdit(){
+  selectedUser=null;
+  document.getElementById('editFormWrap').style.display='none';
+  document.getElementById('submitBtn').disabled=true;
+  document.querySelectorAll('.changed').forEach(function(el){ el.classList.remove('changed'); });
+  ['upnDisplay','editDisplayName','editFirstName','editLastName','editJobTitle',
+   'editDepartment','editCompanyName','editMobilePhone','editBusinessPhone','editManager'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('editUsageLocation').value='US';
+  document.getElementById('editLicense').value='';
+  document.getElementById('currentLicenseInfo').style.display='none';
+  document.getElementById('resultBox').className='result-box';
+  document.getElementById('prev-avatar').textContent='?';
+  document.getElementById('prev-name').textContent='—';
+  document.getElementById('prev-title-display').textContent='—';
+  ['prev-email','prev-displayname','prev-company','prev-dept','prev-mobile','prev-biz','prev-location','prev-license'].forEach(function(id){
+    var el=document.getElementById(id); if(el){ el.textContent='—'; el.classList.remove('changed'); }
+  });
+}
+
+function showResult(type,title,body){
+  var box=document.getElementById('resultBox');
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('resultBody').textContent=typeof body==='string'?body:JSON.stringify(body,null,2);
+  box.className='result-box '+type+' show';
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=type==='success'?'var(--success)':type==='warn'?'var(--warn)':'var(--danger)';
+  t.style.color=type==='warn'?'#0f1117':'#fff';
+  t.className='show';
+  setTimeout(function(){ t.className=''; },2800);
+}
+
+function switchTab(name){
+  var isSearch=(name==='search');
+  document.getElementById('tab-search').classList.toggle('active',isSearch);
+  document.getElementById('tab-results').classList.toggle('active',!isSearch);
+  var sp=document.getElementById('panel-search');
+  var rp=document.getElementById('panel-results');
+  sp.className=isSearch?'panel flex-active':'panel';
+  rp.className=isSearch?'panel':'panel block-active';
+  if(!isSearch) rp.style.display='block'; else rp.style.display='none';
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
