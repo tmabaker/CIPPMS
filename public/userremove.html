@@ -403,9 +403,10 @@ function checkConnection(){
   var txt=document.getElementById('statusText');
   dot.className='status-dot';
   txt.textContent='Connecting…'; txt.style.color='var(--text-muted)';
-  cippFetch('/api/ListTenants','GET')
+  if(!currentTenant) return;
+  cippFetch('/api/ListLicenses?tenantFilter='+encodeURIComponent(currentTenant.domain),'GET')
     .then(function(r){
-      if(r.ok){ dot.className='status-dot connected'; txt.textContent='Connected'; txt.style.color='var(--success)'; }
+      if(r.ok){ dot.className='status-dot connected'; txt.textContent='Connected to '+currentTenant.name; txt.style.color='var(--success)'; }
       else { dot.className='status-dot error'; txt.textContent='Error '+r.status; txt.style.color='var(--danger)'; }
     })
     .catch(function(){ dot.className='status-dot error'; txt.textContent='Unreachable'; txt.style.color='var(--danger)'; });
@@ -436,7 +437,14 @@ function doSearch(){
   var wrap=document.getElementById('userListWrap');
   btn.disabled=true; btn.innerHTML='<span class="spinner" style="border-top-color:var(--text-muted)"></span>';
   wrap.innerHTML='<div class="empty-state"><span class="icon">⏳</span>Loading users…</div>';
-  cippFetch('/api/ListUsers?tenantFilter='+encodeURIComponent(currentTenant.id)+'&top=200','GET')
+  cippFetch('/api/ListGraphRequest','POST',{
+      tenantFilter: currentTenant.domain,
+      Endpoint: 'users',
+      '$select': 'id,displayName,userPrincipalName,givenName,surname,department,jobTitle,companyName,mobilePhone,businessPhones,usageLocation,mail,accountEnabled,assignedLicenses',
+      '$top': 999,
+      '$count': true,
+      '$orderby': 'displayName'
+    })
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(result){
       allUsers=Array.isArray(result)?result:(result.Results||result.value||[]);
@@ -604,7 +612,7 @@ function doOffboard(){
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Running…';
 
   var payload={
-    tenantFilter: currentTenant.id,
+    tenantFilter: currentTenant.domain,
     user:{
       defaultDomainName: currentTenant.domain,
       userPrincipalName: upn
