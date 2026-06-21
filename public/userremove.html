@@ -14,44 +14,156 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ── Header ── */
   header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;}
-  header .logo{width:32px;height:32px;background:linear-gradient(135deg,var(--danger),#c0392b);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;}
+  header .logo{width:32px;height:32px;background:linear-gradient(135deg,var(--danger),#c0392b);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
   header h1{font-size:15px;font-weight:600;}
-  header span{font-size:13px;color:var(--text-muted);margin-left:4px;}
-  .cipp-status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;}
-  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text-dim);}
+  header .header-sub{font-size:13px;color:var(--text-muted);margin-left:2px;}
+  .cipp-status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--text-dim);flex-shrink:0;}
   .status-dot.connected{background:var(--success);box-shadow:0 0 6px var(--success);}
   .status-dot.error{background:var(--danger);}
-  .tenant-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-  .tenant-bar label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap;}
-  .tenant-select-wrap{position:relative;min-width:260px;}
-  .tenant-select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:12px;}
-  .tenant-select-wrap select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 32px 8px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;appearance:none;transition:border-color .2s;}
-  .tenant-select-wrap select:focus{border-color:var(--accent);}
-  .tenant-domain{font-size:12px;color:var(--text-muted);font-family:var(--mono);}
-  main{flex:1;padding:28px;display:flex;gap:28px;}
-  .main-col{flex:1;max-width:700px;}
-  .section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+  /* ── Progress Bar ── */
+  .progress-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:center;gap:0;}
+  .step-item{display:flex;align-items:center;gap:0;}
+  .step-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;border:2px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .3s;}
+  .step-circle.active{border-color:var(--accent);background:var(--accent);color:#fff;}
+  .step-circle.done{border-color:var(--success);background:var(--success);color:#fff;}
+  .step-label{font-size:11px;font-weight:500;color:var(--text-dim);margin-top:4px;white-space:nowrap;transition:color .3s;}
+  .step-label.active{color:var(--accent);}
+  .step-label.done{color:var(--success);}
+  .step-block{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:90px;}
+  .step-connector{height:2px;width:60px;background:var(--border);margin-bottom:20px;transition:background .3s;}
+  .step-connector.done{background:var(--success);}
+  @media(max-width:600px){.step-connector{width:30px;}.step-block{min-width:60px;}.step-label{font-size:10px;}}
+
+  /* ── Main ── */
+  main{flex:1;padding:28px;display:flex;justify-content:center;}
+  .wizard-wrap{width:100%;max-width:980px;}
+
+  /* ── Cards ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+  .card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .card-sub{font-size:12px;color:var(--warn);font-style:italic;margin-bottom:16px;}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;margin-top:20px;display:flex;align-items:center;gap:8px;}
+  .section-title:first-child{margin-top:0;}
   .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+
+  /* ── Fields ── */
   .field{margin-bottom:16px;}
   .field:last-child{margin-bottom:0;}
   .field label{display:block;font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:6px;letter-spacing:.03em;}
   .field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none;}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
   .field input::placeholder,.field textarea::placeholder{color:var(--text-dim);}
-  .field input:disabled,.field textarea:disabled{opacity:.45;cursor:not-allowed;}
-  .btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
-  .btn{padding:9px 20px;border-radius:7px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+  .field textarea{resize:vertical;}
+  .select-wrap{position:relative;}
+  .select-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:12px;}
+
+  /* ── Heading ── */
+  .step-heading{font-size:20px;font-weight:600;margin-bottom:6px;}
+  .step-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+
+  /* ── Tenant dropdown ── */
+  .tenant-opt-main{display:block;font-size:13px;color:var(--text);}
+  .tenant-opt-domain{display:block;font-size:11px;color:var(--text-muted);font-family:var(--mono);}
+
+  /* ── Buttons ── */
+  .btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;flex-wrap:wrap;}
+  .btn{padding:9px 22px;border-radius:7px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
   .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
   .btn-ghost:hover{border-color:var(--text-muted);color:var(--text);}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover{background:#6a9ef8;}
   .btn-primary:disabled{background:var(--text-dim);cursor:not-allowed;opacity:.7;}
-  .btn-sm{padding:5px 12px;font-size:12px;border-radius:6px;}
   .btn-danger{background:var(--danger);color:#fff;}
-  .btn-danger:hover{background:#ff7070;}
+  .btn-danger:hover{background:#f87070;}
   .btn-danger:disabled{background:var(--text-dim);cursor:not-allowed;opacity:.7;}
+  .btn-back{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);}
+  .btn-back:hover{color:var(--text);border-color:var(--text-muted);}
+
+  /* ── Search + Results (Step 2) ── */
+  .search-row{display:flex;gap:8px;margin-bottom:16px;}
+  .search-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
+  .search-row input:focus{border-color:var(--accent);}
+  .search-row input::placeholder{color:var(--text-dim);}
+  .user-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;}
+  .user-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;}
+  .user-item:hover{border-color:var(--accent);background:rgba(79,142,247,.06);}
+  .user-item.selected{border-color:var(--accent);background:rgba(79,142,247,.12);}
+  .user-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-avatar.danger-av{background:linear-gradient(135deg,var(--danger),#c0392b);}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-upn{font-size:11px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-dept{font-size:11px;color:var(--text-dim);}
+  .user-check{color:var(--accent);font-size:18px;flex-shrink:0;}
+  .selected-card{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.25);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+  .selected-card .label{font-size:11px;color:var(--accent);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;}
+  .loading-row{text-align:center;padding:28px;color:var(--text-muted);font-size:13px;}
+  .empty-row{text-align:center;padding:28px;color:var(--text-dim);font-size:13px;}
+
+  /* ── Toggle Switches ── */
+  .toggle-wrap{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+  .toggle-wrap:last-child{border-bottom:none;}
+  .toggle-wrap label.toggle-label{flex:1;font-size:13px;color:var(--text);cursor:pointer;user-select:none;}
+  .toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;}
+  .toggle input{opacity:0;width:0;height:0;position:absolute;}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--surface2);border:1px solid var(--border);border-radius:22px;transition:.3s;}
+  .slider:before{position:absolute;content:"";height:16px;width:16px;left:2px;bottom:2px;background:var(--text-muted);border-radius:50%;transition:.3s;}
+  input:checked+.slider{background:var(--warn);border-color:var(--warn);}
+  input:checked+.slider:before{transform:translateX(18px);background:#fff;}
+  .toggle-wrap.toggle-off input:checked+.slider{background:var(--accent);border-color:var(--accent);}
+
+  /* ── Two-col layout ── */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:820px){.two-col{grid-template-columns:1fr;}}
+
+  /* ── Scheduling ── */
+  .schedule-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+  .schedule-date{margin-top:12px;display:none;}
+  .schedule-date.show{display:block;}
+
+  /* ── Autocomplete ── */
+  .ac-wrap{position:relative;}
+  .ac-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;transition:border-color .2s;cursor:text;}
+  .ac-chips:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);border-radius:5px;padding:2px 8px 2px 8px;font-size:12px;color:var(--accent);white-space:nowrap;}
+  .chip .chip-x{cursor:pointer;color:var(--text-muted);font-size:14px;line-height:1;margin-left:2px;transition:color .15s;}
+  .chip .chip-x:hover{color:var(--danger);}
+  .ac-input{border:none;outline:none;background:transparent;color:var(--text);font-family:var(--font);font-size:13px;min-width:120px;flex:1;padding:2px 4px;}
+  .ac-input::placeholder{color:var(--text-dim);}
+  .ac-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:220px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+  .ac-dropdown.show{display:block;}
+  .ac-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .15s;}
+  .ac-opt:hover{background:var(--surface2);}
+  .ac-opt .ac-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+  .ac-opt .ac-name{font-size:13px;color:var(--text);}
+  .ac-opt .ac-upn{font-size:11px;color:var(--text-muted);font-family:var(--mono);}
+  .ac-empty{padding:12px;text-align:center;color:var(--text-dim);font-size:12px;}
+
+  /* ── Confirmation ── */
+  .confirm-user-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .confirm-user-card .cu-info .cu-name{font-size:15px;font-weight:600;}
+  .confirm-user-card .cu-info .cu-upn{font-size:12px;color:var(--text-muted);font-family:var(--mono);}
+  .confirm-user-card .cu-info .cu-tenant{font-size:12px;color:var(--accent);margin-top:4px;}
+  .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;}
+  @media(max-width:600px){.opts-grid{grid-template-columns:1fr;}}
+  .opt-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .opt-row:last-child{border-bottom:none;}
+  .opt-lbl{color:var(--text-muted);}
+  .opt-val{font-weight:500;}
+  .opt-val.yes{color:var(--success);}
+  .opt-val.no{color:var(--text-dim);}
+  .opt-val.warn{color:var(--warn);}
+  .opt-val.val{color:var(--accent);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .warn-box{background:rgba(247,95,95,.1);border:1px solid rgba(247,95,95,.35);border-radius:8px;padding:14px 18px;margin-top:16px;font-size:13px;color:var(--danger);line-height:1.6;}
+  .warn-box strong{font-weight:600;}
+  .sched-box{background:rgba(247,169,79,.1);border:1px solid rgba(247,169,79,.3);border-radius:8px;padding:10px 16px;margin-top:12px;font-size:12px;color:var(--warn);}
+
+  /* ── Result ── */
   .result-box{border-radius:8px;padding:16px 20px;margin-top:20px;font-size:13px;line-height:1.7;display:none;}
   .result-box.success{background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:var(--success);}
   .result-box.error{background:rgba(247,95,95,.1);border:1px solid rgba(247,95,95,.3);color:var(--danger);}
@@ -59,629 +171,943 @@
   .result-box .result-title{font-weight:600;font-size:14px;margin-bottom:6px;}
   .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  .search-bar{display:flex;gap:10px;margin-bottom:16px;}
-  .search-bar input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
-  .search-bar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.12);}
-  .search-bar input::placeholder{color:var(--text-dim);}
-  .user-list{max-height:260px;overflow-y:auto;}
-  .user-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;margin-bottom:6px;cursor:pointer;transition:border-color .2s,background .2s;}
-  .user-item:hover{border-color:var(--danger);background:rgba(247,95,95,.04);}
-  .user-item.selected{border-color:var(--danger);background:rgba(247,95,95,.08);}
-  .user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--danger),#c0392b);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
-  .user-info{flex:1;min-width:0;}
-  .user-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .user-upn{font-size:11px;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .user-dept{font-size:11px;color:var(--text-dim);}
-  /* User card */
-  .user-card{background:var(--surface);border:1px solid var(--danger);border-radius:var(--radius);padding:18px;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
-  .user-card-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--danger),#c0392b);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
-  .user-card-info{flex:1;min-width:0;}
-  .user-card-name{font-size:15px;font-weight:600;}
-  .user-card-upn{font-size:12px;color:var(--text-muted);font-family:var(--mono);}
-  .user-card-meta{font-size:12px;color:var(--text-dim);margin-top:4px;}
-  .user-card-badge{background:rgba(247,95,95,.15);border:1px solid rgba(247,95,95,.35);color:var(--danger);border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600;margin-left:10px;}
-  /* Checklist */
-  .checklist-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:border-color .15s;}
-  .checklist-item.danger-item{border-color:rgba(247,95,95,.3);background:rgba(247,95,95,.05);}
-  .checklist-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--danger);margin-top:1px;flex-shrink:0;cursor:pointer;}
-  .checklist-label{flex:1;}
-  .checklist-label .cl-title{font-size:13px;font-weight:500;color:var(--text);}
-  .checklist-label .cl-desc{font-size:11px;color:var(--text-muted);margin-top:2px;}
-  .checklist-label .cl-input{margin-top:8px;}
-  /* Delete confirmation */
-  .delete-confirm{background:rgba(247,95,95,.07);border:1px solid rgba(247,95,95,.3);border-radius:8px;padding:14px;margin-top:12px;display:none;}
-  .delete-confirm.show{display:block;}
-  .delete-confirm p{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
-  .delete-confirm strong{color:var(--danger);}
-  .delete-confirm input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s;}
-  .delete-confirm input:focus{border-color:var(--danger);}
-  .delete-confirm input::placeholder{color:var(--text-dim);}
-  /* Sidebar */
-  .sidebar{width:260px;flex-shrink:0;}
-  .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:sticky;top:28px;}
-  .info-row{padding:8px 0;border-top:1px solid var(--border);font-size:12px;display:flex;gap:8px;}
-  .info-row .ir-label{color:var(--text-dim);min-width:80px;flex-shrink:0;}
-  .info-row .ir-val{color:var(--text);word-break:break-all;}
-  .danger-warn{background:rgba(247,95,95,.08);border:1px solid rgba(247,95,95,.25);border-radius:8px;padding:12px;font-size:12px;color:var(--text-muted);line-height:1.6;}
-  .danger-warn strong{color:var(--danger);}
-  /* Modal overlay */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;display:none;}
-  .modal-overlay.show{display:flex;}
-  .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:480px;width:100%;margin:20px;}
-  .modal h2{font-size:16px;font-weight:600;margin-bottom:8px;}
-  .modal p{font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:18px;}
-  .modal .modal-user{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:13px;}
-  .modal .modal-user .mu-name{font-weight:600;margin-bottom:2px;}
-  .modal .modal-user .mu-upn{font-family:var(--mono);font-size:11px;color:var(--text-muted);}
-  .modal .modal-user .mu-tenant{font-size:11px;color:var(--text-dim);margin-top:3px;}
-  .modal .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
-  /* Empty state */
-  .empty-state{text-align:center;padding:36px 20px;color:var(--text-dim);font-size:13px;}
-  .empty-state .icon{font-size:28px;margin-bottom:10px;display:block;}
-  /* Toast */
-  #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:999;}
-  #toast.show{opacity:1;transform:translateY(0);}
-  @media(max-width:900px){main{flex-direction:column;}.sidebar{width:100%;}}
+
+  /* ── Step panels ── */
+  .step-panel{display:none;}
+  .step-panel.active{display:block;}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════ HEADER ═══════════════ -->
 <header>
   <div class="logo">🚫</div>
-  <h1>Remove User</h1>
-  <span>— NOIT Tech Portal</span>
+  <div>
+    <h1 id="hdrTitle">Remove User</h1>
+    <span class="header-sub" id="hdrSub">Select a tenant to begin</span>
+  </div>
   <div class="cipp-status">
     <div class="status-dot" id="statusDot"></div>
-    <span id="statusText" style="color:var(--text-muted)">Not connected</span>
+    <span id="statusText">Not connected</span>
   </div>
 </header>
 
-<div class="tenant-bar">
-  <label>Tenant:</label>
-  <div class="tenant-select-wrap">
-    <select id="tenantSelect" onchange="onTenantChange()">
-      <option value="">— Select a tenant —</option>
-    </select>
+<!-- ═══════════════ PROGRESS BAR ═══════════════ -->
+<div class="progress-bar">
+  <div class="step-block">
+    <div class="step-circle active" id="sc1">1</div>
+    <div class="step-label active" id="sl1">Tenant Selection</div>
   </div>
-  <span class="tenant-domain" id="tenantDomain"></span>
+  <div class="step-connector" id="con1"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc2">2</div>
+    <div class="step-label" id="sl2">User Selection</div>
+  </div>
+  <div class="step-connector" id="con2"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc3">3</div>
+    <div class="step-label" id="sl3">Offboarding Options</div>
+  </div>
+  <div class="step-connector" id="con3"></div>
+  <div class="step-block">
+    <div class="step-circle" id="sc4">4</div>
+    <div class="step-label" id="sl4">Confirmation</div>
+  </div>
 </div>
 
+<!-- ═══════════════ MAIN ═══════════════ -->
 <main>
+<div class="wizard-wrap">
 
-  <div class="main-col">
-
-    <!-- Search -->
-    <div class="section-title">Find User to Offboard</div>
-    <div class="card">
-      <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Display name or UPN…" onkeydown="if(event.key==='Enter')doSearch()">
-        <button class="btn btn-sm" id="searchBtn"
-          style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);"
-          onclick="doSearch()">Search</button>
-      </div>
-      <div id="userListWrap">
-        <div class="empty-state"><span class="icon">👥</span>Select a tenant and search for a user to offboard</div>
-      </div>
-    </div>
-
-    <!-- Selected user card -->
-    <div id="userCardWrap" style="display:none;">
-      <div class="section-title">Selected User</div>
-      <div class="user-card" id="userCard">
-        <div class="user-card-avatar" id="uc-avatar">?</div>
-        <div class="user-card-info">
-          <div class="user-card-name" id="uc-name">—<span class="user-card-badge">TO BE OFFBOARDED</span></div>
-          <div class="user-card-upn" id="uc-upn">—</div>
-          <div class="user-card-meta" id="uc-meta">—</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Offboarding checklist -->
-    <div id="checklistWrap" style="display:none;">
-      <div class="section-title">Offboarding Actions</div>
-      <div class="card" style="padding:16px;">
-
-        <!-- Block sign-in -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-block" checked>
-          <div class="checklist-label">
-            <div class="cl-title">🔒 Block Sign-In</div>
-            <div class="cl-desc">Immediately disables the account — user cannot authenticate</div>
-          </div>
-        </div>
-
-        <!-- Revoke sessions -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-revoke" checked>
-          <div class="checklist-label">
-            <div class="cl-title">🔄 Revoke All Sessions &amp; Refresh Tokens</div>
-            <div class="cl-desc">Terminates all active sign-in sessions across all apps</div>
-          </div>
-        </div>
-
-        <!-- Remove licenses -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-licenses" checked>
-          <div class="checklist-label">
-            <div class="cl-title">📄 Remove All Licenses</div>
-            <div class="cl-desc">Frees up assigned Microsoft 365 license seats</div>
-          </div>
-        </div>
-
-        <!-- Remove groups -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-groups" checked>
-          <div class="checklist-label">
-            <div class="cl-title">👥 Remove from All Groups</div>
-            <div class="cl-desc">Removes membership from all Azure AD / M365 groups</div>
-          </div>
-        </div>
-
-        <!-- Hide from GAL -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-gal" checked>
-          <div class="checklist-label">
-            <div class="cl-title">📒 Hide from Global Address List</div>
-            <div class="cl-desc">Prevents the account from appearing in the Exchange address book</div>
-          </div>
-        </div>
-
-        <!-- OOO -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-ooo" onchange="toggleOOO()">
-          <div class="checklist-label">
-            <div class="cl-title">✉️ Set Out of Office Reply</div>
-            <div class="cl-desc">Configure an automatic reply for incoming messages</div>
-            <div class="cl-input">
-              <textarea id="oooMessage" rows="3" placeholder="e.g. This employee is no longer with the company. Please contact helpdesk@domain.com for assistance."
-                disabled style="resize:vertical;"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Forward email -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-forward" onchange="toggleForward()">
-          <div class="checklist-label">
-            <div class="cl-title">📨 Forward Email To</div>
-            <div class="cl-desc">Redirect incoming mail to another mailbox</div>
-            <div class="cl-input">
-              <input type="email" id="forwardTo" placeholder="manager@domain.com" disabled>
-            </div>
-          </div>
-        </div>
-
-        <!-- Convert to shared -->
-        <div class="checklist-item">
-          <input type="checkbox" id="chk-shared">
-          <div class="checklist-label">
-            <div class="cl-title">📦 Convert Mailbox to Shared Mailbox</div>
-            <div class="cl-desc">Preserves email access without requiring a license</div>
-          </div>
-        </div>
-
-        <!-- Delete user (danger) -->
-        <div class="checklist-item danger-item">
-          <input type="checkbox" id="chk-delete" onchange="toggleDelete()">
-          <div class="checklist-label">
-            <div class="cl-title">💀 Delete User Permanently <span style="font-size:10px;background:var(--danger);color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">DANGER</span></div>
-            <div class="cl-desc">Permanently deletes the account. Soft-deleted accounts can be recovered within 30 days from Entra ID.</div>
-            <div class="delete-confirm" id="deleteConfirm">
-              <p>Type <strong>DELETE</strong> below to confirm permanent deletion:</p>
-              <input type="text" id="deleteConfirmInput" placeholder='Type "DELETE" to enable' oninput="checkDeleteConfirm()">
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="result-box" id="resultBox">
-        <div class="result-title" id="resultTitle"></div>
-        <div id="resultBody"></div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-ghost" onclick="clearSelection()">Clear Selection</button>
-        <button class="btn btn-danger" id="offboardBtn" onclick="showConfirmModal()" disabled>
-          🚫 Offboard User
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="info-card">
-      <div class="section-title" style="margin-bottom:12px">User Details</div>
-      <div id="sidebarEmpty" style="text-align:center;padding:20px 0;color:var(--text-dim);font-size:12px;">Select a user to see details</div>
-      <div id="sidebarDetails" style="display:none;">
-        <div class="info-row"><span class="ir-label">Name</span><span class="ir-val" id="sd-name">—</span></div>
-        <div class="info-row"><span class="ir-label">UPN</span><span class="ir-val" id="sd-upn" style="font-family:var(--mono);font-size:11px;">—</span></div>
-        <div class="info-row"><span class="ir-label">Title</span><span class="ir-val" id="sd-title">—</span></div>
-        <div class="info-row"><span class="ir-label">Dept</span><span class="ir-val" id="sd-dept">—</span></div>
-        <div class="info-row"><span class="ir-label">Company</span><span class="ir-val" id="sd-company">—</span></div>
-        <div class="info-row"><span class="ir-label">License</span><span class="ir-val" id="sd-license">—</span></div>
-        <div class="info-row"><span class="ir-label">Tenant</span><span class="ir-val" id="sd-tenant">—</span></div>
-      </div>
-    </div>
-
-    <div style="margin-top:16px;">
-      <div class="danger-warn">
-        <strong>⚠️ Offboarding is irreversible for most actions.</strong><br><br>
-        • Block + Revoke happen immediately<br>
-        • License removal frees the seat at once<br>
-        • Group removal may affect shared resources<br>
-        • Delete has a 30-day recovery window in Entra ID<br><br>
-        Always verify you have the right user before proceeding.
+<!-- ─── STEP 1: Tenant Selection ─── -->
+<div class="step-panel active" id="step1">
+  <div class="step-heading">Select a tenant</div>
+  <div class="step-sub">Choose the Microsoft 365 tenant for the user you want to offboard.</div>
+  <div class="card">
+    <div class="field">
+      <label>Tenant</label>
+      <div class="select-wrap">
+        <select id="tenantSelect" onchange="onTenantChange()">
+          <option value="">— Select a tenant —</option>
+        </select>
       </div>
     </div>
   </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goPortal()">Close</button>
+    <button class="btn btn-primary" id="btn1Next" disabled onclick="goStep(2)">Next Step →</button>
+  </div>
+</div>
 
+<!-- ─── STEP 2: User Selection ─── -->
+<div class="step-panel" id="step2">
+  <div class="step-heading">Select the user to offboard</div>
+  <div class="step-sub" id="step2Sub">Search for a user in the selected tenant.</div>
+
+  <!-- Selected user card (hidden until selected) -->
+  <div class="selected-card" id="selectedCard" style="display:none;">
+    <div class="user-avatar danger-av" id="selAvatar">?</div>
+    <div>
+      <div class="label">Selected User</div>
+      <div class="user-name" id="selName">—</div>
+      <div class="user-upn" id="selUpn">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="search-row">
+      <input type="text" id="userSearch" placeholder="Search by name or email…" oninput="filterUsers()" onkeydown="if(event.key==='Enter')filterUsers()">
+      <button class="btn btn-primary" onclick="filterUsers()">Search</button>
+    </div>
+    <div class="user-list" id="userList">
+      <div class="loading-row" id="userListStatus">Loading users…</div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goPortal()">Close</button>
+    <button class="btn btn-back" onclick="goStep(1)">← Back</button>
+    <button class="btn btn-primary" id="btn2Next" disabled onclick="goStep(3)">Next Step →</button>
+  </div>
+</div>
+
+<!-- ─── STEP 3: Offboarding Options ─── -->
+<div class="step-panel" id="step3">
+  <div class="step-heading">Offboarding Options</div>
+  <div class="step-sub">Configure what actions to perform during offboarding.</div>
+
+  <div class="two-col">
+
+    <!-- LEFT: Offboarding Settings -->
+    <div class="card" style="overflow-y:auto;max-height:780px;">
+      <div class="card-title">Offboarding Settings</div>
+      <div class="card-sub">Using User Defaults</div>
+
+      <!-- Default ON toggles -->
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tHideFromGAL">Hide from Global Address List</label>
+        <label class="toggle"><input type="checkbox" id="tHideFromGAL" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tRemoveRules">Remove all Rules</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveRules" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tRemoveMobile">Remove all Mobile Devices</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveMobile" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tRemoveGroups">Remove from all groups</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveGroups" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tRemoveLicenses">Remove Licenses</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveLicenses" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tRevokeSessions">Revoke all sessions</label>
+        <label class="toggle"><input type="checkbox" id="tRevokeSessions" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tDisableSignIn">Disable Sign in</label>
+        <label class="toggle"><input type="checkbox" id="tDisableSignIn" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle-label" for="tResetPass">Reset Password</label>
+        <label class="toggle"><input type="checkbox" id="tResetPass" checked><span class="slider"></span></label>
+      </div>
+
+      <!-- Default OFF toggles (use accent color) -->
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tConvertToShared">Convert to Shared Mailbox</label>
+        <label class="toggle"><input type="checkbox" id="tConvertToShared"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tRemoveCalInvites">Cancel all calendar invites</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveCalInvites"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tRemovePermissions">Remove user's mailbox permissions</label>
+        <label class="toggle"><input type="checkbox" id="tRemovePermissions"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tRemoveCalPerms">Remove user's calendar permissions</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveCalPerms"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tClearImmutableId">Clear Immutable ID</label>
+        <label class="toggle"><input type="checkbox" id="tClearImmutableId"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tRemoveMFADevices">Remove all MFA Devices</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveMFADevices"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tRemoveTeamsPhone">Remove Teams Phone DID</label>
+        <label class="toggle"><input type="checkbox" id="tRemoveTeamsPhone"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tDeleteUser">Delete user ⚠️</label>
+        <label class="toggle"><input type="checkbox" id="tDeleteUser"><span class="slider"></span></label>
+      </div>
+
+      <!-- Scheduling -->
+      <div class="schedule-section">
+        <div class="section-title">Scheduling</div>
+        <div class="toggle-wrap toggle-off">
+          <label class="toggle-label" for="tScheduled">Schedule this offboarding</label>
+          <label class="toggle"><input type="checkbox" id="tScheduled" onchange="toggleScheduleDate()"><span class="slider"></span></label>
+        </div>
+        <div class="schedule-date" id="schedDateWrap">
+          <div class="field" style="margin-top:10px;">
+            <label>Scheduled Date</label>
+            <input type="date" id="schedDate">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Permissions and Forwarding -->
+    <div class="card" style="overflow-y:auto;max-height:780px;">
+      <div class="card-title">Permissions &amp; Forwarding</div>
+
+      <!-- Mailbox Access -->
+      <div class="section-title">Mailbox Access</div>
+
+      <div class="field">
+        <label>Grant Full Access (no automap)</label>
+        <div class="ac-wrap" id="acWrapNoAutomap">
+          <div class="ac-chips" id="chipsNoAutomap" onclick="focusAcInput('acInputNoAutomap')">
+            <input class="ac-input" id="acInputNoAutomap" placeholder="Leave blank if not needed" oninput="acFilter('NoAutomap')" onkeydown="acKeydown(event,'NoAutomap')" autocomplete="off">
+          </div>
+          <div class="ac-dropdown" id="acDropNoAutomap"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Grant Full Access (automap)</label>
+        <div class="ac-wrap" id="acWrapAutomap">
+          <div class="ac-chips" id="chipsAutomap" onclick="focusAcInput('acInputAutomap')">
+            <input class="ac-input" id="acInputAutomap" placeholder="Leave blank if not needed" oninput="acFilter('Automap')" onkeydown="acKeydown(event,'Automap')" autocomplete="off">
+          </div>
+          <div class="ac-dropdown" id="acDropAutomap"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Grant OneDrive Full Access</label>
+        <div class="ac-wrap" id="acWrapOnedrive">
+          <div class="ac-chips" id="chipsOnedrive" onclick="focusAcInput('acInputOnedrive')">
+            <input class="ac-input" id="acInputOnedrive" placeholder="Leave blank if not needed" oninput="acFilter('Onedrive')" onkeydown="acKeydown(event,'Onedrive')" autocomplete="off">
+          </div>
+          <div class="ac-dropdown" id="acDropOnedrive"></div>
+        </div>
+      </div>
+
+      <!-- Email Forwarding -->
+      <div class="section-title">Email Forwarding</div>
+
+      <div class="toggle-wrap toggle-off" style="margin-bottom:12px;">
+        <label class="toggle-label" for="tDisableForwarding">Disable Email Forwarding</label>
+        <label class="toggle"><input type="checkbox" id="tDisableForwarding" onchange="toggleForwardSection()"><span class="slider"></span></label>
+      </div>
+
+      <div id="forwardSection">
+        <div class="field">
+          <label>Forward Email To</label>
+          <div class="ac-wrap" id="acWrapForward">
+            <div class="ac-chips" id="chipsForward" onclick="focusAcInput('acInputForward')">
+              <input class="ac-input" id="acInputForward" placeholder="Leave blank if not needed" oninput="acFilter('Forward')" onkeydown="acKeydown(event,'Forward')" autocomplete="off">
+            </div>
+            <div class="ac-dropdown" id="acDropForward"></div>
+          </div>
+        </div>
+        <div class="toggle-wrap toggle-off" style="margin-top:8px;">
+          <label class="toggle-label" for="tKeepCopy">Keep a copy of forwarded mail</label>
+          <label class="toggle"><input type="checkbox" id="tKeepCopy"><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <!-- Out of Office -->
+      <div class="section-title">Out of Office Message</div>
+      <div class="field">
+        <label>Out of Office Message</label>
+        <textarea id="oooText" rows="4" placeholder="Leave blank to not set"></textarea>
+      </div>
+
+      <!-- Post-Execution -->
+      <div class="section-title">Send Results To (Post Execution)</div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tPostWebhook">Webhook</label>
+        <label class="toggle"><input type="checkbox" id="tPostWebhook"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tPostEmail">E-mail</label>
+        <label class="toggle"><input type="checkbox" id="tPostEmail"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-wrap toggle-off">
+        <label class="toggle-label" for="tPostPSA">PSA</label>
+        <label class="toggle"><input type="checkbox" id="tPostPSA"><span class="slider"></span></label>
+      </div>
+
+      <!-- Reference -->
+      <div class="section-title">Reference</div>
+      <div class="field">
+        <label>Reference</label>
+        <input type="text" id="refInput" placeholder="Enter a reference for notifications and scheduled tasks">
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goPortal()">Close</button>
+    <button class="btn btn-back" onclick="goStep(2)">← Back</button>
+    <button class="btn btn-primary" onclick="goStep(4)">Next Step →</button>
+  </div>
+</div>
+
+<!-- ─── STEP 4: Confirmation ─── -->
+<div class="step-panel" id="step4">
+  <div class="step-heading">Confirm Offboarding</div>
+  <div class="step-sub">Review all settings before submitting. This action cannot be undone.</div>
+
+  <!-- User being offboarded -->
+  <div class="confirm-user-card">
+    <div class="user-avatar danger-av" id="confAvatar">?</div>
+    <div class="cu-info">
+      <div class="label" style="font-size:11px;color:var(--danger);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;">User Being Offboarded</div>
+      <div class="cu-name" id="confName">—</div>
+      <div class="cu-upn" id="confUpn">—</div>
+      <div class="cu-tenant" id="confTenant">—</div>
+    </div>
+  </div>
+
+  <!-- Options summary -->
+  <div class="card">
+    <div class="section-title">Selected Options</div>
+    <div class="opts-grid" id="optsGrid"></div>
+  </div>
+
+  <!-- Scheduling summary -->
+  <div class="sched-box" id="schedBox" style="display:none;"></div>
+
+  <!-- Delete user warning -->
+  <div class="warn-box" id="deleteWarn" style="display:none;">
+    <strong>⚠️ Warning:</strong> This will <strong>permanently delete</strong> the user account. This action cannot be undone.
+  </div>
+
+  <!-- Result -->
+  <div class="result-box" id="resultBox">
+    <div class="result-title" id="resultTitle"></div>
+    <div id="resultDetail"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goPortal()">Close</button>
+    <button class="btn btn-back" id="btnBack4" onclick="goStep(3)">← Back</button>
+    <button class="btn btn-danger" id="btnSubmit" onclick="submitOffboard()">🚫 Submit Offboarding</button>
+  </div>
+</div>
+
+</div><!-- /wizard-wrap -->
 </main>
 
-<!-- CONFIRM MODAL -->
-<div class="modal-overlay" id="confirmModal">
-  <div class="modal">
-    <h2>⚠️ Confirm Offboarding</h2>
-    <p>You are about to offboard the following user. Selected actions will execute immediately and most cannot be undone.</p>
-    <div class="modal-user">
-      <div class="mu-name" id="modal-name">—</div>
-      <div class="mu-upn" id="modal-upn">—</div>
-      <div class="mu-tenant" id="modal-tenant">—</div>
-    </div>
-    <div id="modal-actions-list" style="font-size:12px;color:var(--text-muted);margin-bottom:18px;line-height:1.8;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancel</button>
-      <button class="btn btn-danger" id="confirmBtn" onclick="doOffboard()">Yes, Offboard</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
 <script>
-// =============================================
+// ═══════════════════════════════════════════════════════
 // CONFIG
-// =============================================
-var CIPP_BASE = 'https://agreeable-stone-060c94b0f.3.azurestaticapps.net';
-var CIPP_KEY  = '_MNhh4ZlkdwQfRurLGXkWs0MGshcx18cheGXZYNt6F9RAzFuacKCWg==';
+// ═══════════════════════════════════════════════════════
+var BASE_URL = 'https://agreeable-stone-060c94b0f.3.azurestaticapps.net';
+var API_KEY  = '_MNhh4ZlkdwQfRurLGXkWs0MGshcx18cheGXZYNt6F9RAzFuacKCWg==';
 
 var TENANTS = [
-  { name:'Geaux Automotive',             domain:'geauxautomotive.com',       id:'4ceb1a80-7fd3-4760-a827-aedf07b8d4fa' },
-  { name:'Level Homes',                  domain:'levelbr.com',               id:'6444fec1-ccb7-43e6-a075-ba259750173f' },
-  { name:'Bailey Investments',           domain:'jjbiii.com',                id:'3d9de324-5169-4438-aa46-16ffa112196d' },
-  { name:'Brindis Smile Effect',         domain:'brindissmileeffect.com',    id:'e5937982-3451-4e41-8049-fc446ac5df1d' },
-  { name:'City Pork Deli',              domain:'citypork.com',              id:'221e67fd-a985-41ab-9e40-508b2e4f2c91' },
-  { name:'Community Assoc. Management', domain:'camgmttlc.com',             id:'3cbaf35e-e56c-4aee-993a-ddb12651da43' },
-  { name:'Convergent Processing',        domain:'convergentprocessing.com',  id:'ad44e991-3922-4946-88fb-949bbd5c4601' },
-  { name:'Crescent City Dentistry',      domain:'crescentcitydentistry.com', id:'5dc53393-fc1c-4be1-9c74-01dc26eebb26' },
-  { name:'Engquist Development',         domain:'engquistcap.com',           id:'aa5be8ed-d9e8-485d-a596-66bd1cec417a' },
-  { name:'Georgia Proton',              domain:'georgiaproton.org',         id:'b898ded5-f17a-46be-a6e2-4585a7736e88' },
-  { name:'Gertler Firm',                 domain:'gertlerfirm.com',           id:'ff05afc0-faa2-46bb-8739-f6d03aefb6dc' },
-  { name:'Irby Investments',             domain:'irbyinvestments.com',       id:'e951bbc6-d33e-4471-b006-48e389fda2e5' },
-  { name:'Plotkin Vincent',              domain:'plotkinvincent.com',        id:'c6a26024-94d9-4bb4-81df-9484ec100baa' },
-  { name:'Sibille Legal Services',       domain:'sibillelaw.com',            id:'89f0c68f-054b-49c2-85ac-cb5912237916' },
-  { name:'True Title',                   domain:'truetitle.net',             id:'5e17b006-ba85-4bc8-8638-441a4d4264e6' }
+  { name:'Geaux Automotive',              domain:'geauxautomotive.com',         id:'4ceb1a80-7fd3-4760-a827-aedf07b8d4fa' },
+  { name:'Level Homes',                   domain:'levelbr.com',                  id:'6444fec1-ccb7-43e6-a075-ba259750173f' },
+  { name:'Bailey Investments',            domain:'jjbiii.com',                   id:'3d9de324-5169-4438-aa46-16ffa112196d' },
+  { name:'Brindis Smile Effect',          domain:'brindissmileeffect.com',       id:'e5937982-3451-4e41-8049-fc446ac5df1d' },
+  { name:'City Pork Deli',               domain:'citypork.com',                 id:'221e67fd-a985-41ab-9e40-508b2e4f2c91' },
+  { name:'Community Association Management', domain:'camgmttlc.com',            id:'3cbaf35e-e56c-4aee-993a-ddb12651da43' },
+  { name:'Convergent Processing',         domain:'convergentprocessing.com',     id:'ad44e991-3922-4946-88fb-949bbd5c4601' },
+  { name:'Crescent City Dentistry',       domain:'crescentcitydentistry.com',    id:'5dc53393-fc1c-4be1-9c74-01dc26eebb26' },
+  { name:'Engquist Development',          domain:'engquistcap.com',              id:'aa5be8ed-d9e8-485d-a596-66bd1cec417a' },
+  { name:'Georgia Proton',                domain:'georgiaproton.org',            id:'b898ded5-f17a-46be-a6e2-4585a7736e88' },
+  { name:'Gertler Firm',                  domain:'gertlerfirm.com',              id:'ff05afc0-faa2-46bb-8739-f6d03aefb6dc' },
+  { name:'Irby Investments',              domain:'irbyinvestments.com',          id:'e951bbc6-d33e-4471-b006-48e389fda2e5' },
+  { name:'Plotkin Vincent',               domain:'plotkinvincent.com',           id:'c6a26024-94d9-4bb4-81df-9484ec100baa' },
+  { name:'Sibille Legal Services',        domain:'sibillelaw.com',               id:'89f0c68f-054b-49c2-85ac-cb5912237916' },
+  { name:'True Title',                    domain:'truetitle.net',                id:'5e17b006-ba85-4bc8-8638-441a4d4264e6' }
 ];
 
-// =============================================
+// ═══════════════════════════════════════════════════════
 // STATE
-// =============================================
-var currentTenant  = null;
-var allUsers       = [];
-var filteredUsers  = [];
-var selectedUser   = null;
+// ═══════════════════════════════════════════════════════
+var currentStep  = 1;
+var currentTenant = null;
+var allUsers     = [];
+var selectedUser = null;
 
-// =============================================
+// Autocomplete state: arrays for multi-select, single for forward
+var acSelections = { NoAutomap:[], Automap:[], Onedrive:[], Forward:[] };
+
+// ═══════════════════════════════════════════════════════
 // INIT
-// =============================================
-document.addEventListener('DOMContentLoaded', function(){
+// ═══════════════════════════════════════════════════════
+(function init(){
+  // Populate tenant dropdown
   var sel = document.getElementById('tenantSelect');
   TENANTS.forEach(function(t){
-    var opt = document.createElement('option');
-    opt.value = t.id; opt.textContent = t.name;
-    sel.appendChild(opt);
+    var o = document.createElement('option');
+    o.value = t.id;
+    o.textContent = t.name + ' — ' + t.domain;
+    sel.appendChild(o);
   });
+
+  // Check ?tenant=ID param
   var params = new URLSearchParams(window.location.search);
-  var pre = params.get('tenant');
-  if (pre){ sel.value=pre; onTenantChange(); }
-});
+  var preId  = params.get('tenant');
+  if(preId){
+    sel.value = preId;
+    onTenantChange();
+    // auto-advance after brief delay to let DOM settle
+    setTimeout(function(){ if(currentTenant) goStep(2); }, 100);
+  }
 
-// =============================================
-// CIPP FETCH
-// =============================================
-function cippFetch(path, method, body){
-  var opts={ method:method||'GET', headers:{'Content-Type':'application/json','x-functions-key':CIPP_KEY} };
-  if(body) opts.body=JSON.stringify(body);
-  return fetch(CIPP_BASE+path, opts);
-}
+  updateProgress(1);
+  setStatus(false, 'Not connected');
+})();
 
-function checkConnection(){
-  var dot=document.getElementById('statusDot');
-  var txt=document.getElementById('statusText');
-  dot.className='status-dot';
-  txt.textContent='Connecting…'; txt.style.color='var(--text-muted)';
-  if(!currentTenant) return;
-  cippFetch('/api/ListLicenses?tenantFilter='+encodeURIComponent(currentTenant.domain),'GET')
-    .then(function(r){
-      if(r.ok){ dot.className='status-dot connected'; txt.textContent='Connected to '+currentTenant.name; txt.style.color='var(--success)'; }
-      else { dot.className='status-dot error'; txt.textContent='Error '+r.status; txt.style.color='var(--danger)'; }
-    })
-    .catch(function(){ dot.className='status-dot error'; txt.textContent='Unreachable'; txt.style.color='var(--danger)'; });
-}
-
-// =============================================
-// TENANT
-// =============================================
+// ═══════════════════════════════════════════════════════
+// TENANT SELECTION
+// ═══════════════════════════════════════════════════════
 function onTenantChange(){
-  var id=document.getElementById('tenantSelect').value;
-  if(!id){ currentTenant=null; document.getElementById('tenantDomain').textContent=''; return; }
-  currentTenant=TENANTS.find(function(t){ return t.id===id; });
-  document.getElementById('tenantDomain').textContent=currentTenant?currentTenant.domain:'';
-  allUsers=[]; filteredUsers=[]; selectedUser=null;
-  clearSelection();
-  document.getElementById('userListWrap').innerHTML=
-    '<div class="empty-state"><span class="icon">🔍</span>Search for a user in '+esc(currentTenant.name)+'</div>';
-  checkConnection();
+  var val = document.getElementById('tenantSelect').value;
+  currentTenant = TENANTS.find(function(t){ return t.id === val; }) || null;
+  document.getElementById('btn1Next').disabled = !currentTenant;
+
+  if(currentTenant){
+    document.getElementById('hdrTitle').textContent = '🚫 Remove User — ' + currentTenant.name + ' (' + currentTenant.domain + ')';
+    document.getElementById('hdrSub').textContent = currentTenant.domain;
+    setStatus(true, 'Connected to ' + currentTenant.name);
+  } else {
+    document.getElementById('hdrTitle').textContent = 'Remove User';
+    document.getElementById('hdrSub').textContent = 'Select a tenant to begin';
+    setStatus(false, 'Not connected');
+  }
 }
 
-// =============================================
-// SEARCH
-// =============================================
-function doSearch(){
-  if(!currentTenant){ showToast('Select a tenant first','warn'); return; }
-  var q=document.getElementById('searchInput').value.trim();
-  var btn=document.getElementById('searchBtn');
-  var wrap=document.getElementById('userListWrap');
-  btn.disabled=true; btn.innerHTML='<span class="spinner" style="border-top-color:var(--text-muted)"></span>';
-  wrap.innerHTML='<div class="empty-state"><span class="icon">⏳</span>Loading users…</div>';
-  cippFetch('/api/ListGraphRequest','POST',{
+function setStatus(connected, text){
+  var dot  = document.getElementById('statusDot');
+  var txt  = document.getElementById('statusText');
+  dot.className = 'status-dot' + (connected ? ' connected' : '');
+  txt.textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════
+// USER LOADING (Step 2)
+// ═══════════════════════════════════════════════════════
+function loadUsers(){
+  var listEl = document.getElementById('userList');
+  listEl.innerHTML = '<div class="loading-row">Loading users from ' + currentTenant.name + '…</div>';
+  document.getElementById('step2Sub').textContent = 'Select the user to offboard from ' + currentTenant.name + ' (' + currentTenant.domain + ')';
+
+  fetch(BASE_URL + '/api/ListGraphRequest', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-functions-key': API_KEY
+    },
+    body: JSON.stringify({
       tenantFilter: currentTenant.domain,
       Endpoint: 'users',
-      '$select': 'id,displayName,userPrincipalName,givenName,surname,department,jobTitle,companyName,mobilePhone,businessPhones,usageLocation,mail,accountEnabled,assignedLicenses',
+      '$select': 'id,displayName,userPrincipalName,department,jobTitle',
       '$top': 999,
       '$count': true,
       '$orderby': 'displayName'
     })
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(function(result){
-      allUsers=Array.isArray(result)?result:(result.Results||result.value||[]);
-      filterAndRender(q);
-    })
-    .catch(function(e){
-      wrap.innerHTML='<div class="empty-state"><span class="icon">❌</span>Failed: '+esc(e.message)+'</div>';
-    })
-    .finally(function(){ btn.disabled=false; btn.textContent='Search'; });
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var results = data.Results || data.results || [];
+    allUsers = results;
+    renderUserList('');
+  })
+  .catch(function(err){
+    listEl.innerHTML = '<div class="empty-row" style="color:var(--danger);">Failed to load users: ' + err.message + '</div>';
+  });
 }
 
-function filterAndRender(q){
-  var wrap=document.getElementById('userListWrap');
-  if(!allUsers.length){ wrap.innerHTML='<div class="empty-state"><span class="icon">👥</span>No users found</div>'; return; }
-  var query=(q||'').toLowerCase();
-  filteredUsers=query
+function filterUsers(){
+  var q = document.getElementById('userSearch').value.toLowerCase().trim();
+  renderUserList(q);
+}
+
+function renderUserList(query){
+  var listEl = document.getElementById('userList');
+  var filtered = query
     ? allUsers.filter(function(u){
-        return (u.displayName||u.DisplayName||'').toLowerCase().includes(query)||
-               (u.userPrincipalName||u.UserPrincipalName||'').toLowerCase().includes(query);
+        return (u.displayName||'').toLowerCase().indexOf(query) > -1
+            || (u.userPrincipalName||'').toLowerCase().indexOf(query) > -1;
       })
     : allUsers;
-  if(!filteredUsers.length){ wrap.innerHTML='<div class="empty-state"><span class="icon">🔍</span>No matches for "'+esc(q)+'"</div>'; return; }
-  var html='<div class="user-list">';
-  filteredUsers.slice(0,50).forEach(function(u,i){
-    var dn=u.displayName||u.DisplayName||'—';
-    var upn=u.userPrincipalName||u.UserPrincipalName||'';
-    var dep=u.department||u.Department||'';
-    var ini=dn.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase()||'?';
-    html+='<div class="user-item" onclick="selectUser('+i+')" id="uitem-'+i+'">';
-    html+='<div class="user-avatar">'+ini+'</div>';
-    html+='<div class="user-info"><div class="user-name">'+esc(dn)+'</div>';
-    html+='<div class="user-upn">'+esc(upn)+'</div>';
-    if(dep) html+='<div class="user-dept">'+esc(dep)+'</div>';
-    html+='</div></div>';
+
+  if(!filtered.length){
+    listEl.innerHTML = '<div class="empty-row">' + (allUsers.length ? 'No users match your search.' : 'No users found in this tenant.') + '</div>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  filtered.slice(0,150).forEach(function(u){
+    var initials = getInitials(u.displayName || u.userPrincipalName || '?');
+    var isSelected = selectedUser && selectedUser.id === u.id;
+    var div = document.createElement('div');
+    div.className = 'user-item' + (isSelected ? ' selected' : '');
+    div.innerHTML =
+      '<div class="user-avatar danger-av">' + initials + '</div>' +
+      '<div class="user-info">' +
+        '<div class="user-name">' + esc(u.displayName || '—') + '</div>' +
+        '<div class="user-upn">' + esc(u.userPrincipalName || '—') + '</div>' +
+        (u.department || u.jobTitle ? '<div class="user-dept">' + esc([u.department, u.jobTitle].filter(Boolean).join(' · ')) + '</div>' : '') +
+      '</div>' +
+      (isSelected ? '<div class="user-check">✓</div>' : '');
+    div.onclick = function(){ selectUser(u); };
+    listEl.appendChild(div);
   });
-  if(filteredUsers.length>50) html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--text-dim)">Showing 50 of '+filteredUsers.length+'</div>';
-  html+='</div>';
-  wrap.innerHTML=html;
+  if(filtered.length > 150){
+    var more = document.createElement('div');
+    more.className = 'empty-row';
+    more.textContent = (filtered.length - 150) + ' more results — refine your search to see them.';
+    listEl.appendChild(more);
+  }
 }
 
-// =============================================
-// SELECT USER
-// =============================================
-function selectUser(idx){
-  document.querySelectorAll('.user-item').forEach(function(el){ el.classList.remove('selected'); });
-  var item=document.getElementById('uitem-'+idx);
-  if(item) item.classList.add('selected');
-  selectedUser=filteredUsers[idx];
-  var u=selectedUser;
-  var dn=u.displayName||u.DisplayName||'—';
-  var upn=u.userPrincipalName||u.UserPrincipalName||'';
-  var title=u.jobTitle||u.JobTitle||'';
-  var dept=u.department||u.Department||'';
-  var company=u.companyName||u.CompanyName||'';
-  var licenses=u.assignedLicenses||u.AssignedLicenses||[];
-  var ini=dn.split(' ').map(function(w){return w[0]||'';}).join('').substring(0,2).toUpperCase()||'?';
+function selectUser(u){
+  selectedUser = u;
+  document.getElementById('btn2Next').disabled = false;
 
-  // User card
-  document.getElementById('uc-avatar').textContent=ini;
-  document.getElementById('uc-name').innerHTML=esc(dn)+'<span class="user-card-badge">TO BE OFFBOARDED</span>';
-  document.getElementById('uc-upn').textContent=upn;
-  document.getElementById('uc-meta').textContent=[title,dept,company].filter(Boolean).join(' · ')||'No title/department set';
+  // Show selected card
+  var initials = getInitials(u.displayName || u.userPrincipalName);
+  document.getElementById('selAvatar').textContent = initials;
+  document.getElementById('selName').textContent   = u.displayName || '—';
+  document.getElementById('selUpn').textContent    = u.userPrincipalName || '—';
+  document.getElementById('selectedCard').style.display = 'flex';
 
-  // Sidebar
-  document.getElementById('sd-name').textContent=dn;
-  document.getElementById('sd-upn').textContent=upn;
-  document.getElementById('sd-title').textContent=title||'—';
-  document.getElementById('sd-dept').textContent=dept||'—';
-  document.getElementById('sd-company').textContent=company||'—';
-  document.getElementById('sd-license').textContent=licenses.length?licenses.length+' license(s)':'None';
-  document.getElementById('sd-tenant').textContent=currentTenant?currentTenant.name:'—';
-  document.getElementById('sidebarEmpty').style.display='none';
-  document.getElementById('sidebarDetails').style.display='block';
-
-  document.getElementById('userCardWrap').style.display='block';
-  document.getElementById('checklistWrap').style.display='block';
-  document.getElementById('offboardBtn').disabled=false;
-  document.getElementById('resultBox').className='result-box';
-
-  // Reset checklist to defaults
-  document.getElementById('chk-block').checked=true;
-  document.getElementById('chk-revoke').checked=true;
-  document.getElementById('chk-licenses').checked=true;
-  document.getElementById('chk-groups').checked=true;
-  document.getElementById('chk-gal').checked=true;
-  document.getElementById('chk-ooo').checked=false;
-  document.getElementById('chk-forward').checked=false;
-  document.getElementById('chk-shared').checked=false;
-  document.getElementById('chk-delete').checked=false;
-  document.getElementById('oooMessage').disabled=true; document.getElementById('oooMessage').value='';
-  document.getElementById('forwardTo').disabled=true;  document.getElementById('forwardTo').value='';
-  document.getElementById('deleteConfirm').className='delete-confirm';
-  document.getElementById('deleteConfirmInput').value='';
-
-  document.getElementById('userCardWrap').scrollIntoView({behavior:'smooth',block:'start'});
+  // Re-render list to show check
+  filterUsers();
 }
 
-// =============================================
-// CHECKLIST TOGGLES
-// =============================================
-function toggleOOO(){
-  var checked=document.getElementById('chk-ooo').checked;
-  document.getElementById('oooMessage').disabled=!checked;
-  if(checked) document.getElementById('oooMessage').focus();
-}
-function toggleForward(){
-  var checked=document.getElementById('chk-forward').checked;
-  document.getElementById('forwardTo').disabled=!checked;
-  if(checked) document.getElementById('forwardTo').focus();
-}
-function toggleDelete(){
-  var checked=document.getElementById('chk-delete').checked;
-  var conf=document.getElementById('deleteConfirm');
-  conf.className=checked?'delete-confirm show':'delete-confirm';
-  if(!checked) document.getElementById('deleteConfirmInput').value='';
-  checkDeleteConfirm();
-}
-function checkDeleteConfirm(){
-  var del=document.getElementById('chk-delete').checked;
-  var val=document.getElementById('deleteConfirmInput').value;
-  var btn=document.getElementById('offboardBtn');
-  if(del && val!=='DELETE'){ btn.disabled=true; return; }
-  if(!selectedUser){ btn.disabled=true; return; }
-  btn.disabled=false;
+// ═══════════════════════════════════════════════════════
+// TOGGLE HELPERS
+// ═══════════════════════════════════════════════════════
+function toggleScheduleDate(){
+  var on   = document.getElementById('tScheduled').checked;
+  var wrap = document.getElementById('schedDateWrap');
+  wrap.classList.toggle('show', on);
 }
 
-// =============================================
-// CONFIRM MODAL
-// =============================================
-function showConfirmModal(){
-  if(!selectedUser||!currentTenant) return;
-  var u=selectedUser;
-  var dn=u.displayName||u.DisplayName||'—';
-  var upn=u.userPrincipalName||u.UserPrincipalName||'';
-  document.getElementById('modal-name').textContent=dn;
-  document.getElementById('modal-upn').textContent=upn;
-  document.getElementById('modal-tenant').textContent='Tenant: '+currentTenant.name+' ('+currentTenant.domain+')';
-
-  var actions=[];
-  if(document.getElementById('chk-block').checked)    actions.push('🔒 Block sign-in');
-  if(document.getElementById('chk-revoke').checked)   actions.push('🔄 Revoke all sessions');
-  if(document.getElementById('chk-licenses').checked) actions.push('📄 Remove all licenses');
-  if(document.getElementById('chk-groups').checked)   actions.push('👥 Remove from all groups');
-  if(document.getElementById('chk-gal').checked)      actions.push('📒 Hide from Global Address List');
-  if(document.getElementById('chk-ooo').checked)      actions.push('✉️ Set Out of Office reply');
-  if(document.getElementById('chk-forward').checked)  actions.push('📨 Forward email to: '+document.getElementById('forwardTo').value);
-  if(document.getElementById('chk-shared').checked)   actions.push('📦 Convert to Shared Mailbox');
-  if(document.getElementById('chk-delete').checked)   actions.push('💀 DELETE USER PERMANENTLY');
-  document.getElementById('modal-actions-list').innerHTML='<strong>Actions to execute:</strong><br>'+actions.join('<br>');
-
-  document.getElementById('confirmModal').className='modal-overlay show';
-}
-function closeConfirmModal(){
-  document.getElementById('confirmModal').className='modal-overlay';
+function toggleForwardSection(){
+  var on = document.getElementById('tDisableForwarding').checked;
+  document.getElementById('forwardSection').style.display = on ? 'none' : 'block';
 }
 
-// =============================================
-// OFFBOARD
-// =============================================
-function doOffboard(){
-  if(!selectedUser||!currentTenant) return;
-  var u=selectedUser;
-  var upn=u.userPrincipalName||u.UserPrincipalName||'';
-  var btn=document.getElementById('confirmBtn');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Running…';
+// ═══════════════════════════════════════════════════════
+// AUTOCOMPLETE
+// ═══════════════════════════════════════════════════════
+var acMulti  = ['NoAutomap','Automap','Onedrive'];
+var acSingle = ['Forward'];
 
-  var payload={
+function focusAcInput(id){ document.getElementById(id).focus(); }
+
+function acFilter(key){
+  var input = document.getElementById('acInput' + key);
+  var q     = input.value.toLowerCase().trim();
+  var drop  = document.getElementById('acDrop' + key);
+
+  if(!q){ drop.classList.remove('show'); return; }
+
+  var selected = acSelections[key];
+  var selIds   = (Array.isArray(selected) ? selected : (selected ? [selected] : [])).map(function(u){ return u.id; });
+
+  var matches = allUsers.filter(function(u){
+    if(selIds.indexOf(u.id) > -1) return false;
+    return (u.displayName||'').toLowerCase().indexOf(q) > -1
+        || (u.userPrincipalName||'').toLowerCase().indexOf(q) > -1;
+  }).slice(0,10);
+
+  if(!matches.length){
+    drop.innerHTML = '<div class="ac-empty">No matches</div>';
+    drop.classList.add('show');
+    return;
+  }
+
+  drop.innerHTML = '';
+  matches.forEach(function(u){
+    var div = document.createElement('div');
+    div.className = 'ac-opt';
+    div.innerHTML =
+      '<div class="ac-av">' + getInitials(u.displayName||u.userPrincipalName) + '</div>' +
+      '<div><div class="ac-name">' + esc(u.displayName||'—') + '</div>' +
+         '<div class="ac-upn">' + esc(u.userPrincipalName||'—') + '</div></div>';
+    div.onmousedown = function(e){ e.preventDefault(); acSelect(key, u); };
+    drop.appendChild(div);
+  });
+  drop.classList.add('show');
+}
+
+function acKeydown(e, key){
+  if(e.key === 'Escape'){
+    document.getElementById('acDrop' + key).classList.remove('show');
+  }
+  if(e.key === 'Backspace' && e.target.value === ''){
+    acRemoveLast(key);
+  }
+}
+
+function acSelect(key, user){
+  var input = document.getElementById('acInput' + key);
+  input.value = '';
+  document.getElementById('acDrop' + key).classList.remove('show');
+
+  if(acSingle.indexOf(key) > -1){
+    // single-select: replace
+    acSelections[key] = user;
+  } else {
+    // multi-select: append if not already there
+    var arr = acSelections[key];
+    if(!arr.find(function(u){ return u.id === user.id; })){
+      arr.push(user);
+    }
+  }
+  renderChips(key);
+  input.focus();
+}
+
+function acRemoveLast(key){
+  if(acSingle.indexOf(key) > -1){
+    acSelections[key] = null;
+  } else {
+    if(acSelections[key].length > 0) acSelections[key].pop();
+  }
+  renderChips(key);
+}
+
+function acRemove(key, idx){
+  if(acSingle.indexOf(key) > -1){
+    acSelections[key] = null;
+  } else {
+    acSelections[key].splice(idx, 1);
+  }
+  renderChips(key);
+}
+
+function renderChips(key){
+  var container = document.getElementById('chips' + key);
+  var input     = document.getElementById('acInput' + key);
+
+  // Remove old chips (keep input)
+  var existing = container.querySelectorAll('.chip');
+  existing.forEach(function(c){ c.remove(); });
+
+  var sel   = acSelections[key];
+  var users = Array.isArray(sel) ? sel : (sel ? [sel] : []);
+  users.forEach(function(u, i){
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = esc(u.displayName || u.userPrincipalName) +
+      '<span class="chip-x" onmousedown="event.preventDefault();acRemove(\'' + key + '\',' + i + ')">×</span>';
+    container.insertBefore(chip, input);
+  });
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e){
+  ['NoAutomap','Automap','Onedrive','Forward'].forEach(function(key){
+    var wrap = document.getElementById('acWrap' + key);
+    var drop = document.getElementById('acDrop' + key);
+    if(wrap && !wrap.contains(e.target)){
+      drop.classList.remove('show');
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goStep(n){
+  if(n === 2 && !currentTenant) return;
+  if(n === 3 && !selectedUser)   return;
+
+  // Load users when entering step 2 (once per tenant)
+  if(n === 2 && currentTenant && allUsers.length === 0){
+    setStatus(false, 'Loading users…');
+    loadUsers();
+    setTimeout(function(){ setStatus(true, 'Connected to ' + currentTenant.name); }, 2000);
+  }
+
+  // Build confirmation when entering step 4
+  if(n === 4) buildConfirmation();
+
+  // Hide all steps
+  for(var i=1;i<=4;i++){
+    document.getElementById('step'+i).classList.remove('active');
+  }
+  document.getElementById('step'+n).classList.add('active');
+  currentStep = n;
+  updateProgress(n);
+  window.scrollTo(0,0);
+}
+
+function updateProgress(active){
+  for(var i=1;i<=4;i++){
+    var circ  = document.getElementById('sc'+i);
+    var lbl   = document.getElementById('sl'+i);
+    circ.className = 'step-circle';
+    lbl.className  = 'step-label';
+    if(i < active){
+      circ.className += ' done';
+      lbl.className  += ' done';
+      circ.textContent = '✓';
+    } else if(i === active){
+      circ.className += ' active';
+      lbl.className  += ' active';
+      circ.textContent = i;
+    } else {
+      circ.textContent = i;
+    }
+    // connectors
+    if(i <= 3){
+      var con = document.getElementById('con'+i);
+      con.className = 'step-connector' + (i < active ? ' done' : '');
+    }
+  }
+}
+
+function goPortal(){
+  window.location.href = 'https://agreeable-stone-060c94b0f.3.azurestaticapps.net';
+}
+
+// ═══════════════════════════════════════════════════════
+// CONFIRMATION BUILD
+// ═══════════════════════════════════════════════════════
+function buildConfirmation(){
+  if(!selectedUser || !currentTenant) return;
+
+  var initials = getInitials(selectedUser.displayName || selectedUser.userPrincipalName);
+  document.getElementById('confAvatar').textContent  = initials;
+  document.getElementById('confName').textContent    = selectedUser.displayName || '—';
+  document.getElementById('confUpn').textContent     = selectedUser.userPrincipalName || '—';
+  document.getElementById('confTenant').textContent  = currentTenant.name + ' (' + currentTenant.domain + ')';
+
+  // Options to show
+  var opts = collectOpts();
+  var rows = [
+    { label:'Hide from GAL',             val: opts.HideFromGAL },
+    { label:'Remove Rules',              val: opts.RemoveRules },
+    { label:'Remove Mobile Devices',     val: opts.RemoveMobile },
+    { label:'Remove from Groups',        val: opts.RemoveGroups },
+    { label:'Remove Licenses',           val: opts.RemoveLicenses },
+    { label:'Revoke Sessions',           val: opts.RevokeSessions },
+    { label:'Disable Sign In',           val: opts.DisableSignIn },
+    { label:'Reset Password',            val: opts.ResetPass },
+    { label:'Convert to Shared Mailbox', val: opts.ConvertToShared },
+    { label:'Cancel Calendar Invites',   val: opts.removeCalendarInvites },
+    { label:'Remove Mailbox Permissions',val: opts.removePermissions },
+    { label:'Remove Calendar Perms',     val: opts.removeCalendarPermissions },
+    { label:'Clear Immutable ID',        val: opts.ClearImmutableId },
+    { label:'Remove MFA Devices',        val: opts.RemoveMFADevices },
+    { label:'Remove Teams Phone DID',    val: opts.RemoveTeamsPhoneDID },
+    { label:'Delete User',               val: opts.DeleteUser },
+    { label:'Disable Forwarding',        val: opts.disableForwarding },
+    { label:'Keep Copy of Forwarded Mail', val: opts.KeepCopy },
+    { label:'Post Exec → Webhook',       val: opts.postWebhook },
+    { label:'Post Exec → Email',         val: opts.postEmail },
+    { label:'Post Exec → PSA',           val: opts.postPSA },
+  ];
+
+  // Value rows
+  var valRows = [];
+  var forwardUsers = acSelections.Forward ? [acSelections.Forward] : [];
+  var noAutoUsers  = acSelections.NoAutomap;
+  var autoUsers    = acSelections.Automap;
+  var oneDriveUsers = acSelections.Onedrive;
+
+  if(forwardUsers.length)
+    valRows.push({ label:'Forward Email To', txt: forwardUsers[0].displayName + ' <' + forwardUsers[0].userPrincipalName + '>' });
+  if(noAutoUsers.length)
+    valRows.push({ label:'Full Access (no automap)', txt: noAutoUsers.map(function(u){ return u.displayName; }).join(', ') });
+  if(autoUsers.length)
+    valRows.push({ label:'Full Access (automap)', txt: autoUsers.map(function(u){ return u.displayName; }).join(', ') });
+  if(oneDriveUsers.length)
+    valRows.push({ label:'OneDrive Access', txt: oneDriveUsers.map(function(u){ return u.displayName; }).join(', ') });
+  if(opts.OOO)
+    valRows.push({ label:'Out of Office Msg', txt: opts.OOO.length > 60 ? opts.OOO.substr(0,60)+'…' : opts.OOO });
+  if(opts.reference)
+    valRows.push({ label:'Reference', txt: opts.reference });
+
+  var grid = document.getElementById('optsGrid');
+  grid.innerHTML = '';
+  rows.forEach(function(r){
+    var div = document.createElement('div');
+    div.className = 'opt-row';
+    var cls = r.val ? 'yes' : 'no';
+    div.innerHTML = '<span class="opt-lbl">' + esc(r.label) + '</span><span class="opt-val ' + cls + '">' + (r.val ? '✓ Yes' : '✗ No') + '</span>';
+    grid.appendChild(div);
+  });
+  valRows.forEach(function(r){
+    var div = document.createElement('div');
+    div.className = 'opt-row';
+    div.innerHTML = '<span class="opt-lbl">' + esc(r.label) + '</span><span class="opt-val val" title="' + esc(r.txt) + '">' + esc(r.txt) + '</span>';
+    grid.appendChild(div);
+  });
+
+  // Scheduling
+  var schedBox = document.getElementById('schedBox');
+  if(opts.scheduledEnabled && opts.scheduledDate){
+    schedBox.style.display = 'block';
+    schedBox.textContent = '📅 Scheduled for: ' + opts.scheduledDate;
+  } else {
+    schedBox.style.display = 'none';
+  }
+
+  // Delete warning
+  document.getElementById('deleteWarn').style.display = opts.DeleteUser ? 'block' : 'none';
+
+  // Hide result box
+  var rb = document.getElementById('resultBox');
+  rb.className = 'result-box';
+  document.getElementById('btnSubmit').disabled = false;
+  document.getElementById('btnBack4').disabled  = false;
+}
+
+// ═══════════════════════════════════════════════════════
+// COLLECT OPTIONS
+// ═══════════════════════════════════════════════════════
+function collectOpts(){
+  return {
+    HideFromGAL:             document.getElementById('tHideFromGAL').checked,
+    RemoveRules:             document.getElementById('tRemoveRules').checked,
+    RemoveMobile:            document.getElementById('tRemoveMobile').checked,
+    RemoveGroups:            document.getElementById('tRemoveGroups').checked,
+    RemoveLicenses:          document.getElementById('tRemoveLicenses').checked,
+    RevokeSessions:          document.getElementById('tRevokeSessions').checked,
+    DisableSignIn:           document.getElementById('tDisableSignIn').checked,
+    ResetPass:               document.getElementById('tResetPass').checked,
+    ConvertToShared:         document.getElementById('tConvertToShared').checked,
+    removeCalendarInvites:   document.getElementById('tRemoveCalInvites').checked,
+    removePermissions:       document.getElementById('tRemovePermissions').checked,
+    removeCalendarPermissions: document.getElementById('tRemoveCalPerms').checked,
+    ClearImmutableId:        document.getElementById('tClearImmutableId').checked,
+    RemoveMFADevices:        document.getElementById('tRemoveMFADevices').checked,
+    RemoveTeamsPhoneDID:     document.getElementById('tRemoveTeamsPhone').checked,
+    DeleteUser:              document.getElementById('tDeleteUser').checked,
+    disableForwarding:       document.getElementById('tDisableForwarding').checked,
+    KeepCopy:                document.getElementById('tKeepCopy').checked,
+    OOO:                     document.getElementById('oooText').value.trim(),
+    postWebhook:             document.getElementById('tPostWebhook').checked,
+    postEmail:               document.getElementById('tPostEmail').checked,
+    postPSA:                 document.getElementById('tPostPSA').checked,
+    reference:               document.getElementById('refInput').value.trim(),
+    scheduledEnabled:        document.getElementById('tScheduled').checked,
+    scheduledDate:           document.getElementById('schedDate').value,
+    forward:                 acSelections.Forward  || null,
+    AccessNoAutomap:         acSelections.NoAutomap,
+    AccessAutomap:           acSelections.Automap,
+    OnedriveAccess:          acSelections.Onedrive
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════════
+function submitOffboard(){
+  var opts = collectOpts();
+  var btn  = document.getElementById('btnSubmit');
+  var rb   = document.getElementById('resultBox');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting…';
+  rb.className  = 'result-box';
+
+  var payload = {
     tenantFilter: currentTenant.domain,
-    user:{
+    user: {
       defaultDomainName: currentTenant.domain,
-      userPrincipalName: upn
+      userPrincipalName: selectedUser.userPrincipalName,
+      displayName:       selectedUser.displayName
     },
-    DisableUser:       document.getElementById('chk-block').checked,
-    RevokeSessions:    document.getElementById('chk-revoke').checked,
-    RemoveLicenses:    document.getElementById('chk-licenses').checked,
-    RemoveGroups:      document.getElementById('chk-groups').checked,
-    HideFromGAL:       document.getElementById('chk-gal').checked,
-    SetOOO:            document.getElementById('chk-ooo').checked,
-    OOOMessage:        document.getElementById('chk-ooo').checked ? document.getElementById('oooMessage').value : '',
-    ForwardTo:         document.getElementById('chk-forward').checked ? document.getElementById('forwardTo').value : '',
-    KeepCopy:          true,
-    ConvertToShared:   document.getElementById('chk-shared').checked,
-    DeleteUser:        document.getElementById('chk-delete').checked
+    ConvertToShared:           opts.ConvertToShared,
+    HideFromGAL:               opts.HideFromGAL,
+    removeCalendarInvites:     opts.removeCalendarInvites,
+    removePermissions:         opts.removePermissions,
+    removeCalendarPermissions: opts.removeCalendarPermissions,
+    RemoveRules:               opts.RemoveRules,
+    RemoveMobile:              opts.RemoveMobile,
+    RemoveGroups:              opts.RemoveGroups,
+    RemoveLicenses:            opts.RemoveLicenses,
+    RevokeSessions:            opts.RevokeSessions,
+    DisableSignIn:             opts.DisableSignIn,
+    ClearImmutableId:          opts.ClearImmutableId,
+    ResetPass:                 opts.ResetPass,
+    RemoveMFADevices:          opts.RemoveMFADevices,
+    RemoveTeamsPhoneDID:       opts.RemoveTeamsPhoneDID,
+    DeleteUser:                opts.DeleteUser,
+    disableForwarding:         opts.disableForwarding,
+    forward:                   opts.forward ? { value: opts.forward.userPrincipalName } : null,
+    KeepCopy:                  opts.KeepCopy,
+    OOO:                       opts.OOO || '',
+    AccessNoAutomap:           opts.AccessNoAutomap.map(function(u){ return { value: u.userPrincipalName }; }),
+    AccessAutomap:             opts.AccessAutomap.map(function(u){ return { value: u.userPrincipalName }; }),
+    OnedriveAccess:            opts.OnedriveAccess.map(function(u){ return { value: u.userPrincipalName }; }),
+    Scheduled: opts.scheduledEnabled
+      ? { enabled: true,  date: opts.scheduledDate }
+      : { enabled: false },
+    postExecution: {
+      webhook: opts.postWebhook,
+      email:   opts.postEmail,
+      psa:     opts.postPSA
+    },
+    reference: opts.reference || ''
   };
 
-  closeConfirmModal();
-
-  cippFetch('/api/ExecOffboardUser','POST',payload)
-    .then(function(r){
-      if(!r.ok) return r.text().then(function(t){ throw new Error('HTTP '+r.status+': '+t); });
-      return r.json().catch(function(){ return {}; });
-    })
-    .then(function(result){
-      var msg=(result&&(result.Results||result.Message||result.message))||'Offboarding completed successfully.';
-      var msgStr=typeof msg==='string'?msg:JSON.stringify(msg);
-      showResult('success','✅ Offboarding Complete',msgStr);
-      showToast('User offboarded!','success');
-    })
-    .catch(function(e){
-      showResult('error','❌ Offboarding Failed',e.message);
-      showToast('Failed: '+e.message,'danger');
-    })
-    .finally(function(){ btn.disabled=false; btn.textContent='Yes, Offboard'; });
+  fetch(BASE_URL + '/api/ExecOffboardUser', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-functions-key': API_KEY
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){
+    if(!r.ok) return r.text().then(function(t){ throw new Error('HTTP ' + r.status + ': ' + t); });
+    return r.json();
+  })
+  .then(function(data){
+    btn.innerHTML = '🚫 Submit Offboarding';
+    rb.className  = 'result-box success show';
+    document.getElementById('resultTitle').textContent = '✓ Offboarding initiated for ' + selectedUser.displayName;
+    var detail = data.Results || data.results || data.message || 'Request submitted successfully.';
+    document.getElementById('resultDetail').textContent = typeof detail === 'string' ? detail : JSON.stringify(detail, null, 2);
+    document.getElementById('btnBack4').disabled = true;
+  })
+  .catch(function(err){
+    btn.disabled  = false;
+    btn.innerHTML = '🚫 Submit Offboarding';
+    rb.className  = 'result-box error show';
+    document.getElementById('resultTitle').textContent = '✗ Submission failed';
+    document.getElementById('resultDetail').textContent = err.message || 'An unexpected error occurred.';
+  });
 }
 
-// =============================================
-// HELPERS
-// =============================================
-function clearSelection(){
-  selectedUser=null;
-  document.getElementById('userCardWrap').style.display='none';
-  document.getElementById('checklistWrap').style.display='none';
-  document.getElementById('offboardBtn').disabled=true;
-  document.getElementById('resultBox').className='result-box';
-  document.getElementById('sidebarEmpty').style.display='block';
-  document.getElementById('sidebarDetails').style.display='none';
-  document.querySelectorAll('.user-item').forEach(function(el){ el.classList.remove('selected'); });
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+function getInitials(name){
+  if(!name) return '?';
+  var parts = name.split(/\s+/).filter(Boolean);
+  if(parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  return name.substring(0,2).toUpperCase();
 }
 
-function showResult(type,title,body){
-  var box=document.getElementById('resultBox');
-  document.getElementById('resultTitle').textContent=title;
-  document.getElementById('resultBody').textContent=typeof body==='string'?body:JSON.stringify(body,null,2);
-  box.className='result-box '+type+' show';
-  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
-function showToast(msg,type){
-  var t=document.getElementById('toast');
-  t.textContent=msg;
-  t.style.background=type==='success'?'var(--success)':type==='warn'?'var(--warn)':'var(--danger)';
-  t.style.color=type==='warn'?'#0f1117':'#fff';
-  t.className='show';
-  setTimeout(function(){ t.className=''; },2800);
-}
-
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 </script>
 </body>
 </html>
