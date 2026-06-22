@@ -416,6 +416,7 @@ function doSearch(){
   cippFetch('/api/ListGraphRequest','POST',{
       tenantFilter: currentTenant.domain,
       Endpoint: 'users',
+      manualPagination: true,
       '$select': 'id,displayName,userPrincipalName,givenName,surname,department,jobTitle,companyName,mobilePhone,businessPhones,usageLocation,mail,accountEnabled,assignedLicenses',
       '$top': 999,
       '$count': true,

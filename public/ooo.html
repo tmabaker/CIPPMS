@@ -652,11 +652,13 @@ window.addEventListener('DOMContentLoaded', function(){
    CIPP PING
 ══════════════════════════════════════════ */
 function checkConnection(){
-  fetch(CIPP_BASE+'/api/ListTenants',{
+  if (!state.tenant) return;
+  setStatus('','Connecting…');
+  fetch(CIPP_BASE+'/api/ListLicenses?tenantFilter='+encodeURIComponent(state.tenant.domain),{
     method:'GET',
     headers:{'x-functions-key':CIPP_KEY}
   }).then(function(r){
-    setStatus(r.ok ? 'connected' : 'error', r.ok ? 'Connected' : 'Error '+r.status);
+    setStatus(r.ok ? 'connected' : 'error', r.ok ? 'Connected to '+state.tenant.name : 'Error '+r.status);
   }).catch(function(){
     setStatus('error','Offline');
   });
@@ -767,6 +769,7 @@ function loadUsers(){
   cippPost('/api/ListGraphRequest', {
     tenantFilter: state.tenant.domain,
     Endpoint: 'users',
+    manualPagination: true,
     '$select': 'id,displayName,userPrincipalName',
     '$top': 999,
     '$count': true,
@@ -904,6 +907,7 @@ function loadCAPolicies(){
   cippPost('/api/ListGraphRequest',{
     tenantFilter: state.tenant.domain,
     Endpoint: 'conditionalAccess/policies',
+    manualPagination: true,
     AsApp: true
   }).then(function(data){
     var policies = (data && data.Results) ? data.Results : (Array.isArray(data) ? data : []);

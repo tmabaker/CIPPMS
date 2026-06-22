@@ -635,6 +635,7 @@ function loadUsers(){
     body: JSON.stringify({
       tenantFilter: currentTenant.domain,
       Endpoint: 'users',
+      manualPagination: true,
       '$select': 'id,displayName,userPrincipalName,department,jobTitle',
       '$top': 999,
       '$count': true,
