@@ -92,12 +92,16 @@ export const CippChartCard = ({
   chartType = "donut",
   title,
   actions,
+  onClick,
+  totalLabel = "Total",
+  customTotal,
 }) => {
   const [range, setRange] = useState("Last 7 days");
   const [barSeries, setBarSeries] = useState([]);
   const chartOptions = useChartOptions(labels, chartType);
   chartSeries = chartSeries.filter((item) => item !== null);
-  const total = chartSeries.reduce((acc, value) => acc + value, 0);
+  const calculatedTotal = chartSeries.reduce((acc, value) => acc + value, 0);
+  const total = customTotal !== undefined ? customTotal : calculatedTotal;
   useEffect(() => {
     if (chartType === "bar") {
       setBarSeries(
@@ -106,10 +110,22 @@ export const CippChartCard = ({
         }))
       );
     }
-  }, [chartType, chartSeries.length, labels]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartType, chartSeries.join(","), labels.join(",")]);
 
   return (
-    <Card style={{ width: "100%", height: "100%" }}>
+    <Card
+      style={{ width: "100%", height: "100%" }}
+      onClick={onClick}
+      sx={{
+        cursor: onClick ? "pointer" : "default",
+        transition: "all 0.2s ease-in-out",
+        "&:hover": onClick ? {
+          boxShadow: (theme) => theme.shadows[8],
+          transform: "translateY(-2px)",
+        } : {},
+      }}
+    >
       <CardHeader
         action={
           actions ? (
@@ -148,7 +164,7 @@ export const CippChartCard = ({
         >
           {labels.length > 0 && (
             <>
-              <Typography variant="h5">Total</Typography>
+              <Typography variant="h5">{totalLabel}</Typography>
               <Typography variant="h5">{isFetching ? "0" : total}</Typography>
             </>
           )}

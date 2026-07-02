@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { useSettings } from "/src/hooks/use-settings";
+import { Layout as DashboardLayout } from "../../../../../layouts/index.js";
+import { useSettings } from "../../../../../hooks/use-settings";
 import { useRouter } from "next/router";
-import CippFormSkeleton from "/src/components/CippFormPages/CippFormSkeleton";
+import CippFormSkeleton from "../../../../../components/CippFormPages/CippFormSkeleton";
 import CalendarIcon from "@heroicons/react/24/outline/CalendarIcon";
-import { Mail, Forward, Fingerprint, Launch } from "@mui/icons-material";
+import { Mail, Fingerprint, Launch } from "@mui/icons-material";
 import { HeaderedTabbedLayout } from "../../../../../layouts/HeaderedTabbedLayout";
 import tabOptions from "./tabOptions";
 import ReactTimeAgo from "react-time-ago";
 import { CippCopyToClipBoard } from "../../../../../components/CippComponents/CippCopyToClipboard";
-import { Box, Stack, Typography, Button, CircularProgress } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import CippFormComponent from "/src/components/CippComponents/CippFormComponent";
-import countryList from "/src/data/countryList";
-import { CippDataTable } from "/src/components/CippTable/CippDataTable";
+import { Box, Stack, Typography, Button } from "@mui/material";
+import { Grid } from "@mui/system";
+import CippFormComponent from "../../../../../components/CippComponents/CippFormComponent";
+import countryList from "../../../../../data/countryList";
+import { CippDataTable } from "../../../../../components/CippTable/CippDataTable";
 import { useForm } from "react-hook-form";
 import CippButtonCard from "../../../../../components/CippCards/CippButtonCard";
 import { ApiGetCall, ApiPostCall } from "../../../../../api/ApiCall";
@@ -57,15 +57,15 @@ const Page = () => {
           icon: <Launch style={{ color: "#667085" }} />,
           text: (
             <Button
-                color="muted"
-                style={{ paddingLeft: 0 }}
-                size="small"
-                href={`https://entra.microsoft.com/${userSettingsDefaults.currentTenant}/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/${userId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View in Entra
-              </Button>
+              color="muted"
+              style={{ paddingLeft: 0 }}
+              size="small"
+              href={`https://entra.microsoft.com/${userSettingsDefaults.currentTenant}/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/${userId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View in Entra
+            </Button>
           ),
         },
       ]
@@ -103,12 +103,12 @@ const Page = () => {
         <Box
           sx={{
             flexGrow: 1,
-            py: 4,
+            py: 1,
           }}
         >
           <Grid container spacing={2}>
             {/* Form Section */}
-            <Grid item xs={12} md={4}>
+            <Grid size={{ md: 4, xs: 12 }}>
               <CippButtonCard
                 title={"Test Conditional Access Policy"}
                 CardButton={
@@ -133,6 +133,7 @@ const Page = () => {
                       label="Select the application to test"
                       name="includeApplications"
                       multiple={false}
+                      creatable={false}
                       api={{
                         tenantFilter: tenant,
                         url: "/api/ListGraphRequest",
@@ -149,38 +150,19 @@ const Page = () => {
                           $top: 999,
                         },
                       }}
+                      validators={{ required: "Application is required" }}
                       formControl={formControl}
                     />
 
                     {/* Optional Parameters */}
                     <Typography variant="subtitle1">Optional Parameters:</Typography>
-
-                    {/* Test from this country */}
-                    <CippFormComponent
-                      type="autoComplete"
-                      label="Test from this country"
-                      name="country"
-                      options={countryList.map(({ Code, Name }) => ({
-                        value: Code,
-                        label: Name,
-                      }))}
-                      formControl={formControl}
-                    />
-
-                    {/* Test from this IP */}
-                    <CippFormComponent
-                      type="textField"
-                      label="Test from this IP"
-                      name="IpAddress"
-                      placeholder="8.8.8.8"
-                      formControl={formControl}
-                    />
-
                     {/* Device Platform */}
                     <CippFormComponent
                       type="autoComplete"
                       label="Select the device platform to test"
                       name="devicePlatform"
+                      multiple={false}
+                      creatable={false}
                       options={[
                         { value: "Windows", label: "Windows" },
                         { value: "iOS", label: "iOS" },
@@ -196,6 +178,8 @@ const Page = () => {
                       type="autoComplete"
                       label="Select the client application type to test"
                       name="clientAppType"
+                      multiple={false}
+                      creatable={false}
                       options={[
                         { value: "all", label: "All" },
                         { value: "Browser", label: "Browser" },
@@ -210,11 +194,51 @@ const Page = () => {
                       formControl={formControl}
                     />
 
+                    {/* Authentication Flow */}
+                    <CippFormComponent
+                      type="autoComplete"
+                      label="Select the authentication flow"
+                      name="authenticationFlow"
+                      multiple={false}
+                      creatable={false}
+                      options={[
+                        { value: "none", label: "None" },
+                        { value: "deviceCodeFlow", label: "Device code flow" },
+                        { value: "authenticationTransfer", label: "Authentication transfer" },
+                      ]}
+                      formControl={formControl}
+                    />
+
+                    {/* Test from this IP */}
+                    <CippFormComponent
+                      type="textField"
+                      label="Test from this IP"
+                      name="IpAddress"
+                      placeholder="8.8.8.8"
+                      formControl={formControl}
+                    />
+
+                    {/* Test from this country */}
+                    <CippFormComponent
+                      type="autoComplete"
+                      label="Test from this country"
+                      name="country"
+                      multiple={false}
+                      creatable={false}
+                      options={countryList.map(({ Code, Name }) => ({
+                        value: Code,
+                        label: Name,
+                      }))}
+                      formControl={formControl}
+                    />
+
                     {/* Sign-in risk level */}
                     <CippFormComponent
                       type="autoComplete"
                       label="Select the sign-in risk level of the user signing in"
                       name="SignInRiskLevel"
+                      multiple={false}
+                      creatable={false}
                       options={[
                         { value: "low", label: "Low" },
                         { value: "medium", label: "Medium" },
@@ -229,6 +253,8 @@ const Page = () => {
                       type="autoComplete"
                       label="Select the user risk level of the user signing in"
                       name="userRiskLevel"
+                      multiple={false}
+                      creatable={false}
                       options={[
                         { value: "low", label: "Low" },
                         { value: "medium", label: "Medium" },
@@ -237,18 +263,18 @@ const Page = () => {
                       ]}
                       formControl={formControl}
                     />
-                    <CippApiResults apiObject={postRequest} />
+                    <CippApiResults apiObject={postRequest} errorsOnly={true} />
                   </Stack>
                 </form>
               </CippButtonCard>
             </Grid>
-            <Grid item xs={12} md={8}>
+            <Grid size={{ md: 8, xs: 12 }}>
               <CippDataTable
                 queryKey={`ExecCACheck-${tenant}-${userId}-${JSON.stringify(formParams)}`}
                 title={"CA Test Results"}
-                simple={true}
-                simpleColumns={["displayName", "state", "policyApplies", "reasons"]}
+                simpleColumns={["displayName", "state", "policyApplies", "analysisReasons"]}
                 data={postRequest.data?.data?.Results?.value || []}
+                isFetching={postRequest.isPending}
               />
             </Grid>
           </Grid>

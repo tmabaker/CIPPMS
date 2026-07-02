@@ -1,7 +1,7 @@
-import { Box, Button, Skeleton, SvgIcon } from "@mui/material";
-import { CippPropertyListCard } from "/src/components/CippCards/CippPropertyListCard";
+import { Box, Button, SvgIcon } from "@mui/material";
+import { CippPropertyListCard } from "../CippCards/CippPropertyListCard";
 import { CheckCircle, SystemUpdateAlt, Warning } from "@mui/icons-material";
-import { ApiGetCall } from "/src/api/ApiCall";
+import { ApiGetCall } from "../../api/ApiCall";
 import { useEffect } from "react";
 
 const CippVersionProperties = () => {
@@ -11,7 +11,7 @@ const CippVersionProperties = () => {
   });
 
   const cippVersion = ApiGetCall({
-    url: `/api/GetVersion?LocalVersion=${version?.data?.version}`,
+    url: `/api/GetVersion?LocalVersion=${encodeURIComponent(version?.data?.version ?? "")}`,
     queryKey: "CippVersion",
     waiting: false,
   });

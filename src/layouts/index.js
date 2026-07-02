@@ -1,200 +1,291 @@
-import { useCallback, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import { Alert, Button, Dialog, DialogContent, DialogTitle, useMediaQuery } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { useSettings } from "../hooks/use-settings";
-import { Footer } from "./footer";
-import { MobileNav } from "./mobile-nav";
-import { SideNav } from "./side-nav";
-import { TopNav } from "./top-nav";
-import { ApiGetCall } from "../api/ApiCall";
-import { useDispatch } from "react-redux";
-import { showToast } from "../store/toasts";
-import { Box, Container, Grid } from "@mui/system";
-import { CippImageCard } from "../components/CippCards/CippImageCard";
-import Page from "../pages/onboarding";
-import { useDialog } from "../hooks/use-dialog";
-import { nativeMenuItems } from "/src/layouts/config";
-import { keepPreviousData } from "@tanstack/react-query";
+import { useCallback, useEffect, useState, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Dialog,
+  Divider,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  useMediaQuery,
+} from '@mui/material'
+import { styled } from '@mui/material/styles'
+import { useSettings } from '../hooks/use-settings'
+import { Footer } from './footer'
+import { MobileNav } from './mobile-nav'
+import { SideNav } from './side-nav'
+import { TopNav } from './top-nav'
+import { ApiGetCall } from '../api/ApiCall'
+import { useDispatch } from 'react-redux'
+import { showToast } from '../store/toasts'
+import Grid from '@mui/system/Grid'
+import { CippImageCard } from '../components/CippCards/CippImageCard'
+import { useDialog } from '../hooks/use-dialog'
+import { nativeMenuItems } from './config'
+import { CippBreadcrumbNav } from '../components/CippComponents/CippBreadcrumbNav'
+import { SsoMigrationDialog } from '../components/CippComponents/SsoMigrationDialog'
+import { ForcedSsoMigrationDialog } from '../components/CippComponents/ForcedSsoMigrationDialog'
+import { SubscriptionEndedDialog } from '../components/CippComponents/SubscriptionEndedDialog'
+import { FailedPaymentDialog } from '../components/CippComponents/FailedPaymentDialog'
 
-const SIDE_NAV_WIDTH = 270;
-const SIDE_NAV_PINNED_WIDTH = 50;
-const TOP_NAV_HEIGHT = 50;
+const OnboardingWizardPage = dynamic(
+  () => import('../components/CippWizard/OnboardingWizardPage.jsx'),
+  { ssr: false }
+)
+
+const SIDE_NAV_WIDTH = 290
+const SIDE_NAV_PINNED_WIDTH = 50
+const TOP_NAV_HEIGHT = 50
 
 const useMobileNav = () => {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname()
+  const [open, setOpen] = useState(false)
 
   const handlePathnameChange = useCallback(() => {
     if (open) {
-      setOpen(false);
+      setOpen(false)
     }
-  }, [open]);
+  }, [open])
 
-  useEffect(
-    () => {
-      handlePathnameChange();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pathname]
-  );
+  useEffect(() => {
+    handlePathnameChange()
+  }, [pathname])
 
   const handleOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
+    setOpen(true)
+  }, [])
 
   const handleClose = useCallback(() => {
-    setOpen(false);
-  }, []);
+    setOpen(false)
+  }, [])
 
   return {
     handleClose,
     handleOpen,
     open,
-  };
-};
+  }
+}
 
-const LayoutRoot = styled("div")(({ theme }) => ({
+const LayoutRoot = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
-  display: "flex",
-  flex: "1 1 auto",
-  maxWidth: "100%",
+  display: 'flex',
+  flex: '1 1 auto',
+  maxWidth: '100%',
+  height: '100vh',
+  overflow: 'hidden',
   paddingTop: TOP_NAV_HEIGHT,
-  [theme.breakpoints.up("lg")]: {
+  [theme.breakpoints.up('lg')]: {
     paddingLeft: SIDE_NAV_WIDTH,
   },
-}));
+}))
 
-const LayoutContainer = styled("div")({
-  display: "flex",
-  flex: "1 1 auto",
-  flexDirection: "column",
-  width: "100%",
-});
+const LayoutContainer = styled('div')({
+  display: 'flex',
+  flex: '1 1 auto',
+  flexDirection: 'column',
+  width: '100%',
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
+})
 
 export const Layout = (props) => {
-  const { children, allTenantsSupport = true } = props;
-  const mdDown = useMediaQuery((theme) => theme.breakpoints.down("md"));
-  const settings = useSettings();
-  const mobileNav = useMobileNav();
-  const [userSettingsComplete, setUserSettingsComplete] = useState(false);
-  const [fetchingVisible, setFetchingVisible] = useState([]);
-  const [menuItems, setMenuItems] = useState(nativeMenuItems);
-  const currentTenant = settings?.currentTenant;
-  const currentRole = ApiGetCall({
-    url: "/.auth/me",
-    queryKey: "authmecipp",
+  const { children, allTenantsSupport = true } = props
+  const mdDown = useMediaQuery((theme) => theme.breakpoints.down('md'))
+  const settings = useSettings()
+  const mobileNav = useMobileNav()
+  const [fetchingVisible, setFetchingVisible] = useState([])
+  const [menuItems, setMenuItems] = useState(nativeMenuItems)
+  const lastUserSettingsUpdate = useRef(null)
+  const currentTenant = settings?.currentTenant
+  const [hideSidebar, setHideSidebar] = useState(false)
+
+  const swaStatus = ApiGetCall({
+    url: '/.auth/me',
+    queryKey: 'authmeswa',
     staleTime: 120000,
     refetchOnWindowFocus: true,
-  });
-  const [hideSidebar, setHideSidebar] = useState(false);
+  })
+
+  const currentRole = ApiGetCall({
+    url: '/api/me',
+    queryKey: 'authmecipp',
+    waiting: swaStatus.isSuccess && swaStatus.data?.clientPrincipal !== null,
+  })
+
+  const featureFlags = ApiGetCall({
+    url: '/api/ListFeatureFlags',
+    queryKey: 'featureFlags',
+    staleTime: 600000, // Cache for 10 minutes
+  })
 
   useEffect(() => {
     if (currentRole.isSuccess && !currentRole.isFetching) {
-      const userRoles = currentRole.data?.clientPrincipal?.userRoles;
+      const userRoles = currentRole.data?.clientPrincipal?.userRoles
+      const userPermissions = currentRole.data?.permissions
       if (!userRoles) {
-        setMenuItems([]);
-        setHideSidebar(true);
-        return;
+        setMenuItems([])
+        setHideSidebar(true)
+        return
       }
+
+      // Get disabled pages from feature flags - only filter if we have valid data
+      let disabledPages = []
+      if (featureFlags.isSuccess && Array.isArray(featureFlags.data)) {
+        disabledPages = featureFlags.data
+          .filter((flag) => flag.Enabled === false || flag.enabled === false)
+          .flatMap((flag) => flag.Pages || flag.pages || [])
+          .filter((page) => typeof page === 'string')
+      }
+
       const filterItemsByRole = (items) => {
         return items
           .map((item) => {
-            if (item.roles && item.roles.length > 0) {
-              const hasRole = item.roles.some((requiredRole) => userRoles.includes(requiredRole));
-              if (!hasRole) {
-                return null;
+            // Check if page is disabled by feature flag
+            if (item.path && disabledPages.length > 0 && disabledPages.includes(item.path)) {
+              return null
+            }
+
+            // Check permission with pattern matching support
+            if (item.permissions && item.permissions.length > 0) {
+              const hasPermission = userPermissions?.some((userPerm) => {
+                return item.permissions.some((requiredPerm) => {
+                  // Exact match
+                  if (userPerm === requiredPerm) {
+                    return true
+                  }
+
+                  // Pattern matching - check if required permission contains wildcards
+                  if (requiredPerm.includes('*')) {
+                    // Convert wildcard pattern to regex
+                    const regexPattern = requiredPerm
+                      .replace(/\./g, '\\.') // Escape dots
+                      .replace(/\*/g, '.*') // Convert * to .*
+                    const regex = new RegExp(`^${regexPattern}$`)
+                    return regex.test(userPerm)
+                  }
+
+                  return false
+                })
+              })
+              if (!hasPermission) {
+                return null
               }
+            } else {
+              return null
             }
+            // check sub-items
             if (item.items && item.items.length > 0) {
-              const filteredSubItems = filterItemsByRole(item.items).filter(Boolean);
-              return { ...item, items: filteredSubItems };
+              const filteredSubItems = filterItemsByRole(item.items).filter(Boolean)
+              if (filteredSubItems.length === 0) return null
+              return { ...item, items: filteredSubItems }
             }
 
-            return item;
+            return item
           })
-          .filter(Boolean);
-      };
-
-      const filteredMenu = filterItemsByRole(nativeMenuItems);
-      setMenuItems(filteredMenu);
+          .filter(Boolean)
+      }
+      const filteredMenu = filterItemsByRole(nativeMenuItems)
+      setMenuItems(filteredMenu)
+    } else if (
+      swaStatus.isLoading ||
+      swaStatus.data?.clientPrincipal === null ||
+      swaStatus.data === undefined ||
+      currentRole.isLoading
+    ) {
+      setHideSidebar(true)
     }
-  }, [currentRole.isSuccess]);
+  }, [
+    currentRole.isSuccess,
+    swaStatus.data,
+    swaStatus.isLoading,
+    currentRole.data?.clientPrincipal?.userRoles,
+    currentRole.data?.permissions,
+    currentRole.isFetching,
+    featureFlags.isSuccess,
+    featureFlags.data,
+  ])
 
   const handleNavPin = useCallback(() => {
     settings.handleUpdate({
       pinNav: !settings.pinNav,
-    });
-  }, [settings]);
+    })
+  }, [settings])
 
-  const offset = settings.pinNav ? SIDE_NAV_WIDTH : SIDE_NAV_PINNED_WIDTH;
+  const offset = settings.pinNav ? SIDE_NAV_WIDTH : SIDE_NAV_PINNED_WIDTH
 
   const userSettingsAPI = ApiGetCall({
-    url: "/api/ListUserSettings",
-    queryKey: "userSettings",
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    keepPreviousData: true,
-  });
+    url: '/api/ListUserSettings',
+    queryKey: 'userSettings',
+  })
 
   useEffect(() => {
-    if (userSettingsAPI.isSuccess && !userSettingsAPI.isFetching && !userSettingsComplete) {
-      //if userSettingsAPI.data contains offboardingDefaults.user, delete that specific key.
-      if (userSettingsAPI.data.offboardingDefaults?.user) {
-        delete userSettingsAPI.data.offboardingDefaults.user;
-      }
-      if (userSettingsAPI?.data?.currentTheme) {
-        delete userSettingsAPI.data.currentTheme;
-      }
-      // get current devtools settings
-      var showDevtools = settings.showDevtools;
-      // get current bookmarks
-      var bookmarks = settings.bookmarks;
+    if (userSettingsAPI.isSuccess && !userSettingsAPI.isFetching) {
+      // Only update if the data has actually changed (using dataUpdatedAt as a proxy)
+      const dataUpdatedAt = userSettingsAPI.dataUpdatedAt
+      if (dataUpdatedAt && dataUpdatedAt !== lastUserSettingsUpdate.current) {
+        const { bookmarks: _bookmarks, ...serverSettings } = userSettingsAPI.data || {}
+        //if userSettingsAPI.data contains offboardingDefaults.user, delete that specific key.
+        if (serverSettings.offboardingDefaults?.user) {
+          delete serverSettings.offboardingDefaults.user
+        }
+        if (serverSettings.offboardingDefaults?.keepCopy) {
+          delete serverSettings.offboardingDefaults.keepCopy
+        }
+        if (serverSettings?.currentTheme) {
+          delete serverSettings.currentTheme
+        }
+        // get current devtools settings (device-local only)
+        var showDevtools = settings.showDevtools
 
-      settings.handleUpdate({
-        ...userSettingsAPI.data,
-        bookmarks,
-        showDevtools,
-      });
-      setUserSettingsComplete(true);
+        settings.handleUpdate({
+          ...serverSettings,
+          showDevtools,
+        })
+
+        // Track this update and set completion status
+        lastUserSettingsUpdate.current = dataUpdatedAt
+      }
     }
   }, [
     userSettingsAPI.isSuccess,
     userSettingsAPI.data,
     userSettingsAPI.isFetching,
-    userSettingsComplete,
-    settings,
-  ]);
+    userSettingsAPI.dataUpdatedAt,
+  ])
 
   const version = ApiGetCall({
-    url: "/version.json",
-    queryKey: "LocalVersion",
-  });
+    url: '/version.json',
+    queryKey: 'LocalVersion',
+  })
 
   const alertsAPI = ApiGetCall({
-    url: `/api/GetCippAlerts?localversion=${version?.data?.version}`,
-    queryKey: "alertsDashboard",
+    url: `/api/GetCippAlerts?localversion=${encodeURIComponent(version?.data?.version)}`,
+    queryKey: 'alertsDashboard',
     waiting: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
     keepPreviousData: true,
-  });
+  })
 
   useEffect(() => {
-    if (version.isFetched && !alertsAPI.isFetched) {
-      alertsAPI.waiting = true;
-      alertsAPI.refetch();
+    if (!hideSidebar && version.isFetched && !alertsAPI.isFetched) {
+      alertsAPI.waiting = true
+      alertsAPI.refetch()
     }
-  }, [version, alertsAPI]);
+  }, [version, alertsAPI, hideSidebar])
 
   useEffect(() => {
     if (alertsAPI.isSuccess && !alertsAPI.isFetching) {
-      setFetchingVisible(new Array(alertsAPI.data.length).fill(true));
+      setFetchingVisible(new Array(alertsAPI.data.length).fill(true))
     }
-  }, [alertsAPI.isSuccess, alertsAPI.data, alertsAPI.isFetching]);
-  const [setupCompleted, setSetupCompleted] = useState(true);
-  const createDialog = useDialog();
-  const dispatch = useDispatch();
+  }, [alertsAPI.isSuccess, alertsAPI.data, alertsAPI.isFetching])
+  const [setupCompleted, setSetupCompleted] = useState(true)
+  const createDialog = useDialog()
+  const dispatch = useDispatch()
   useEffect(() => {
     if (alertsAPI.isSuccess && !alertsAPI.isFetching) {
       if (alertsAPI.data.length > 0) {
@@ -205,19 +296,19 @@ export const Layout = (props) => {
               title: alert.title,
               toastError: alert,
             })
-          );
-        });
+          )
+        })
       }
     }
     if (alertsAPI.isSuccess && !alertsAPI.isFetching) {
       if (alertsAPI.data.length > 0) {
-        const setupCompleted = alertsAPI.data.find((alert) => alert.setupCompleted === false);
+        const setupCompleted = alertsAPI.data.find((alert) => alert.setupCompleted === false)
         if (setupCompleted) {
-          setSetupCompleted(false);
+          setSetupCompleted(false)
         }
       }
     }
-  }, [alertsAPI.isSuccess]);
+  }, [alertsAPI.isSuccess])
 
   return (
     <>
@@ -233,21 +324,47 @@ export const Layout = (props) => {
       <LayoutRoot
         sx={{
           pl: {
-            md: (hideSidebar ? "0" : offset) + "px",
+            md: (hideSidebar ? '0' : offset) + 'px',
           },
         }}
       >
         <LayoutContainer>
-          {(currentTenant === "AllTenants" || !currentTenant) && !allTenantsSupport ? (
-            <Box sx={{ flexGrow: 1, py: 4 }}>
+          <Dialog
+            fullWidth
+            maxWidth="lg"
+            onClose={createDialog.handleClose}
+            open={createDialog.open}
+          >
+            <DialogTitle>Setup Wizard</DialogTitle>
+            <DialogContent>
+              <OnboardingWizardPage />
+            </DialogContent>
+          </Dialog>
+          <SubscriptionEndedDialog hostedSubscriptionEnded={currentRole.data?.hostedSubscriptionEnded} />
+          <FailedPaymentDialog hostedFailedPayments={currentRole.data?.hostedFailedPayments} />
+          <SsoMigrationDialog meData={currentRole.data} />
+          <ForcedSsoMigrationDialog />
+          {!setupCompleted && (
+            <Box sx={{ flexGrow: 1, py: 2 }}>
               <Container maxWidth={false}>
+                <Alert severity="info">
+                  Setup has not been completed.
+                  <Button onClick={createDialog.handleOpen}>Start Wizard</Button>
+                </Alert>
+              </Container>
+            </Box>
+          )}
+          {(currentTenant === 'AllTenants' || !currentTenant) && !allTenantsSupport ? (
+            <Box sx={{ flexGrow: 1, py: 3 }}>
+              <Container maxWidth={false}>
+                <CippBreadcrumbNav mode="hierarchical" />
                 <Grid container spacing={3}>
-                  <Grid item size={6}>
+                  <Grid size={6}>
                     <CippImageCard
                       title="Not supported"
                       imageUrl="/assets/illustrations/undraw_website_ij0l.svg"
                       text={
-                        "The page does not support all Tenants, please select a different tenant using the tenant selector."
+                        'The page does not support all Tenants, please select a different tenant using the tenant selector.'
                       }
                     />
                   </Grid>
@@ -255,34 +372,17 @@ export const Layout = (props) => {
               </Container>
             </Box>
           ) : (
-            <>
-              <Dialog
-                fullWidth
-                maxWidth="lg"
-                onClose={createDialog.handleClose}
-                open={createDialog.open}
-              >
-                <DialogTitle>Setup Wizard</DialogTitle>
-                <DialogContent>
-                  <Page />
-                </DialogContent>
-              </Dialog>
-              {!setupCompleted && (
-                <Box sx={{ flexGrow: 1, py: 2 }}>
-                  <Container maxWidth={false}>
-                    <Alert severity="info">
-                      Setup has not been completed.
-                      <Button onClick={createDialog.handleOpen}>Start Wizard</Button>
-                    </Alert>
-                  </Container>
-                </Box>
-              )}
+            <Stack>
+              <Box sx={{ mx: 3, mt: 3 }}>
+                <CippBreadcrumbNav mode="hierarchical" />
+              </Box>
+              <Divider sx={{ mb: 2 }} />
               {children}
-            </>
+            </Stack>
           )}
           <Footer />
         </LayoutContainer>
       </LayoutRoot>
     </>
-  );
-};
+  )
+}

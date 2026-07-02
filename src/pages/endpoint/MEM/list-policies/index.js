@@ -1,106 +1,82 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
-import { Book, LaptopChromebook } from "@mui/icons-material";
-import { GlobeAltIcon, TrashIcon, UserIcon } from "@heroicons/react/24/outline";
+import { Layout as DashboardLayout } from '../../../../layouts/index.js'
+import { CippTablePage } from '../../../../components/CippComponents/CippTablePage.jsx'
+import { PermissionButton } from '../../../../utils/permissions.js'
+import { CippPolicyDeployDrawer } from '../../../../components/CippComponents/CippPolicyDeployDrawer.jsx'
+import { useSettings } from '../../../../hooks/use-settings.js'
+import { useCippIntunePolicyActions } from '../../../../components/CippComponents/CippIntunePolicyActions.jsx'
+import { useCippReportDB } from '../../../../components/CippComponents/CippReportDBControls'
+import { CippIntunePolicyDetails } from '../../../../components/CippComponents/CippIntunePolicyDetails.jsx'
+import { Stack } from '@mui/system'
 
 const Page = () => {
-  const pageTitle = "Configuration Policies";
+  const pageTitle = 'Configuration Policies'
+  const cardButtonPermissions = ['Endpoint.MEM.ReadWrite']
+  const tenant = useSettings().currentTenant
 
-  const actions = [
-    {
-      label: "Create template based on policy",
-      type: "POST",
-      url: "/api/AddIntuneTemplate",
-      data: {
-        ID: "id",
-        URLName: "URLName",
-      },
-      confirmText: "Are you sure you want to create a template based on this policy?",
-      icon: <Book />,
-      color: "info",
+  const reportDB = useCippReportDB({
+    apiUrl: '/api/ListIntunePolicy',
+    queryKey: 'ListIntunePolicy',
+    cacheName: 'IntunePolicies',
+    syncTitle: 'Sync Intune Policy Report',
+    allowToggle: true,
+    defaultCached: false,
+  })
+
+  const actions = useCippIntunePolicyActions(tenant, 'URLName', {
+    templateData: {
+      ID: 'id',
+      URLName: 'URLName',
     },
-    {
-      label: "Assign to All Users",
-      type: "POST",
-      url: "/api/ExecAssignPolicy",
-      data: {
-        AssignTo: "allLicensedUsers",
-        ID: "id",
-        type: "URLName",
-      },
-      confirmText: "Are you sure you want to assign this policy to all users?",
-      icon: <UserIcon />,
-      color: "info",
-    },
-    {
-      label: "Assign to All Devices",
-      type: "POST",
-      url: "/api/ExecAssignPolicy",
-      data: {
-        AssignTo: "AllDevices",
-        ID: "id",
-        type: "URLName",
-      },
-      confirmText: "Are you sure you want to assign this policy to all devices?",
-      icon: <LaptopChromebook />,
-      color: "info",
-    },
-    {
-      label: "Assign Globally (All Users / All Devices)",
-      type: "POST",
-      url: "/api/ExecAssignPolicy",
-      data: {
-        AssignTo: "AllDevicesAndUsers",
-        ID: "id",
-        type: "URLName",
-      },
-      confirmText: "Are you sure you want to assign this policy to all users and devices?",
-      icon: <GlobeAltIcon />,
-      color: "info",
-    },
-    {
-      label: "Delete Policy",
-      type: "POST",
-      url: "/api/RemovePolicy",
-      data: {
-        ID: "id",
-        URLName: "URLName",
-      },
-      confirmText: "Are you sure you want to delete this policy?",
-      icon: <TrashIcon />,
-      color: "danger",
-    },
-  ];
+    deleteUrlName: 'URLName',
+  })
 
   const offCanvas = {
     extendedInfoFields: [
-      "createdDateTime",
-      "displayName",
-      "lastModifiedDateTime",
-      "PolicyTypeName",
+      'createdDateTime',
+      'displayName',
+      'lastModifiedDateTime',
+      'PolicyTypeName',
     ],
     actions: actions,
-  };
+    children: (row) => <CippIntunePolicyDetails row={row} tenant={tenant} />,
+    size: 'lg',
+  }
 
   const simpleColumns = [
-    "displayName",
-    "PolicyTypeName",
-    "PolicyAssignment",
-    "PolicyExclude",
-    "description",
-    "lastModifiedDateTime",
-  ];
+    ...reportDB.cacheColumns,
+    'displayName',
+    'PolicyTypeName',
+    'PolicyAssignment',
+    'PolicyExclude',
+    'description',
+    'lastModifiedDateTime',
+  ]
+
 
   return (
-    <CippTablePage
-      title={pageTitle}
-      apiUrl="/api/ListIntunePolicy?type=ESP"
-      actions={actions}
-      offCanvas={offCanvas}
-      simpleColumns={simpleColumns}
-    />
-  );
-};
+    <>
+      <CippTablePage
+        title={pageTitle}
+        apiUrl={reportDB.resolvedApiUrl}
+        actions={actions}
+        offCanvas={offCanvas}
+        simpleColumns={simpleColumns}
+        queryKey={reportDB.resolvedQueryKey}
+        cardButton={
+          <Stack direction="row" spacing={1} alignItems="center">
+            <CippPolicyDeployDrawer
+              buttonText="Deploy Policy"
+              requiredPermissions={cardButtonPermissions}
+              PermissionButton={PermissionButton}
+            />
+            {reportDB.controls}
+          </Stack>
+        }
+      />
+      {reportDB.syncDialog}
+    </>
+  )
+}
 
-Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
-export default Page;
+Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>
+export default Page

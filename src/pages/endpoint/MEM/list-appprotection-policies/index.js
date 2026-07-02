@@ -1,66 +1,79 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
-import { Book } from "@mui/icons-material";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Layout as DashboardLayout } from '../../../../layouts/index.js'
+import { CippTablePage } from '../../../../components/CippComponents/CippTablePage.jsx'
+import { PermissionButton } from '../../../../utils/permissions.js'
+import { CippPolicyDeployDrawer } from '../../../../components/CippComponents/CippPolicyDeployDrawer.jsx'
+import { useSettings } from '../../../../hooks/use-settings.js'
+import { useCippIntunePolicyActions } from '../../../../components/CippComponents/CippIntunePolicyActions.jsx'
+import { useCippReportDB } from '../../../../components/CippComponents/CippReportDBControls'
+import { Stack } from '@mui/system'
 
 const Page = () => {
-  const pageTitle = "App Protection & Configuration Policies";
+  const pageTitle = 'App Protection & Configuration Policies'
+  const cardButtonPermissions = ['Endpoint.MEM.ReadWrite']
+  const tenant = useSettings().currentTenant
 
-  const actions = [
-    {
-      label: "Create template based on policy",
-      type: "POST",
-      url: "/api/AddIntuneTemplate",
-      data: {
-        ID: "id",
-        URLName: "managedAppPolicies",
-      },
-      confirmText: "Are you sure you want to create a template based on this policy?",
-      icon: <Book />,
-      color: "info",
+  const reportDB = useCippReportDB({
+    apiUrl: '/api/ListAppProtectionPolicies',
+    queryKey: 'ListAppProtectionPolicies',
+    cacheName: 'IntuneAppProtectionPolicies',
+    syncTitle: 'Sync App Protection Policies Report',
+    allowToggle: true,
+    defaultCached: false,
+  })
+
+  const actions = useCippIntunePolicyActions(tenant, 'URLName', {
+    templateData: {
+      ID: 'id',
+      URLName: 'managedAppPolicies',
     },
-    {
-      label: "Delete Policy",
-      type: "POST",
-      url: "/api/RemovePolicy",
-      data: {
-        ID: "id",
-        URLName: "managedAppPolicies",
-      },
-      confirmText: "Are you sure you want to delete this policy?",
-      icon: <TrashIcon />,
-      color: "danger",
-    },
-  ];
+    platformType: 'deviceAppManagement',
+    deleteUrlName: 'URLName',
+  })
 
   const offCanvas = {
     extendedInfoFields: [
-      "createdDateTime",
-      "displayName",
-      "lastModifiedDateTime",
-      "PolicyTypeName",
+      'createdDateTime',
+      'displayName',
+      'lastModifiedDateTime',
+      'PolicyTypeName',
+      'PolicySource',
     ],
     actions: actions,
-  };
+  }
 
-  const simpleColumns = ["displayName", "isAssigned", "lastModifiedDateTime"];
+  const simpleColumns = [
+    ...reportDB.cacheColumns,
+    'displayName',
+    'PolicyTypeName',
+    'PolicyAssignment',
+    'PolicyExclude',
+    'lastModifiedDateTime',
+  ]
 
   return (
-    <CippTablePage
-      title={pageTitle}
-      apiUrl="/api/ListGraphRequest"
-      apiData={{
-        Endpoint: "deviceAppManagement/managedAppPolicies",
-        $orderby: "displayName",
-        manualPagination: true,
-      }}
-      apiDataKey="Results"
-      actions={actions}
-      offCanvas={offCanvas}
-      simpleColumns={simpleColumns}
-    />
-  );
-};
+    <>
+      <CippTablePage
+        title={pageTitle}
+        apiUrl={reportDB.resolvedApiUrl}
+        queryKey={reportDB.resolvedQueryKey}
+        actions={actions}
+        offCanvas={offCanvas}
+        simpleColumns={simpleColumns}
+        cardButton={
+          <Stack direction="row" spacing={1} alignItems="center">
+            <CippPolicyDeployDrawer
+              buttonText="Deploy Policy"
+              requiredPermissions={cardButtonPermissions}
+              PermissionButton={PermissionButton}
+            />
+            {reportDB.controls}
+          </Stack>
+        }
+      />
+      {reportDB.syncDialog}
+    </>
+  )
+}
 
-Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
-export default Page;
+Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>
+export default Page

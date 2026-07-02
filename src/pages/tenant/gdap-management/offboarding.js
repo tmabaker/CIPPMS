@@ -1,13 +1,13 @@
-import CippFormPage from "/src/components/CippFormPages/CippFormPage";
-import { TabbedLayout } from "/src/layouts/TabbedLayout";
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
+import CippFormPage from "../../../components/CippFormPages/CippFormPage";
+import { TabbedLayout } from "../../../layouts/TabbedLayout";
+import { Layout as DashboardLayout } from "../../../layouts/index.js";
 import tabOptions from "./tabOptions";
 import { useForm, useWatch } from "react-hook-form";
-import { CippFormComponent } from "/src/components/CippComponents/CippFormComponent";
-import vendorTenantList from "/src/data/vendorTenantList";
+import { CippFormComponent } from "../../../components/CippComponents/CippFormComponent";
+import vendorTenantList from "../../../data/vendorTenantList";
 import { Box, Grid, Stack } from "@mui/system";
 import { Alert, Divider, Typography } from "@mui/material";
-import { ApiGetCall, ApiGetCallWithPagination } from "/src/api/ApiCall";
+import { ApiGetCall, ApiGetCallWithPagination } from "../../../api/ApiCall";
 import { CippInfoBar } from "../../../components/CippCards/CippInfoBar";
 import { ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { Apps, Description, Widgets } from "@mui/icons-material";
@@ -22,60 +22,46 @@ const Page = () => {
       return vendor.vendorTenantId;
     })
     .join(",");
-  const vendorGraphFilter = `appOwnerOrganizationId in (${vendorFilter})`;
   const tenantId = useWatch({
     control: formControl.control,
     name: "tenantFilter",
   });
 
   const gdapRelationships = ApiGetCall({
-    url: "/api/ListGraphRequest",
-    data: {
-      Endpoint: "tenantRelationships/delegatedAdminRelationships",
-      tenantFilter: "",
-      $top: 300,
-    },
+    url: "/api/ListGDAPRelationships",
     queryKey: "ListGDAPRelationship",
   });
 
   const cspContracts = ApiGetCall({
-    url: "/api/ListGraphRequest",
-    data: {
-      Endpoint: "contracts",
-      tenantFilter: "",
-      $top: 300,
-    },
+    url: "/api/ListGDAPContracts",
     queryKey: "ListContracts",
   });
 
   const mspApps = ApiGetCall({
-    url: "/api/ListGraphRequest",
+    url: "/api/ListGDAPServicePrincipals",
     data: {
-      Endpoint: "servicePrincipals",
-      TenantFilter: tenantId?.value,
-      $filter: `appOwnerOrganizationId eq %partnertenantid%`,
-      $select: "id,displayName,appId,appOwnerOrganizationId",
-      $count: true,
+      tenantFilter: tenantId?.value,
+      ownerType: "partner",
     },
     queryKey: "ListMSPApps-" + tenantId?.value,
+    waiting: Boolean(tenantId?.value),
   });
 
   const vendorApps = ApiGetCallWithPagination({
-    url: "/api/ListGraphRequest",
+    url: "/api/ListGDAPServicePrincipals",
     data: {
-      Endpoint: "servicePrincipals",
-      TenantFilter: tenantId?.value,
-      $filter: vendorGraphFilter,
-      $select: "id,displayName,appId,appOwnerOrganizationId",
-      $count: true,
+      tenantFilter: tenantId?.value,
+      ownerType: "vendor",
+      vendorTenantIds: vendorFilter,
     },
     queryKey: "ListVendorApps-" + tenantId?.value,
+    waiting: Boolean(tenantId?.value),
   });
 
   return (
     <>
       <CippFormPage
-        queryKey={["ListAllTenants", "TenantSelector"]}
+        queryKey={["ListOffboardTenants", "TenantSelector"]}
         formControl={formControl}
         title="Tenant Offboarding"
         hideBackButton={true}
@@ -98,11 +84,8 @@ const Page = () => {
               label="Select Tenant to Offboard"
               type="autoComplete"
               api={{
-                url: "/api/ExecExcludeTenant",
-                data: {
-                  ListAll: true,
-                },
-                queryKey: "ListAllTenants",
+                url: "/api/ListOffboardTenants",
+                queryKey: "ListOffboardTenants",
                 labelField: (tenant) => {
                   return `${tenant.displayName} (${tenant.defaultDomainName})`;
                 },
@@ -137,6 +120,15 @@ const Page = () => {
                           (relationship) => relationship?.customer?.tenantId === tenantId.value
                         )?.length ?? 0,
                       icon: <ShieldCheckIcon />,
+                      offcanvas: {
+                        title: "GDAP Relationships",
+                        propertyItems: gdapRelationships.data?.Results?.filter(
+                          (relationship) => relationship?.customer?.tenantId === tenantId.value
+                        )?.map((relationship) => ({
+                          label: `Relationship: ${relationship?.displayName}`,
+                          value: `Id: ${relationship?.id}`,
+                        })),
+                      },
                     },
                     {
                       name: "CSP Contract",
@@ -152,11 +144,31 @@ const Page = () => {
                       name: "MSP Applications",
                       data: mspApps.data?.Results?.length ?? 0,
                       icon: <Widgets />,
+                      offcanvas: {
+                        title: "MSP Applications",
+                        propertyItems: mspApps.data?.Results?.map((app) => ({
+                          label: app?.displayName,
+                          value: app?.appId,
+                        })),
+                      },
                     },
                     {
                       name: "Vendor Applications",
-                      data: 0,
+                      data:
+                        vendorApps.data?.pages?.reduce(
+                          (sum, page) => sum + (page?.Results?.length ?? 0),
+                          0
+                        ) ?? 0,
                       icon: <Apps />,
+                      offcanvas: {
+                        title: "Vendor Applications",
+                        propertyItems: vendorApps.data?.pages
+                          ?.reduce((sum, page) => sum.concat(page?.Results ?? []), [])
+                          .map((app) => ({
+                            label: app?.displayName,
+                            value: app?.appId,
+                          })),
+                      },
                     },
                   ]}
                 />
@@ -176,13 +188,11 @@ const Page = () => {
                     label="Vendor Applications to Remove"
                     type="autoComplete"
                     api={{
-                      url: "/api/ListGraphRequest",
+                      url: "/api/ListGDAPServicePrincipals",
                       data: {
-                        Endpoint: "servicePrincipals",
-                        TenantFilter: tenantId.value,
-                        $filter: vendorGraphFilter,
-                        $select: "id,displayName,appId,appOwnerOrganizationId",
-                        $count: true,
+                        tenantFilter: tenantId.value,
+                        ownerType: "vendor",
+                        vendorTenantIds: vendorFilter,
                       },
                       dataKey: "Results",
                       queryKey: "ListVendorApps-" + tenantId.value,
@@ -209,6 +219,12 @@ const Page = () => {
                     label="Remove all notification contacts originating from the CSP tenant (technical, security, marketing notifications)."
                     type="switch"
                     disabled={mspApps?.data?.Results?.length > 0 ? false : true}
+                  />
+                  <CippFormComponent
+                    formControl={formControl}
+                    name="RemoveDomainAnalyserData"
+                    label="Remove all Domain Analyser results for this tenant."
+                    type="switch"
                   />
                 </Stack>
               </Grid>

@@ -1,40 +1,57 @@
-import { useState } from "react";
-import { CardContent, Button, SvgIcon, Alert } from "@mui/material";
-import { PlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
-import { CippDataTable } from "/src/components/CippTable/CippDataTable";
-import { CippApiResults } from "/src/components/CippComponents/CippApiResults";
-import { CippApiDialog } from "/src/components/CippComponents/CippApiDialog";
-import { ApiPostCall } from "/src/api/ApiCall";
+import { useState } from 'react'
+import { CardContent, Button, SvgIcon, Alert } from '@mui/material'
+import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline'
+import { CippDataTable } from '../CippTable/CippDataTable'
+import { CippApiResults } from './CippApiResults'
+import { CippApiDialog } from './CippApiDialog'
+import { ApiPostCall } from '../../api/ApiCall'
 
 const CippCustomVariables = ({ id }) => {
-  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false)
+
+  // Simple cache invalidation using React Query wildcard support
+  const allRelatedKeys = ['CustomVariables*']
 
   const updateCustomVariablesApi = ApiPostCall({
     urlFromData: true,
-    relatedQueryKeys: [`CustomVariables_${id}`],
-  });
+    relatedQueryKeys: allRelatedKeys,
+  })
 
   const reservedVariables = [
-    "tenantid",
-    "tenantname",
-    "tenantfilter",
-    "partnertenantid",
-    "samappid",
-  ];
+    'tenantid',
+    'tenantname',
+    'tenantfilter',
+    'partnertenantid',
+    'samappid',
+    'cippuserschema',
+    'cippurl',
+    'defaultdomain',
+    'serial',
+    'systemroot',
+    'systemdrive',
+    'temp',
+    'userprofile',
+    'username',
+    'userdomain',
+    'windir',
+    'programfiles',
+    'programfiles(x86)',
+    'programdata',
+  ]
 
   const validateVariableName = (value) => {
     if (reservedVariables.includes(value.toLowerCase())) {
-      return "The variable name is reserved and cannot be used.";
-    } else if (!value.includes(" ") && !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(value)) {
-      return true;
+      return 'The variable name is reserved and cannot be used.'
+    } else if (!value.includes(' ') && !/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g.test(value)) {
+      return true
     } else {
-      return "The variable name must not contain spaces or special characters.";
+      return 'The variable name must not contain spaces or special characters.'
     }
-  };
+  }
 
   const actions = [
     {
-      label: "Edit",
+      label: 'Edit',
       icon: (
         <SvgIcon>
           <PencilIcon />
@@ -43,67 +60,85 @@ const CippCustomVariables = ({ id }) => {
       confirmText: "Update the custom variable '[RowKey]'?",
       hideBulk: true,
       setDefaultValues: true,
+      condition: (row) => row.Scope !== 'Global' || id === 'AllTenants',
       fields: [
         {
-          type: "textField",
-          name: "RowKey",
-          label: "Variable Name",
-          placeholder: "Enter the key for the custom variable.",
+          type: 'textField',
+          name: 'RowKey',
+          label: 'Variable Name',
+          placeholder: 'Enter the key for the custom variable.',
           required: true,
-          validators: validateVariableName,
+          disableVariables: true,
+          validators: { validate: validateVariableName },
         },
         {
-          type: "textField",
-          name: "Value",
-          label: "Value",
-          placeholder: "Enter the value for the custom variable.",
+          type: 'textField',
+          name: 'Value',
+          label: 'Value',
+          placeholder: 'Enter the value for the custom variable.',
           required: true,
         },
+        {
+          type: 'textField',
+          name: 'Description',
+          label: 'Description',
+          placeholder: 'Enter a description for the custom variable.',
+          required: false,
+          disableVariables: true,
+        },
       ],
-      type: "POST",
-      url: "/api/ExecCippReplacemap",
+      type: 'POST',
+      url: '/api/ExecCippReplacemap',
       data: {
-        Action: "!AddEdit",
-        customerId: id,
+        Action: '!AddEdit',
+        tenantId: id,
       },
-      relatedQueryKeys: [`CustomVariables_${id}`],
+      relatedQueryKeys: allRelatedKeys,
     },
     {
-      label: "Delete",
+      label: 'Delete',
       icon: <TrashIcon />,
-      confirmText: "Are you sure you want to delete [RowKey]?",
-      type: "POST",
-      url: "/api/ExecCippReplacemap",
+      confirmText: 'Are you sure you want to delete [RowKey]?',
+      condition: (row) => row.Scope !== 'Global' || id === 'AllTenants',
+      type: 'POST',
+      url: '/api/ExecCippReplacemap',
       data: {
-        Action: "Delete",
-        RowKey: "RowKey",
-        customerId: id,
+        Action: 'Delete',
+        RowKey: 'RowKey',
+        tenantId: id,
       },
-      relatedQueryKeys: [`CustomVariables_${id}`],
+      relatedQueryKeys: allRelatedKeys,
       multiPost: false,
     },
-  ];
+  ]
 
   const handleAddVariable = () => {
-    setOpenAddDialog(true);
-  };
+    setOpenAddDialog(true)
+  }
 
   return (
     <CardContent>
       <Alert severity="info" sx={{ mb: 2 }}>
-        {id === "AllTenants"
+        {id === 'AllTenants'
           ? "Global variables are key-value pairs that can be used to store additional information for All Tenants. These are applied to templates in standards using the format %variablename%. If a tenant has a custom variable with the same name, the tenant's variable will take precedence."
-          : "Custom variables are key-value pairs that can be used to store additional information about a tenant. These are applied to templates in standards using the format %variablename%."}
+          : 'Custom variables are key-value pairs that can be used to store additional information about a tenant. These are applied to templates in standards using the format %variablename%.'}
       </Alert>
       <CippDataTable
-        queryKey={`CustomVariables_${id}`}
-        title={id === "AllTenants" ? "Global Variables" : "Custom Variables"}
+        queryKey={`CustomVariables-${id}`}
+        title={id === 'AllTenants' ? 'Global Variables' : 'Custom Variables'}
         actions={actions}
         api={{
-          url: `/api/ExecCippReplacemap?Action=List&customerId=${id}`,
-          dataKey: "Results",
+          url:
+            id === 'AllTenants'
+              ? `/api/ExecCippReplacemap?Action=List&tenantId=${id}`
+              : `/api/ExecCippReplacemap?Action=List&tenantId=${id}&includeGlobal=true`,
+          dataKey: 'Results',
         }}
-        simpleColumns={["RowKey", "Value"]}
+        simpleColumns={
+          id === 'AllTenants'
+            ? ['RowKey', 'Value', 'Description']
+            : ['RowKey', 'Value', 'Description', 'Scope']
+        }
         cardButton={
           <Button
             variant="contained"
@@ -129,30 +164,39 @@ const CippCustomVariables = ({ id }) => {
         title="Add Variable"
         fields={[
           {
-            type: "textField",
-            name: "RowKey",
-            label: "Variable Name",
-            placeholder: "Enter the name for the custom variable without %.",
+            type: 'textField',
+            name: 'RowKey',
+            label: 'Variable Name',
+            placeholder: 'Enter the name for the custom variable without %.',
             required: true,
-            validators: validateVariableName,
+            disableVariables: true,
+            validators: { validate: validateVariableName },
           },
           {
-            type: "textField",
-            name: "Value",
-            label: "Value",
-            placeholder: "Enter the value for the custom variable.",
+            type: 'textField',
+            name: 'Value',
+            label: 'Value',
+            placeholder: 'Enter the value for the custom variable.',
             required: true,
+          },
+          {
+            type: 'textField',
+            name: 'Description',
+            label: 'Description',
+            placeholder: 'Enter a description for the custom variable.',
+            required: false,
+            disableVariables: true,
           },
         ]}
         api={{
-          type: "POST",
-          url: "/api/ExecCippReplacemap",
-          data: { Action: "AddEdit", customerId: id },
-          relatedQueryKeys: [`CustomVariables_${id}`],
+          type: 'POST',
+          url: '/api/ExecCippReplacemap',
+          data: { Action: 'AddEdit', tenantId: id },
+          relatedQueryKeys: allRelatedKeys,
         }}
       />
     </CardContent>
-  );
-};
+  )
+}
 
-export default CippCustomVariables;
+export default CippCustomVariables

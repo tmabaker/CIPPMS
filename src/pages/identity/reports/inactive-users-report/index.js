@@ -1,11 +1,22 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
+import { Layout as DashboardLayout } from "../../../../layouts/index.js";
+import { CippTablePage } from "../../../../components/CippComponents/CippTablePage.jsx";
 import { EyeIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Edit, Block } from "@mui/icons-material";
+import { useCippReportDB } from "../../../../components/CippComponents/CippReportDBControls";
 
 const Page = () => {
   const pageTitle = "Inactive users (6 months)";
-  const apiUrl = "/api/ListInactiveAccounts";
+
+  const reportDB = useCippReportDB({
+    apiUrl: "/api/ListInactiveAccounts",
+    queryKey: "inactive-users",
+    cacheName: "Users",
+    syncTitle: "Sync User Cache",
+    allowToggle: false,
+    defaultCached: true,
+    cacheColumns: ["lastRefreshedDateTime"],
+  });
+
   const actions = [
     {
       label: "View User",
@@ -51,30 +62,37 @@ const Page = () => {
       "lastSignInDateTime",
       "lastNonInteractiveSignInDateTime",
       "numberOfAssignedLicenses",
+      "daysSinceLastSignIn",
       "lastRefreshedDateTime",
     ],
     actions: actions,
   };
 
   const simpleColumns = [
+    ...reportDB.cacheColumns.filter((c) => c === "Tenant"),
     "tenantDisplayName",
     "userPrincipalName",
     "displayName",
     "lastSignInDateTime",
     "lastNonInteractiveSignInDateTime",
     "numberOfAssignedLicenses",
-    "lastRefreshedDateTime",
+    "daysSinceLastSignIn",
+    ...reportDB.cacheColumns.filter((c) => c !== "Tenant"),
   ];
 
   return (
-    <CippTablePage
-      title={pageTitle}
-      apiUrl={apiUrl}
-      // apiDataKey="Results"
-      actions={actions}
-      offCanvas={offCanvas}
-      simpleColumns={simpleColumns}
-    />
+    <>
+      <CippTablePage
+        title={pageTitle}
+        apiUrl={reportDB.resolvedApiUrl}
+        queryKey={reportDB.resolvedQueryKey}
+        actions={actions}
+        offCanvas={offCanvas}
+        simpleColumns={simpleColumns}
+        cardButton={reportDB.controls}
+      />
+      {reportDB.syncDialog}
+    </>
   );
 };
 

@@ -9,8 +9,8 @@ import {
   SvgIcon,
   Typography,
 } from "@mui/material";
-import CippButtonCard from "/src/components/CippCards/CippButtonCard";
-import { ApiGetCall } from "/src/api/ApiCall";
+import CippButtonCard from "../CippCards/CippButtonCard";
+import { ApiGetCall } from "../../api/ApiCall";
 import { useEffect, useState } from "react";
 import { CippPermissionResults } from "./CippPermissionResults";
 import { CippGDAPResults } from "./CippGDAPResults";
@@ -112,6 +112,17 @@ const CippPermissionCheck = (props) => {
     );
   };
 
+  const responseData = executeCheck?.error?.response?.data;
+  const responseText =
+    typeof responseData === "string" ? responseData : responseData ? JSON.stringify(responseData) : "";
+  const shouldShowApiResponse = responseText.includes(
+    "Access to this CIPP API endpoint is not allowed",
+  );
+  const checkErrorMessage =
+    shouldShowApiResponse
+      ? responseText
+      : `Failed to load ${type} check. Please try refreshing the page.`;
+
   return (
     <>
       <CippButtonCard
@@ -139,6 +150,11 @@ const CippPermissionCheck = (props) => {
         }}
         CardButton={<CheckButton />}
       >
+        {executeCheck.isError && !importReport && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {checkErrorMessage}
+          </Alert>
+        )}
         {(executeCheck.isSuccess || executeCheck.isLoading) && (
           <>
             {executeCheck.data?.Metadata?.AlertMessage && (

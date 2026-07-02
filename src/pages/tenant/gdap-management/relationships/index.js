@@ -1,10 +1,8 @@
-import { TabbedLayout } from "/src/layouts/TabbedLayout";
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
+import { TabbedLayout } from "../../../../layouts/TabbedLayout";
+import { Layout as DashboardLayout } from "../../../../layouts/index.js";
 import tabOptions from "../tabOptions";
-import CippTablePage from "/src/components/CippComponents/CippTablePage";
-import CippGdapActions from "/src/components/CippComponents/CippGdapActions";
-
-const pageTitle = "GDAP Relationships";
+import CippTablePage from "../../../../components/CippComponents/CippTablePage";
+import CippGdapActions from "../../../../components/CippComponents/CippGdapActions";
 
 const actions = CippGdapActions();
 
@@ -47,20 +45,12 @@ const offCanvas = {
   extendedInfoFields: simpleColumns,
 };
 
-const apiUrl = "/api/ListGraphRequest";
-const apiData = {
-  Endpoint: "tenantRelationships/delegatedAdminRelationships",
-  tenantFilter: "",
-  $top: 300,
-};
-
 const Page = () => {
   return (
     <CippTablePage
-      title={pageTitle}
+      title="GDAP Relationships"
       tenantInTitle={false}
-      apiUrl={apiUrl}
-      apiData={apiData}
+      apiUrl="/api/ListGDAPRelationships"
       apiDataKey="Results"
       queryKey="ListGDAPRelationships"
       actions={actions}

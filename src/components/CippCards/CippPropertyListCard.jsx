@@ -15,6 +15,7 @@ import { PropertyListItem } from "../../components/property-list-item";
 import { useDialog } from "../../hooks/use-dialog";
 import { CippApiDialog } from "../CippComponents/CippApiDialog";
 import { useState } from "react";
+import { getIconByName } from "../../utils/icon-registry";
 
 export const CippPropertyListCard = (props) => {
   const {
@@ -51,6 +52,12 @@ export const CippPropertyListCard = (props) => {
     return false;
   };
 
+  const renderActionIcon = (icon) => {
+    if (!icon) return null;
+    if (typeof icon === "string") return getIconByName(icon, { fontSize: "small" });
+    return <SvgIcon fontSize="small">{icon}</SvgIcon>;
+  };
+
   return (
     <>
       <Card sx={cardSx} {...other}>
@@ -62,11 +69,11 @@ export const CippPropertyListCard = (props) => {
             <PropertyList>
               {isFetching ? (
                 <>
-                  {propertyItems.map((item, index) => (
+                  {Array.from({ length: propertyItems?.length || 3 }).map((_, index) => (
                     <PropertyListItem
-                      key={`${index}-index-PropertyListOffCanvas`}
+                      key={`${index}-skeleton-PropertyListOffCanvas`}
                       align={align}
-                      label={item.label}
+                      label={propertyItems?.[index]?.label || ""}
                       value={<Skeleton width={280} />}
                       sx={setPadding}
                     />
@@ -102,13 +109,17 @@ export const CippPropertyListCard = (props) => {
             >
               <PropertyList>
                 {isFetching ? (
-                  <PropertyListItem
-                    key={"loading-bar"}
-                    align={align}
-                    divider={showDivider}
-                    label="Loading"
-                    value={<Skeleton width={280} />}
-                  />
+                  <>
+                    {Array.from({ length: Math.max(1, firstHalf?.length || 1) }).map((_, index) => (
+                      <PropertyListItem
+                        key={`${index}-skeleton-first`}
+                        align={align}
+                        divider={showDivider}
+                        label=""
+                        value={<Skeleton width={280} />}
+                      />
+                    ))}
+                  </>
                 ) : (
                   firstHalf.map((item, index) => (
                     <PropertyListItem
@@ -123,13 +134,19 @@ export const CippPropertyListCard = (props) => {
               </PropertyList>
               <PropertyList>
                 {isFetching ? (
-                  <PropertyListItem
-                    key={"loading-bar"}
-                    align={align}
-                    divider={showDivider}
-                    label="Loading"
-                    value={<Skeleton width={280} />}
-                  />
+                  <>
+                    {Array.from({ length: Math.max(1, secondHalf?.length || 1) }).map(
+                      (_, index) => (
+                        <PropertyListItem
+                          key={`${index}-skeleton-second`}
+                          align={align}
+                          divider={showDivider}
+                          label=""
+                          value={<Skeleton width={280} />}
+                        />
+                      )
+                    )}
+                  </>
                 ) : (
                   secondHalf.map((item, index) => (
                     <PropertyListItem
@@ -150,7 +167,7 @@ export const CippPropertyListCard = (props) => {
             actionItems.map((item, index) => (
               <ActionListItem
                 key={`${item.label}-${index}-ActionList-OffCanvas`}
-                icon={<SvgIcon fontSize="small">{item.icon}</SvgIcon>}
+                icon={renderActionIcon(item.icon)}
                 label={item.label}
                 onClick={() => {
                   setActionData({

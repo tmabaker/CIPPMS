@@ -15,8 +15,9 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import { ActionsMenu } from "/src/components/actions-menu";
+import { ActionsMenu } from "../components/actions-menu";
 import { useMediaQuery } from "@mui/material";
+import { getIconByName } from "../utils/icon-registry";
 
 export const HeaderedTabbedLayout = (props) => {
   const {
@@ -55,25 +56,12 @@ export const HeaderedTabbedLayout = (props) => {
     <Box
       sx={{
         flexGrow: 1,
-        py: 4,
+        pb: 4,
       }}
     >
       <Container maxWidth="xl" sx={{ height: "100%" }}>
         <Stack spacing={1} sx={{ height: "100%" }}>
           <Stack spacing={2}>
-            <div>
-              <Button
-                color="inherit"
-                onClick={() => (backUrl ? router.push(backUrl) : router.back())}
-                startIcon={
-                  <SvgIcon fontSize="small">
-                    <ArrowLeftIcon />
-                  </SvgIcon>
-                }
-              >
-                Back to previous page
-              </Button>
-            </div>
             <Stack
               alignItems="flex-start"
               direction="row"
@@ -94,14 +82,18 @@ export const HeaderedTabbedLayout = (props) => {
                 ) : (
                   subtitle && (
                     <Stack alignItems="center" flexWrap="wrap" direction="row" spacing={2}>
-                      {subtitle.map((item, index) => (
-                        <Stack key={index} alignItems="center" direction="row" spacing={1}>
-                          <SvgIcon fontSize="small">{item.icon}</SvgIcon>
-                          <Typography color="text.secondary" variant="body2">
-                            {item.text}
-                          </Typography>
-                        </Stack>
-                      ))}
+                      {subtitle.map((item, index) =>
+                        item.component ? (
+                          <Box key={index}>{item.component}</Box>
+                        ) : (
+                          <Stack key={index} alignItems="center" direction="row" spacing={1}>
+                            <SvgIcon fontSize="small">{item.icon}</SvgIcon>
+                            <Typography color="text.secondary" variant="body2">
+                              {item.text}
+                            </Typography>
+                          </Stack>
+                        )
+                      )}
                     </Stack>
                   )
                 )}
@@ -111,10 +103,32 @@ export const HeaderedTabbedLayout = (props) => {
               )}
             </Stack>
             <div>
-              <Tabs onChange={handleTabsChange} value={currentTab?.path} variant="scrollable">
-                {tabOptions.map((option) => (
-                  <Tab key={option.path} label={option.label} value={option.path} />
-                ))}
+              <Tabs
+                onChange={handleTabsChange}
+                value={currentTab?.path}
+                variant="scrollable"
+                sx={{
+                  "& .MuiTab-root:first-of-type": {
+                    ml: 2,
+                  },
+                }}
+              >
+                {tabOptions.map((option) => {
+                  const icon = getIconByName(option.icon, { fontSize: "small" });
+                  const iconPosition = option.iconPosition ?? "start";
+                  const compactIcon = icon && ["end", "start"].includes(iconPosition);
+
+                  return (
+                    <Tab
+                      key={option.path}
+                      label={option.label}
+                      value={option.path}
+                      icon={icon ?? undefined}
+                      iconPosition={icon ? iconPosition : undefined}
+                      sx={compactIcon ? { minHeight: 48, py: 1.5 } : undefined}
+                    />
+                  );
+                })}
               </Tabs>
               <Divider />
             </div>
@@ -124,7 +138,7 @@ export const HeaderedTabbedLayout = (props) => {
               !mdDown && {
                 flexGrow: 1,
                 overflow: "auto",
-                height: "calc(100vh - 400px)",
+                height: "calc(100vh - 350px)",
               }
             }
           >
@@ -142,6 +156,8 @@ HeaderedTabbedLayout.propTypes = {
     PropTypes.shape({
       label: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
+      icon: PropTypes.string,
+      iconPosition: PropTypes.oneOf(["bottom", "end", "start", "top"]),
     })
   ).isRequired,
   title: PropTypes.string.isRequired,

@@ -1,49 +1,68 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
+import { Layout as DashboardLayout } from "../../../../layouts/index.js";
+import { CippTablePage } from "../../../../components/CippComponents/CippTablePage.jsx";
 import { Block } from "@mui/icons-material";
-
-/* 
-  NOTE for Devs:
-  - The original component used a Redux selector (`useSelector`) for tenant data, 
-    which is handled by `CippTablePage` in the refactored version, thus eliminating `useSelector`.
-  - The `ModalService` with `confirm` handling was originally used to confirm blocking sign-in.
-    The action here replaces it with a confirmation text as per current guidelines.
-  - Original button and `FontAwesomeIcon` (faBan) are not used since action confirmation is handled by CippTablePage.
-*/
+import { useCippReportDB } from "../../../../components/CippComponents/CippReportDBControls";
 
 const Page = () => {
+  const reportDB = useCippReportDB({
+    apiUrl: "/api/ListSharedMailboxAccountEnabled",
+    queryKey: "ListSharedMailboxAccountEnabled",
+    cacheName: "Mailboxes",
+    syncTitle: "Sync Shared Mailbox Cache",
+    allowToggle: true,
+    defaultCached: false,
+  });
+
+  const simpleColumns = [
+    ...reportDB.cacheColumns.filter((c) => c === "Tenant"),
+    "UserPrincipalName",
+    "displayName",
+    "accountEnabled",
+    "assignedLicenses",
+    "onPremisesSyncEnabled",
+    ...reportDB.cacheColumns.filter((c) => c !== "Tenant"),
+  ];
+
   return (
-    <CippTablePage
-      title="Shared Mailbox with Enabled Account"
-      apiUrl="/api/ListSharedMailboxAccountEnabled"
-      actions={[
-        {
-          label: "Block Sign In",
-          type: "POST",
-          icon: <Block />,
-          url: "/api/ExecDisableUser",
-          data: { ID: "id" },
-          confirmText: "Are you sure you want to block the sign-in for this user?",
-        },
-      ]}
-      offCanvas={{
-        extendedInfoFields: [
-          "UserPrincipalName",
-          "displayName",
-          "accountEnabled",
-          "onPremisesSyncEnabled",
-        ],
-      }}
-      simpleColumns={[
-        "UserPrincipalName",
-        "displayName",
-        "accountEnabled",
-        "onPremisesSyncEnabled",
-      ]}
-    />
+    <>
+      <CippTablePage
+        title="Shared Mailbox with Enabled Account"
+        apiUrl={reportDB.resolvedApiUrl}
+        queryKey={reportDB.resolvedQueryKey}
+        cardButton={reportDB.controls}
+        actions={[
+          {
+            label: "Block Sign In",
+            type: "POST",
+            icon: <Block />,
+            url: "/api/ExecDisableUser",
+            data: { ID: "id" },
+            confirmText: "Are you sure you want to block the sign-in for this mailbox?",
+            condition: (row) => row.accountEnabled && !row.onPremisesSyncEnabled,
+          },
+        ]}
+        offCanvas={{
+          extendedInfoFields: [
+            "UserPrincipalName",
+            "displayName",
+            "accountEnabled",
+            "assignedLicenses",
+            "onPremisesSyncEnabled",
+          ],
+        }}
+        simpleColumns={simpleColumns}
+        filters={[
+          {
+            id: "accountEnabled",
+            value: "Yes",
+          },
+        ]}
+      />
+      {reportDB.syncDialog}
+    </>
   );
 };
 
-Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
+Page.getLayout = (page) => <DashboardLayout allTenantsSupport={true}>{page}</DashboardLayout>;
 
 export default Page;

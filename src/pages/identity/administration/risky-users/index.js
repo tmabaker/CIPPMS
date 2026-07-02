@@ -1,5 +1,5 @@
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
-import { CippTablePage } from "/src/components/CippComponents/CippTablePage.jsx";
+import { Layout as DashboardLayout } from "../../../../layouts/index.js";
+import { CippTablePage } from "../../../../components/CippComponents/CippTablePage.jsx";
 import { Clear, Search } from "@mui/icons-material";
 
 const Page = () => {
@@ -50,7 +50,7 @@ const Page = () => {
   const filterList = [
     {
       filterName: "Users at Risk",
-      value: [{ id: "riskState", value: "atRisk" }],
+      value: [{ id: "riskState", value: "at Risk" }],
       type: "column",
     },
     {

@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, Button } from "@mui/material";
 import { CippDataTable } from "./CippDataTable";
 import { getCippTranslation } from "../../utils/get-cipp-translation";
-import { getCippFormatting } from "../../utils/get-cipp-formatting";
 const CippDataTableButton = ({ data, title, tableTitle = "Data" }) => {
   const [openDialogs, setOpenDialogs] = useState([]);
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = (event) => {
+    event?.stopPropagation();
+
     let dataArray;
 
     if (Array.isArray(data)) {
@@ -22,7 +23,8 @@ const CippDataTableButton = ({ data, title, tableTitle = "Data" }) => {
     setOpenDialogs([...openDialogs, dataArray]);
   };
 
-  const handleCloseDialog = (index) => {
+  const handleCloseDialog = (index, event) => {
+    event?.stopPropagation?.();
     setOpenDialogs(openDialogs.filter((_, i) => i !== index));
   };
   const dataIsNotANullArray =
@@ -49,7 +51,9 @@ const CippDataTableButton = ({ data, title, tableTitle = "Data" }) => {
         <Dialog
           key={index}
           open={true}
-          onClose={() => handleCloseDialog(index)}
+          onClose={(event) => handleCloseDialog(index, event)}
+          onMouseDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
           fullWidth
           maxWidth="lg"
         >
@@ -59,6 +63,7 @@ const CippDataTableButton = ({ data, title, tableTitle = "Data" }) => {
               title={tableTitle}
               data={dialogData}
               simple={false}
+              isInDialog={true}
             />
           </DialogContent>
         </Dialog>
