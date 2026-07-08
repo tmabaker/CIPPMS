@@ -49,7 +49,7 @@
     "@tiptap/react": "^2.9.1",
     "@tiptap/starter-kit": "^2.9.1",
     "@uiw/react-json-view": "^2.0.0-alpha.30",
-    "apexcharts": "4.5.0",
+    "apexcharts": "5.16.0",
     "axios": "^1.7.2",
     "date-fns": "4.1.0",
     "eml-parse-js": "^1.2.0-beta.0",
