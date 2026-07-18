@@ -1,23 +1,19 @@
 # Security Policy
 
-CIPPMS is a fork of [CIPP](https://github.com/KelvinTegelaar/CIPP) and is kept in
-sync with upstream. Where you report a vulnerability depends on where the flaw
-lives.
+## Supported Versions
+
+The current [release](https://github.com/KelvinTegelaar/CIPP/releases) is the only "supported version" and should not have any security bugs. However if you find a security issue in an older release feel free to also report this in case of regression, We'd rather know we made a mistake at one point in time and avoid that in the future.
 
 ## Reporting a Vulnerability
 
-**Issues specific to this fork** — its deploy workflow, fork-specific
-configuration, or its hosted deployment: open a private report from this
-repository's **Security → Report a vulnerability** tab
-(<https://github.com/tmabaker/CIPPMS/security/advisories/new>), or contact the
-repository owner directly. Please do not open a public issue for a suspected
-vulnerability.
+Reporting a vulnerability is best done by emailing [security@cyberdrain.com](mailto:security@cyberdrain.com?subject=CIPP%20Security%20Issue) but you can also message an admin directly on the CyberDrain Discord. All relevant contributors will be alerted and can discuss the issue in private and address it if appropriate. It will help in making the fix available as soon as possible without endangering other users of the product.
 
-**Issues in upstream CIPP code** — anything inherited from
-`KelvinTegelaar/CIPP`: report it to the upstream project under its own security
-policy (<https://github.com/KelvinTegelaar/CIPP/security/policy>, or email
-<security@cyberdrain.com>) so the fix reaches every downstream fork, then let us
-know so we can pull it in.
+We will publicly release any security report after the resolution, including all communications. If you would rather have only the bug report public, please let us know in the report.
 
-We will acknowledge valid reports, keep you updated on remediation, and
-coordinate disclosure once a fix is available.
+## Notifications and security advisories
+
+We report any security notification via the GitHub notification and advisory system. Sponsors that are hosted will also receive a notification in case a major bug has been found.
+
+## Bounties and Rewards
+
+This project is an open-source sponsorware effort, which makes it hard to create a monetary reward without breaking the bank very quickly. for *critical* level bugs, that cause RCE/API data leaks/etc I will award a 50 dollar reward. For other bugs, I potentially am able to reward with some swag such as an official CyberDrain T-shirt or hoodie :)
