@@ -617,7 +617,21 @@ function GrantControlsSection({ formControl, disabled }) {
           disabled={disabled}
           options={operatorOpts}
           multiple={false}
-          validators={{ required: "Grant operator is required when grant controls are set" }}
+          validators={{
+            validate: (value, formValues) => {
+              const gc = formValues?.grantControls || {};
+              const hasControls =
+                (Array.isArray(gc.builtInControls)
+                  ? gc.builtInControls.length
+                  : gc.builtInControls) ||
+                gc.authenticationStrength?.id ||
+                (Array.isArray(gc.termsOfUse) ? gc.termsOfUse.length : gc.termsOfUse);
+              if (hasControls && !(value?.value ?? value)) {
+                return "Grant operator is required when grant controls are set";
+              }
+              return true;
+            },
+          }}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>

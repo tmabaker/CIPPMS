@@ -148,7 +148,8 @@ const App = (props) => {
     setDateLocale(resolvedLocale)
   }, [])
 
-  const excludeQueryKeys = ['authmeswa', 'alertsDashboard']
+  // authmecipp not persisted, stale clientPrincipal:null flashes 401 on post-login reload
+  const excludeQueryKeys = ['authmeswa', 'authmecipp', 'alertsDashboard']
 
   // 👇 Persist TanStack Query cache to localStorage
   useEffect(() => {
@@ -162,7 +163,7 @@ const App = (props) => {
         persister: localStoragePersister,
         maxAge: 1000 * 60 * 60 * 24, // 24 hours
         staleTime: 1000 * 60 * 5, // optional: 5 minutes
-        buster: 'v1',
+        buster: 'v2',
         dehydrateOptions: {
           shouldDehydrateQuery: (query) => {
             const queryIsReadyForPersistence = query.state.status === 'success'
@@ -220,18 +221,18 @@ const App = (props) => {
       id: 'bug-report',
       icon: <BugReportIcon />,
       name: 'Report Bug',
-      href: 'https://github.com/KelvinTegelaar/CIPP/issues/new?template=bug.yml',
+      href: 'https://github.com/CyberDrain/CIPP/issues/new?template=bug.yml',
       onClick: () =>
-        window.open('https://github.com/KelvinTegelaar/CIPP/issues/new?template=bug.yml', '_blank'),
+        window.open('https://github.com/CyberDrain/CIPP/issues/new?template=bug.yml', '_blank'),
     },
     {
       id: 'feature-request',
       icon: <FeedbackIcon />,
       name: 'Request Feature',
-      href: 'https://github.com/KelvinTegelaar/CIPP/issues/new?template=feature.yml',
+      href: 'https://github.com/CyberDrain/CIPP/issues/new?template=feature.yml',
       onClick: () =>
         window.open(
-          'https://github.com/KelvinTegelaar/CIPP/issues/new?template=feature.yml',
+          'https://github.com/CyberDrain/CIPP/issues/new?template=feature.yml',
           '_blank'
         ),
     },
