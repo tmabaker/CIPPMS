@@ -503,7 +503,15 @@ export const CippFormComponent = (props) => {
               name={convertedName}
               control={formControl.control}
               defaultValue={defaultValue}
-              rules={validators}
+              rules={
+                // Pass row as third parameter, same as autoComplete fields
+                typeof validators?.validate === "function"
+                  ? {
+                      ...validators,
+                      validate: (value, formValues) => validators.validate(value, formValues, row),
+                    }
+                  : validators
+              }
               render={({ field }) => {
                 return (
                   <RadioGroup

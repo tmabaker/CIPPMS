@@ -41,10 +41,16 @@ const Page = () => {
   const [portalMenuItems, setPortalMenuItems] = useState([])
   const isWide = useMediaQuery('(min-width:1513px)')
   const [reportsMenuAnchor, setReportsMenuAnchor] = useState(null)
-  // Get reportId from query params or default to "ztna"
+  // Get reportId from query params or default to the user's preferred suite (Preferences page)
   // Only use default if router is ready and reportId is still not present
+  const defaultReportId =
+    settings.UserSpecificSettings?.defaultTestSuite?.value ||
+    settings.defaultTestSuite?.value ||
+    'ztna'
   const selectedReport =
-    router.isReady && !router.query.reportId ? 'ztna' : router.query.reportId || 'ztna'
+    router.isReady && !router.query.reportId
+      ? defaultReportId
+      : router.query.reportId || defaultReportId
 
   // Fetch available reports (shared cache with CippReportToolbar)
   const reportsApi = ApiGetCall({
@@ -169,7 +175,12 @@ const Page = () => {
       const menuItems = filteredPortals.map((portal) => ({
         label: portal.label,
         target: '_blank',
-        link: portal.url.replace(portal.variable, tenantLookup?.[portal.variable]),
+        // A portal with a `field` has a URL the backend resolved for us (SharePoint's host cannot be
+        // derived from the tenant). Use it when it's there, otherwise fall back to the templated URL.
+        link:
+          portal.field && tenantLookup?.[portal.field]
+            ? tenantLookup[portal.field]
+            : portal.url.replace(portal.variable, tenantLookup?.[portal.variable]),
         icon: portal.icon,
       }))
       setPortalMenuItems(menuItems)

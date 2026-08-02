@@ -495,17 +495,19 @@ const DatabaseBlock = ({
       cardActions={
         <Stack direction="row" spacing={0.5} alignItems="center">
           <Tooltip title="Refresh data">
-            <IconButton
-              size="small"
-              onClick={handleRefresh}
-              disabled={dbCacheApi.isFetching || !currentTenant}
-            >
-              {dbCacheApi.isFetching ? (
-                <CircularProgress size={16} />
-              ) : (
-                <Refresh fontSize="small" />
-              )}
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={handleRefresh}
+                disabled={dbCacheApi.isFetching || !currentTenant}
+              >
+                {dbCacheApi.isFetching ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  <Refresh fontSize="small" />
+                )}
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title="Move up">
             <span>
@@ -876,18 +878,20 @@ const Page = () => {
         if (desc) parts.push(desc)
       }
 
+      // Mirror CippTestDetailOffCanvas: a script that emitted its own markdown wins over
+      // the template renderer, whose empty-template fallback dumps raw JSON.
       let resultContent = ''
-      if (result.TestType === 'Custom' && result.ResultDataJson) {
+      if (result.ResultMarkdown) {
+        resultContent = result.ResultMarkdown
+      } else if (result.TestType === 'Custom' && result.ResultDataJson) {
         try {
           resultContent = renderCustomScriptMarkdownTemplate(
             JSON.parse(result.ResultDataJson),
             result.MarkdownTemplate || ''
           )
         } catch {
-          resultContent = result.ResultMarkdown || ''
+          resultContent = ''
         }
-      } else {
-        resultContent = result.ResultMarkdown || ''
       }
 
       resultContent = maybeStripRemediation(resultContent)
@@ -1323,6 +1327,7 @@ const Page = () => {
                     label="Block Type"
                     formControl={addBlockForm}
                     multiple={false}
+                    creatable={false}
                     options={[
                       { label: 'Custom Block', value: 'blank' },
                       { label: 'Test Result', value: 'test' },
@@ -1343,6 +1348,7 @@ const Page = () => {
                       name="testSuite"
                       label="Test Suite"
                       formControl={addBlockForm}
+                      creatable={false}
                       multiple={false}
                       options={suiteOptions}
                       isFetching={availableTestsApi.isFetching}
@@ -1354,6 +1360,7 @@ const Page = () => {
                       name="selectedTest"
                       label="Select Tests"
                       formControl={addBlockForm}
+                      creatable={false}
                       multiple={true}
                       options={filteredTestOptions}
                       isFetching={availableTestsApi.isFetching}
@@ -1374,6 +1381,7 @@ const Page = () => {
                       name="dbCacheType"
                       label="Data Source"
                       formControl={addBlockForm}
+                      creatable={false}
                       multiple={false}
                       options={availableCacheTypes}
                       isFetching={availableCacheTypesApi.isFetching}
@@ -1385,6 +1393,7 @@ const Page = () => {
                       name="dbFormat"
                       label="Format"
                       formControl={addBlockForm}
+                      creatable={false}
                       multiple={false}
                       options={[
                         { label: 'Table (Text)', value: 'text' },

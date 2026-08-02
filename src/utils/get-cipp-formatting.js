@@ -106,6 +106,9 @@ export const getCippFormatting = (data, cellName, type, canReceive, flatten = tr
   }
 
   if (cellName === 'Severity' || cellName === 'logsToInclude') {
+    if (data == null) {
+      return isText ? 'No data' : <Chip variant="outlined" label="No data" size="small" color="info" />
+    }
     if (Array.isArray(data)) {
       return isText ? data.join(', ') : renderChipList(data)
     } else {
@@ -287,6 +290,8 @@ export const getCippFormatting = (data, cellName, type, canReceive, flatten = tr
     'requestDate', // App Consent Requests
     'reviewedDate', // App Consent Requests
     'GeneratedAt', // Report Builder
+    'directTenantAuthDate', // Direct tenant service account
+    'ServiceAccountLastAuth', // Direct tenant service account
   ]
 
   const matchDateTime = /([dD]ate[tT]ime|[Ee]xpiration|[Tt]imestamp|[sS]tart[Dd]ate)/
@@ -701,6 +706,9 @@ export const getCippFormatting = (data, cellName, type, canReceive, flatten = tr
   }
 
   if (cellName === 'Parameters.ScheduledBackupValues') {
+    if (!data || typeof data !== 'object') {
+      return isText ? 'No data' : <Chip variant="outlined" label="No data" size="small" color="info" />
+    }
     return isText ? (
       JSON.stringify(data)
     ) : (

@@ -81,13 +81,15 @@ const formatUptime = (seconds) => {
 const WorkerStatusChip = ({ isBusy, currentFunction }) => {
   if (isBusy) {
     return (
-      <Chip
-        label={currentFunction || "Busy"}
-        color="warning"
-        size="small"
-        icon={<PlayArrow />}
-        sx={{ maxWidth: 200 }}
-      />
+      <Tooltip title={currentFunction || "Busy"} arrow>
+        <Chip
+          label={currentFunction || "Busy"}
+          color="warning"
+          size="small"
+          icon={<PlayArrow />}
+          sx={{ maxWidth: 420 }}
+        />
+      </Tooltip>
     );
   }
   return <Chip label="Idle" color="success" size="small" icon={<CheckCircle />} />;
@@ -121,7 +123,7 @@ const WorkerTable = ({ workers, title }) => {
             <TableHead>
               <TableRow>
                 <TableCell>Worker</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell sx={{ whiteSpace: "nowrap" }}>Status</TableCell>
                 <TableCell align="right">Invocations</TableCell>
                 <TableCell align="right">Utilization</TableCell>
                 <TableCell align="right">Avg</TableCell>
@@ -443,7 +445,8 @@ const HistoryChart = ({ data, rangeMinutes, title, icon, children }) => {
       <CardHeader title={title} titleTypographyProps={{ variant: "h6" }} avatar={icon} />
       <CardContent sx={{ pt: 0 }}>
         <Box sx={{ height: 250 }}>
-          <ResponsiveContainer width="100%" height="100%">
+          {/* numeric height, recharts warns before its first measure when both sizes are percentages */}
+          <ResponsiveContainer width="100%" height={250}>
             {children(data, theme)}
           </ResponsiveContainer>
         </Box>
@@ -460,6 +463,7 @@ const Page = () => {
   const [paused, setPaused] = useState(false);
   const [importedData, setImportedData] = useState(null);
   const [jobLimit, setJobLimit] = useState(2000);
+  const [jobStatus, setJobStatus] = useState("");
 
   const isImported = importedData !== null;
   const effectivePaused = paused || isImported;
@@ -485,7 +489,8 @@ const Page = () => {
   });
 
   const jobAction = ApiPostCall({
-    relatedQueryKeys: ["WorkerHealthJobs", "WorkerHealth"],
+    // wildcard: the job table's query key carries the limit/status suffix
+    relatedQueryKeys: ["WorkerHealthJobs*", "WorkerHealth"],
   });
 
   const cacheDiagQuery = ApiGetCall({
@@ -529,17 +534,15 @@ const Page = () => {
       history: historyQuery.data?.Results ?? null,
       jobs: null,
     };
-    // Try to grab current job data from query cache
-    // CippDataTable may store the key with extra params, so search by prefix
-    const allQueries = queryClient.getQueriesData({ queryKey: ["WorkerHealthJobs"] });
-    for (const [, data] of allQueries) {
-      if (data) {
-        const rows = data?.Results ?? data?.data?.Results ?? data;
-        if (Array.isArray(rows)) {
-          payload.jobs = rows;
-          break;
-        }
-      }
+    // Grab the job data for the currently selected limit/status only — a prefix match
+    // would hand back a stale query from a previous filter.
+    const jobsData = queryClient.getQueryData([`WorkerHealthJobs-${jobLimit}-${jobStatus}`]);
+    if (jobsData) {
+      // CippDataTable uses an infinite query, so the cache holds { pages: [{ Results }] }.
+      const rows = Array.isArray(jobsData.pages)
+        ? jobsData.pages.flatMap((page) => page?.Results ?? [])
+        : (jobsData.Results ?? jobsData);
+      if (Array.isArray(rows)) payload.jobs = rows;
     }
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -549,7 +552,15 @@ const Page = () => {
     a.download = `worker-health-${new Date().toISOString().slice(0, 16).replace(/:/g, "")}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [healthQuery.data, startupQuery.data, historyQuery.data, historyRange, queryClient]);
+  }, [
+    healthQuery.data,
+    startupQuery.data,
+    historyQuery.data,
+    historyRange,
+    queryClient,
+    jobLimit,
+    jobStatus,
+  ]);
 
   // ── Import ──
   const handleImport = useCallback((event) => {
@@ -664,7 +675,7 @@ const Page = () => {
         }),
         confirmText: "Change",
         condition: (row) => row.Status === "Queued",
-        relatedQueryKeys: ["WorkerHealthJobs", "WorkerHealth"],
+        relatedQueryKeys: ["WorkerHealthJobs*", "WorkerHealth"],
       },
       {
         label: "Cancel Run",
@@ -697,15 +708,6 @@ const Page = () => {
     [jobAction]
   );
 
-  const jobFilters = useMemo(
-    () => [
-      { filterName: "Queued", value: [{ id: "Status", value: "Queued" }] },
-      { filterName: "Running", value: [{ id: "Status", value: "Running" }] },
-      { filterName: "Failed", value: [{ id: "Status", value: "Failed" }] },
-    ],
-    []
-  );
-
   return (
     <>
       <Head>
@@ -734,14 +736,20 @@ const Page = () => {
                   </Typography>
                 )}
                 <Tooltip title={effectivePaused ? "Resume auto-refresh" : "Pause auto-refresh"}>
-                  <IconButton
-                    size="small"
-                    onClick={() => setPaused((p) => !p)}
-                    color={effectivePaused ? "warning" : "default"}
-                    disabled={isImported}
-                  >
-                    {effectivePaused ? <PlayArrow fontSize="small" /> : <Pause fontSize="small" />}
-                  </IconButton>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={() => setPaused((p) => !p)}
+                      color={effectivePaused ? "warning" : "default"}
+                      disabled={isImported}
+                    >
+                      {effectivePaused ? (
+                        <PlayArrow fontSize="small" />
+                      ) : (
+                        <Pause fontSize="small" />
+                      )}
+                    </IconButton>
+                  </span>
                 </Tooltip>
                 <Tooltip title="Export page data as JSON">
                   <IconButton size="small" onClick={handleExport}>
@@ -813,29 +821,48 @@ const Page = () => {
             ) : (
               <CippDataTable
                 title="Job Queue"
-                queryKey={`WorkerHealthJobs-${jobLimit}`}
+                queryKey={`WorkerHealthJobs-${jobLimit}-${jobStatus}`}
                 api={{
                   url: "/api/ListWorkerHealth",
-                  data: { Action: "Jobs", Limit: String(jobLimit) },
+                  // Status is filtered server-side, before Limit truncates — a client-side
+                  // filter would only ever see the oldest N jobs (mostly Completed).
+                  data: {
+                    Action: "Jobs",
+                    Limit: String(jobLimit),
+                    ...(jobStatus && { Status: jobStatus }),
+                  },
                   dataKey: "Results",
                 }}
                 simpleColumns={jobSimpleColumns}
                 actions={jobActions}
-                filters={jobFilters}
                 defaultSorting={[{ id: "QueuedUtc", desc: true }]}
                 cardButton={
-                  <ToggleButtonGroup
-                    value={jobLimit}
-                    exclusive
-                    onChange={(_, val) => val !== null && setJobLimit(val)}
-                    size="small"
-                  >
-                    {[500, 2000, 5000, 10000].map((n) => (
-                      <ToggleButton key={n} value={n}>
-                        {n >= 1000 ? `${n / 1000}k` : n}
-                      </ToggleButton>
-                    ))}
-                  </ToggleButtonGroup>
+                  <Stack direction="row" spacing={1}>
+                    <ToggleButtonGroup
+                      value={jobStatus}
+                      exclusive
+                      onChange={(_, val) => val !== null && setJobStatus(val)}
+                      size="small"
+                    >
+                      {["", "Queued", "Running", "Completed", "Failed", "Cancelled"].map((s) => (
+                        <ToggleButton key={s || "all"} value={s}>
+                          {s || "All"}
+                        </ToggleButton>
+                      ))}
+                    </ToggleButtonGroup>
+                    <ToggleButtonGroup
+                      value={jobLimit}
+                      exclusive
+                      onChange={(_, val) => val !== null && setJobLimit(val)}
+                      size="small"
+                    >
+                      {[500, 2000, 5000, 10000].map((n) => (
+                        <ToggleButton key={n} value={n}>
+                          {n >= 1000 ? `${n / 1000}k` : n}
+                        </ToggleButton>
+                      ))}
+                    </ToggleButtonGroup>
+                  </Stack>
                 }
               />
             )}

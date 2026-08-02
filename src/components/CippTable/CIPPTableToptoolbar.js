@@ -677,7 +677,7 @@ export const CIPPTableToptoolbar = React.memo(
         // update filters to include graph explorer presets
         setFilterList([...filters, ...graphPresetList])
       }
-    }, [presetList?.isSuccess, simpleColumns])
+    }, [presetList?.isSuccess, presetList?.data, simpleColumns])
 
     return (
       <>
@@ -762,7 +762,7 @@ export const CIPPTableToptoolbar = React.memo(
             <ModernSearchContainer elevation={0}>
               <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
               <ModernSearchInput
-                placeholder="Search input"
+                placeholder="Search..."
                 value={searchValue}
                 onChange={handleSearchChange}
               />
