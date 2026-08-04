@@ -145,7 +145,12 @@ export const nativeMenuItems = [
         <BuildingOfficeIcon />
       </SvgIcon>
     ),
-    permissions: ['Tenant.*', 'Identity.AuditLog.*', 'CIPP.Backup.*', 'Scheduler.Billing.*'],
+    permissions: [
+      'Tenant.*',
+      'Identity.AuditLog.*',
+      'CIPP.Backup.*',
+      'Scheduler.Billing.*',
+    ],
     items: [
       {
         title: 'Administration',
@@ -220,6 +225,14 @@ export const nativeMenuItems = [
             permissions: ['Tenant.Standards.*'],
             scope: 'global',
           },
+          // Baselines mockup - hidden from the nav for now; reach it directly
+          // at /tenant/baselines
+          // {
+          //   title: 'Baselines (Preview)',
+          //   path: '/tenant/baselines',
+          //   permissions: ['Tenant.Standards.*'],
+          //   scope: 'global',
+          // },
           {
             title: 'Best Practice Analyser',
             path: '/tenant/standards/bpa-report',
@@ -263,7 +276,11 @@ export const nativeMenuItems = [
       },
       {
         title: 'Reports',
-        permissions: ['Tenant.Administration.*', 'Scheduler.Billing.*', 'Tenant.Application.*'],
+        permissions: [
+          'Tenant.Administration.*',
+          'Scheduler.Billing.*',
+          'Tenant.Application.*',
+        ],
         items: [
           {
             title: 'Licence Report',
@@ -644,7 +661,11 @@ export const nativeMenuItems = [
       },
       {
         title: 'Reports',
-        permissions: ['Endpoint.Device.*', 'Endpoint.Autopilot.*', 'Endpoint.MEM.*'],
+        permissions: [
+          'Endpoint.Device.*',
+          'Endpoint.Autopilot.*',
+          'Endpoint.MEM.*',
+        ],
         items: [
           {
             title: 'Analytics Device Score',
