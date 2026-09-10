@@ -84,7 +84,7 @@
     "material-react-table": "^3.0.1",
     "monaco-editor": "^0.55.1",
     "mui-tiptap": "^1.31.0",
-    "next": "^16.2.11",
+    "next": "^16.3.3",
     "nprogress": "0.2.0",
     "numeral": "2.0.6",
     "prop-types": "15.8.1",
@@ -147,7 +147,7 @@
     "storybook": "10.5.10",
     "typescript": "5.9.3",
     "vite": "8.2.2",
-    "vitest": "4.1.10"
+    "vitest": "5.0.0"
   },
   "msw": {
     "workerDirectory": [
