@@ -84,7 +84,7 @@
     "react-dom": "19.2.8",
     "react-dropzone": "19.2.0",
     "react-error-boundary": "^6.1.2",
-    "react-hook-form": "^7.76.1",
+    "react-hook-form": "^7.87.0",
     "react-hot-toast": "2.6.0",
     "react-html-parser": "^2.0.2",
     "react-leaflet": "5.0.0",
