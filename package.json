@@ -42,7 +42,7 @@
     "@react-pdf/renderer": "^4.9.0",
     "@reduxjs/toolkit": "^2.12.0",
     "@tanstack/query-sync-storage-persister": "^5.101.2",
-    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-query": "^5.104.1",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@tanstack/react-query-persist-client": "^5.101.2",
     "@tanstack/react-table": "^9.1.1",
